@@ -1,0 +1,123 @@
+package main
+
+import (
+	"fmt"
+)
+
+type MLPLayer struct {
+	base       BaseLayer
+	bias       []float64
+	weights    [][]float64
+	biasAdd    []float64
+	weightsAdd [][]float64
+	size       int
+}
+
+func (self *MLPLayer) printDebug() {
+	fmt.Println(self.bias)
+}
+func (self *MLPLayer) forWard(data []float64) *[]float64 {
+
+	for neuronID := range self.bias {
+		neuronVal := self.bias[neuronID]
+
+		for weightID, weight := range self.weights[neuronID] {
+
+			neuronVal += data[weightID] * weight
+		}
+
+		self.base.nonAktOut[neuronID] = neuronVal
+		self.base.out[neuronID] = self.base.aktfunc(neuronVal)
+	}
+	return &self.base.out
+}
+
+func (self *MLPLayer) initLayer(prevLayerSize int, xavierRange float64, initData initLayerData) {
+	layerSize := initData.size
+	self.size = layerSize
+	self.base.OutSize = layerSize
+
+	self.base.nonAktOut = make([]float64, layerSize)
+	self.base.out = make([]float64, layerSize)
+
+	self.bias = make([]float64, layerSize)
+
+	self.biasAdd = make([]float64, layerSize)
+
+	for neuronID := 0; neuronID < layerSize; neuronID++ {
+		neWeights := make([]float64, prevLayerSize)
+
+		for weightID := 0; weightID < prevLayerSize; weightID++ {
+			neWeights[weightID] = initWeightXavierUniform(xavierRange)
+		}
+		self.weights = append(self.weights, neWeights)
+		self.weightsAdd = append(self.weightsAdd, make([]float64, prevLayerSize))
+	}
+
+	self.base.aktfunc = getAktFuncFromName(false, initData.aktFunName)
+	self.base.aktDevFunc = getAktFuncFromName(true, initData.aktFunName)
+	self.base.aktFunName = initData.aktFunName
+
+}
+
+func (self *MLPLayer) applyGrad(batchSize float64, lRate float64) {
+
+	mult := lRate / batchSize
+	for neuronID, neuronWeights := range self.weights {
+
+		for weightID := range neuronWeights {
+			neuronWeights[weightID] -= self.weightsAdd[neuronID][weightID] * mult
+
+			self.weightsAdd[neuronID][weightID] = 0
+		}
+
+		self.bias[neuronID] -= self.biasAdd[neuronID] * mult
+		self.biasAdd[neuronID] = 0
+	}
+}
+
+func (self *MLPLayer) updateGrad(outputGrad []float64, prevLayAkt *[]float64) {
+
+	for neuronID := range outputGrad {
+
+		for weightID := range self.weights[neuronID] {
+			//fmt.Println(len(lay.weightsAdd), len(nodeVals), len(prevLayAkt))
+			//	fmt.Println(prevLayAkt)
+			//fmt.Println(*prevLayAkt)
+			self.weightsAdd[neuronID][weightID] += outputGrad[neuronID] * (*prevLayAkt)[weightID]
+		}
+
+		self.biasAdd[neuronID] += outputGrad[neuronID]
+	}
+}
+
+func (self *MLPLayer) backProp(oldOutPutGrad []float64, UpperLayerWeights *[][]float64, prevOut *[]float64) []float64 {
+	newOutPutGrad := make([]float64, len(self.base.out))
+
+	for neuronID := 0; neuronID < self.base.OutSize; neuronID++ {
+		newVal := float64(0)
+		for oldIndex := 0; oldIndex < len(oldOutPutGrad); oldIndex++ {
+			newVal += oldOutPutGrad[oldIndex] * (*UpperLayerWeights)[oldIndex][neuronID]
+		}
+		newVal *= self.base.aktDevFunc(self.base.nonAktOut[neuronID])
+		newOutPutGrad[neuronID] = newVal
+
+	}
+	self.updateGrad(newOutPutGrad, prevOut)
+	return newOutPutGrad
+}
+
+func (self *MLPLayer) lastLayerbackProp(targets []float64) []float64 {
+	nodeValues := make([]float64, self.base.OutSize)
+
+	for neuronID := 0; neuronID < self.base.OutSize; neuronID++ {
+		addVal := devGetCost(self.base.out[neuronID], targets[neuronID]) * self.base.aktDevFunc(self.base.nonAktOut[neuronID])
+		nodeValues[neuronID] = addVal
+	}
+
+	return nodeValues
+}
+
+func (self *MLPLayer) getWeightArray() *[][]float64 {
+	return &self.weights
+}
