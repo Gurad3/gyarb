@@ -13,10 +13,23 @@ type MiM struct {
 	data_type int32
 }
 
-func (self *MiM) requst_3d(x int32, y int32, z int32) [x][y][z]float64 {
-	switch self.data_type {
+func (shelf *MiM) requst_3d(x int32, y int32, z int32) {
+	switch shelf.data_type {
 	case OneD:
 
-		break
+		arr3D := make([][][]float64, x)
+		index := 0
+		for i := int32(0); i < x; i++ {
+			arr3D[i] = make([][]float64, y)
+			for j := int32(0); j < y; j++ {
+				arr3D[i][j] = make([]float64, z)
+				for k := int32(0); k < z; k++ {
+					arr3D[i][j][k] = shelf.data_flat[index]
+					index++
+				}
+			}
+		}
+		shelf.data_3d = arr3D
+
 	}
 }

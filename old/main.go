@@ -66,6 +66,7 @@ func main() {
 			typ:        "MLP",
 			aktFunName: "reLU",
 		},
+
 		{
 			size:       10,
 			typ:        "MLP",
