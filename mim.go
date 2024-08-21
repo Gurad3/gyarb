@@ -13,7 +13,7 @@ type MiM struct {
 	data_type int32
 }
 
-func (shelf *MiM) requst_3d(x int32, y int32, z int32) {
+func (shelf *MiM) request_3d(x int32, y int32, z int32) {
 	switch shelf.data_type {
 	case OneD:
 
@@ -33,7 +33,7 @@ func (shelf *MiM) requst_3d(x int32, y int32, z int32) {
 	}
 }
 
-func (shelf *MiM) requst_flatt(x int32, y int32, z int32) {
+func (shelf *MiM) request_flat(x int32, y int32, z int32) {
 	switch shelf.data_type {
 	case ThreeD:
 
