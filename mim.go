@@ -30,6 +30,5 @@ func (shelf *MiM) requst_3d(x int32, y int32, z int32) {
 			}
 		}
 		shelf.data_3d = arr3D
-
 	}
 }
