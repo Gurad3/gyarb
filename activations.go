@@ -18,3 +18,9 @@ func (shelf *relU) ddx(val float64) float64 {
 		return 0
 	}
 }
+
+type Sigmoid struct{}
+
+func (shelf *Sigmoid) call(val float64) float64 {
+
+}
