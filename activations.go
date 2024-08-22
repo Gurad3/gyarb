@@ -1,5 +1,7 @@
 package main
 
+import "math"
+
 type Activation interface {
 	call(float64) float64
 	ddx(float64) float64
@@ -22,5 +24,10 @@ func (shelf *relU) ddx(val float64) float64 {
 type Sigmoid struct{}
 
 func (shelf *Sigmoid) call(val float64) float64 {
+	return 1 / (1 + math.Exp(-val))
+}
 
+func (shelf *Sigmoid) ddx(val float64) float64 {
+	sig := shelf.call(val)
+	return sig * (1 - sig)
 }
