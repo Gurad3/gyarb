@@ -5,13 +5,15 @@ type Layers interface {
 }
 
 type BaseLayer struct {
-	act_func func(float64) float64
+	act_interface Activation
 }
 
 type DenseLayer struct {
-	base_layer BaseLayer
+	weights [][]float64
+	biases  []float64
 }
 
 type CNLayer struct {
-	base_layer BaseLayer
+	weights [][][]float64
+	biases  [][]float64
 }
