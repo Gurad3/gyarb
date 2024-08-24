@@ -10,13 +10,14 @@ type MiM struct {
 	data_flat []float64
 	data_2d   [][]float64
 	data_3d   [][][]float64
-	data_type int32
+
+	data_type         int32
+	data_type_history []int32
 }
 
 func (shelf *MiM) request_3d(x int32, y int32, z int32) *MiM {
 	switch shelf.data_type {
 	case OneD:
-
 		arr3D := make([][][]float64, x)
 		index := 0
 		for i := int32(0); i < x; i++ {
@@ -35,24 +36,9 @@ func (shelf *MiM) request_3d(x int32, y int32, z int32) *MiM {
 	return shelf
 }
 
-func (shelf *MiM) request_flat(x int32, y int32, z int32) *MiM {
+func (shelf *MiM) request_flat() *MiM {
 	switch shelf.data_type {
 	case ThreeD:
-
-		/*new3d := make([][][]float64, x)
-		index := 0
-		for i := int32(0); i < x; i++ {
-			new3d[i] = make([][]float64, y)
-			for j := int32(0); j < y; j++ {
-				new3d[i][j] = make([]float64, z)
-				for k := int32(0); k < z; k++ {
-					new3d[i][j][k] = shelf.data_flat[index]
-					index++
-				}
-			}
-		}
-
-		shelf.data_3d = new3d*/
 
 		new_flat := make([]float64, len(shelf.data_3d)*len(shelf.data_3d[0])*len(shelf.data_3d[0][0]))
 
