@@ -6,6 +6,7 @@ type Layers interface {
 
 type DenseLayer struct {
 	act_interface Activation
+	layerID       int
 
 	weights [][]float64
 	bias    []float64
@@ -13,13 +14,14 @@ type DenseLayer struct {
 
 type CNLayer struct {
 	act_interface Activation
+	layerID       int
 
 	weights [][][]float64
 	bias    [][]float64
 }
 
 func (shelf *DenseLayer) forward(mim MiM) {
-	data := mim.request_flat().data_flat
+	data := *mim.request_flat().data_flat
 
 	for neuronID := range shelf.bias {
 		neuronVal := shelf.bias[neuronID]
@@ -28,8 +30,8 @@ func (shelf *DenseLayer) forward(mim MiM) {
 			neuronVal += data[weightID] * weight
 		}
 
-		shelf.base.nonAktOut[neuronID] = neuronVal
-		shelf.base.out[neuronID] = shelf.base.aktfunc(neuronVal)
+		mim.layers_out_flat_non_activated[shelf.layerID][neuronID] = neuronVal
+		mim.layers_out_flat[shelf.layerID][neuronID] = shelf.act_interface.call(neuronVal)
+
 	}
-	return shelf.base.out, shelf.base.nonAktOut
 }

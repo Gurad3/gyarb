@@ -7,12 +7,20 @@ const (
 )
 
 type MiM struct {
-	data_flat []float64
-	data_2d   [][]float64
-	data_3d   [][][]float64
+	data_flat *[]float64
+	data_2d   *[][]float64
+	data_3d   *[][][]float64
 
 	data_type         int32
 	data_type_history []int32
+
+	layers_out_flat [][]float64
+	layers_out_3d   [][][][]float64
+
+	layers_out_flat_non_activated [][]float64
+	layers_out_3d_non_activated   [][][][]float64
+
+	layersDimentions [][]int32
 }
 
 func (shelf *MiM) request_3d(x int32, y int32, z int32) *MiM {
@@ -55,20 +63,7 @@ func (shelf *MiM) request_flat() *MiM {
 }
 
 /*
-type MiM struct {
-	data_flat *[]float64
-	data_2d   *[][]float64
-	data_3d   *[][][]float64
 
-	data_type         int32
-	data_type_history []int32
-
-	layers_out_flat [][]float64
-	layers_out_2d   [][][]float64
-	layers_out_3d   [][][][]float64
-
-	layersDimentions [][]int32
-}
 
 func (shelf *MiM) init_MiM(layersDimentions [][]int32) {
 	shelf.layersDimentions = layersDimentions
