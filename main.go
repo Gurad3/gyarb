@@ -16,20 +16,25 @@ func main() {
 
 	net.cost_interface = &MeanSquare{}
 
+	net.input_size = 28 * 28
+	net.output_size = 10
 	net.layers = []Layer{
+
 		&DenseLayer{
 			act_interface:   &relU{},
-			size:            50,
+			size:            100,
 			prev_layer_size: 28 * 28,
 		},
 
 		&DenseLayer{
 			act_interface:   &relU{},
-			size:            100,
-			prev_layer_size: 50,
+			size:            10,
+			prev_layer_size: 100,
 		},
 	}
 
 	net.init()
 	net.init_new_weights()
+
+	net.print_weights()
 }

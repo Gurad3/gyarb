@@ -1,9 +1,12 @@
 package main
 
+import "fmt"
+
 type Layer interface {
 	forward(*MiM)
 	init(layerID int)
-	init_new_weights()
+	init_new_weights(xavierRange float64)
+	print_weights()
 }
 
 type DenseLayer struct {
@@ -56,22 +59,31 @@ func (shelf *DenseLayer) init(layerID int) {
 	shelf.weights_gradiants = make([][]float64, shelf.size)
 
 	for i := 0; i < shelf.size; i++ {
+
 		neuroWeights := make([]float64, shelf.prev_layer_size)
-		shelf.weights = append(shelf.weights, neuroWeights)
-		shelf.weights_gradiants = append(shelf.weights_gradiants, neuroWeights)
+		shelf.weights[i] = neuroWeights
+		shelf.weights_gradiants[i] = neuroWeights
+
 	}
 }
 
-func (shelf *DenseLayer) init_new_weights() {
+func (shelf *DenseLayer) init_new_weights(xavierRange float64) {
 	//Give each weights new random weights (Currentlu 0)
-
-	//xavierRange := math.Sqrt(6 / float64(netData.inpSize+layersData[net.numLayers-1].size))
 
 	for neuronID := range shelf.bias {
 		shelf.bias[neuronID] = 0
 
 		for weightID := range shelf.weights[neuronID] {
+
 			shelf.weights[neuronID][weightID] = initWeightXavierUniform(xavierRange)
 		}
+	}
+}
+
+func (shelf *DenseLayer) print_weights() {
+	for neuronID := range shelf.bias {
+
+		fmt.Println(shelf.weights[neuronID])
+
 	}
 }
