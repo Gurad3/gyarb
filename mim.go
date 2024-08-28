@@ -33,12 +33,12 @@ func (shelf *MiM) request_3d(x int32, y int32, z int32) *MiM {
 			for j := int32(0); j < y; j++ {
 				arr3D[i][j] = make([]float64, z)
 				for k := int32(0); k < z; k++ {
-					arr3D[i][j][k] = shelf.data_flat[index]
+					arr3D[i][j][k] = (*shelf.data_flat)[index]
 					index++
 				}
 			}
 		}
-		shelf.data_3d = arr3D
+		shelf.data_3d = &arr3D
 	}
 
 	return shelf
@@ -48,15 +48,15 @@ func (shelf *MiM) request_flat() *MiM {
 	switch shelf.data_type {
 	case ThreeD:
 
-		new_flat := make([]float64, len(shelf.data_3d)*len(shelf.data_3d[0])*len(shelf.data_3d[0][0]))
+		new_flat := make([]float64, len(*shelf.data_3d)*len((*shelf.data_3d)[0])*len((*shelf.data_3d)[0][0]))
 
-		for i := 0; i < len(shelf.data_3d); i++ {
-			for j := 0; j < len(shelf.data_3d[0]); j++ {
-				new_flat = append(new_flat, shelf.data_3d[i][j]...)
+		for i := 0; i < len(*shelf.data_3d); i++ {
+			for j := 0; j < len((*shelf.data_3d)[0]); j++ {
+				new_flat = append(new_flat, (*shelf.data_3d)[i][j]...)
 			}
 		}
 
-		shelf.data_flat = new_flat
+		shelf.data_flat = &new_flat
 	}
 
 	return shelf
