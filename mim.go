@@ -40,7 +40,6 @@ func (shelf *MiM) request_3d(x int32, y int32, z int32) *MiM {
 		}
 		shelf.data_3d = &arr3D
 	}
-
 	return shelf
 }
 
