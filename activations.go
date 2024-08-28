@@ -1,6 +1,9 @@
 package main
 
-import "math"
+import (
+	"math"
+	"math/rand/v2"
+)
 
 type Activation interface {
 	call(float64) float64
@@ -30,4 +33,8 @@ func (shelf *Sigmoid) call(val float64) float64 {
 func (shelf *Sigmoid) ddx(val float64) float64 {
 	sig := shelf.call(val)
 	return sig * (1 - sig)
+}
+
+func initWeightXavierUniform(xavierRange float64) float64 {
+	return rand.Float64()*2*xavierRange - xavierRange
 }

@@ -1,6 +1,8 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func main() {
 	fmt.Println("Hasdejdå")
@@ -11,6 +13,8 @@ func main() {
 
 	net.learn_rate = 2
 	net.learn_rate_decay = 2
+
+	net.cost_interface = &MeanSquare{}
 
 	net.layers = []Layer{
 		&DenseLayer{
@@ -27,4 +31,5 @@ func main() {
 	}
 
 	net.init()
+	net.init_new_weights()
 }
