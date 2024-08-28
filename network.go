@@ -36,3 +36,15 @@ func (shelf *Network) print_weights() {
 		layer.print_weights()
 	}
 }
+
+func (shelf *Network) forward(mim *MiM, data []float64) {
+
+	mim.data_flat = &data
+	mim.data_type = OneD
+	mim.data_type_history[0] = OneD
+	mim.layers_out_flat[0] = data
+
+	for _, layer := range shelf.layers {
+		layer.forward(mim)
+	}
+}

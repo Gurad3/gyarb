@@ -8,13 +8,13 @@ const (
 
 type MiM struct {
 	data_flat *[]float64
-	data_2d   *[][]float64
-	data_3d   *[][][]float64
+	//data_2d   *[][]float64
+	data_3d *[][][]float64
 
 	data_type         int32
 	data_type_history []int32
 
-	layers_out_flat [][]float64
+	layers_out_flat [][]float64 //First = input data
 	layers_out_3d   [][][][]float64
 
 	layers_out_flat_non_activated [][]float64
@@ -61,14 +61,20 @@ func (shelf *MiM) request_flat() *MiM {
 	return shelf
 }
 
-/*
+func (shelf *MiM) init(net *Network) {
+	shelf.layersDimentions = make([][]int32, len(net.layers))
 
+	shelf.layers_out_flat = make([][]float64, len(net.layers))
+	shelf.layers_out_flat_non_activated = make([][]float64, len(net.layers))
 
-func (shelf *MiM) init_MiM(layersDimentions [][]int32) {
-	shelf.layersDimentions = layersDimentions
+	shelf.layers_out_3d = make([][][][]float64, len(net.layers))
+	shelf.layers_out_3d_non_activated = make([][][][]float64, len(net.layers))
 
-	for layerID, layerDim := range layersDimentions {
+	for layerID, layer := range net.layers {
+		layerDim := layer.get_size()
+
 		switch len(layerDim) - 1 {
+
 		case OneD:
 			new1d := make([]float64, layerDim[0])
 			shelf.layers_out_flat[layerID] = new1d
@@ -81,4 +87,3 @@ func (shelf *MiM) init_MiM(layersDimentions [][]int32) {
 	}
 
 }
-*/

@@ -7,6 +7,7 @@ type Layer interface {
 	init(layerID int)
 	init_new_weights(xavierRange float64)
 	print_weights()
+	get_size() []int
 }
 
 type DenseLayer struct {
@@ -86,4 +87,8 @@ func (shelf *DenseLayer) print_weights() {
 		fmt.Println(shelf.weights[neuronID])
 
 	}
+}
+
+func (shelf *DenseLayer) get_size() []int {
+	return []int{shelf.size}
 }

@@ -37,4 +37,11 @@ func main() {
 	net.init_new_weights()
 
 	net.print_weights()
+
+	mim := new(MiM)
+
+	mim.init(net)
+	data := []float64{}
+	net.forward(mim, data)
+
 }
