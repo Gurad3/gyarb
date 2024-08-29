@@ -11,6 +11,7 @@ type Network struct {
 	learn_rate_decay float64
 	momentum         float64
 
+<<<<<<< HEAD
 	input_size  int
 	output_size int
 
@@ -47,4 +48,7 @@ func (shelf *Network) forward(mim *MiM, data []float64) {
 	for _, layer := range shelf.layers {
 		layer.forward(mim)
 	}
+=======
+	cost_interface Cost
+>>>>>>> dc4856d (hej)
 }
