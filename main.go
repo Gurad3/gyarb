@@ -11,14 +11,14 @@ func main() {
 
 	net := new(Network)
 
-	net.learn_rate = 2
+	net.Learn_rate = 2
 	net.learn_rate_decay = 0.0001
-
+	net.file_name = "TestNet"
 	net.cost_interface = &MeanSquare{}
 
 	net.input_size = 28 * 28
 	net.output_size = 10
-	net.layers = []Layer{
+	net.Layers = []Layer{
 
 		&DenseLayer{
 			act_interface:   &relU{},
@@ -36,12 +36,17 @@ func main() {
 	net.init()
 	net.init_new_weights()
 
-	net.print_weights()
+	// net.print_weights()
 
 	mim := new(MiM)
 
 	mim.init(net)
-	data := []float64{}
-	net.forward(mim, data)
+	// data := []float64{}
+	// net.forward(mim, data)
+	// encode_to_json(*net)
+
+	newNet := load_from_json("saves/TestNet.json")
+	// newNet.print_weights()
+	fmt.Println(newNet.Layers[0])
 
 }
