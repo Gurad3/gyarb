@@ -8,14 +8,30 @@ import (
 type Activation interface {
 	call(float64) float64
 	ddx(float64) float64
+	get_name() string
 }
 
-type relU struct{}
+func Act_name_to_func(name string) Activation {
+	switch name {
+	case "relu":
+		return &relU{}
 
+	case "sigmoid":
+		return &Sigmoid{}
+
+	}
+	return &relU{}
+}
+
+type relU struct {
+}
+
+func (shelf *relU) get_name() string {
+	return "relu"
+}
 func (shelf *relU) call(val float64) float64 {
 	return max(0, val)
 }
-
 func (shelf *relU) ddx(val float64) float64 {
 	if val > 0 {
 		return 1
@@ -26,6 +42,9 @@ func (shelf *relU) ddx(val float64) float64 {
 
 type Sigmoid struct{}
 
+func (shelf *Sigmoid) get_name() string {
+	return "sigmoid"
+}
 func (shelf *Sigmoid) call(val float64) float64 {
 	return 1 / (1 + math.Exp(-val))
 }

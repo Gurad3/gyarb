@@ -6,6 +6,7 @@ type Layer interface {
 	forward(*MiM)
 	init(layerID int)
 	init_new_weights(xavierRange float64)
+	load_weights(flat_weights []float64)
 	print_weights()
 	get_size() []int
 }
@@ -54,7 +55,7 @@ func (shelf *DenseLayer) forward(mim *MiM) {
 
 func (shelf *DenseLayer) init(layerID int) {
 	//Init all layer arrays sizes, Sets bias AND WEIGHTS to 0
-	shelf.layer_type = "DensLayer"
+	shelf.layer_type = "DenseLayer"
 
 	shelf.bias = make([]float64, shelf.size)
 	shelf.weights = make([][]float64, shelf.size)
@@ -82,6 +83,10 @@ func (shelf *DenseLayer) init_new_weights(xavierRange float64) {
 			shelf.weights[neuronID][weightID] = initWeightXavierUniform(xavierRange)
 		}
 	}
+}
+
+func (shelf *DenseLayer) load_weights(flat_weights []float64) {
+
 }
 
 func (shelf *DenseLayer) print_weights() {

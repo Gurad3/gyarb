@@ -27,6 +27,29 @@ func load_from_net_data(net_data NetworkData) Network {
 	net := new(Network)
 
 	net.file_name = net_data.File_name
+	net.learn_rate = net_data.Learn_rate
+	net.learn_rate_decay = net_data.Learn_rate_decay
+	net.input_size = net_data.Input_size
+	net.output_size = net_data.Output_size
+
+	net.layers = make([]Layer, len(net_data.Layer_types))
+
+	for i := 0; i < len(net_data.Layer_types); i++ {
+		if net_data.Layer_types[i] == "DenseLayer" {
+			New_layer := DenseLayer{
+				act_interface:   Act_name_to_func(net_data.Layer_activations[i]),
+				size:            net_data.Layer_sizes[i][0],
+				prev_layer_size: len(net_data.Layer_biases[i]) / net_data.Layer_sizes[i][0],
+			}
+			New_layer.load_weights(net_data.Layer_weights[i])
+			net.layers[i] = &New_layer
+
+		}
+
+		if net_data.Layer_types[i] == "CNNLayer" {
+
+		}
+	}
 
 	return *net
 }
