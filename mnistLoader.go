@@ -1,7 +1,7 @@
 package main
 
 import (
-	"io/ioutil"
+	"os"
 )
 
 func loadMnist() ([][]float64, [][]float64, [][]float64, [][]float64) {
@@ -26,7 +26,7 @@ func check(e error) {
 }
 
 func loadImageFile(file string, size int, bsBytes int) [][]float64 {
-	content, err := ioutil.ReadFile(file)
+	content, err := os.ReadFile(file)
 	check(err)
 
 	newArray := make([][]float64, size)
@@ -43,7 +43,7 @@ func loadImageFile(file string, size int, bsBytes int) [][]float64 {
 }
 
 func loadLabelFile(file string, size int, bsBytes int) [][]float64 {
-	content, err := ioutil.ReadFile(file)
+	content, err := os.ReadFile(file)
 	check(err)
 
 	newArray := make([][]float64, size)

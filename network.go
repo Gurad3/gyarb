@@ -5,9 +5,9 @@ import (
 )
 
 type Network struct {
-	Layers []Layer `json:"Layers"`
+	layers []Layer
 
-	Learn_rate       float64 `json:"learn_rate"`
+	learn_rate       float64
 	learn_rate_decay float64
 	momentum         float64
 
@@ -19,7 +19,7 @@ type Network struct {
 }
 
 func (shelf *Network) init() {
-	for layerID, layer := range shelf.Layers {
+	for layerID, layer := range shelf.layers {
 		layer.init(layerID + 1)
 	}
 }
@@ -27,13 +27,13 @@ func (shelf *Network) init() {
 func (shelf *Network) init_new_weights() {
 	xavierRange := math.Sqrt(6 / float64(shelf.input_size+shelf.output_size))
 
-	for _, layer := range shelf.Layers {
+	for _, layer := range shelf.layers {
 		layer.init_new_weights(xavierRange)
 	}
 }
 
 func (shelf *Network) print_weights() {
-	for _, layer := range shelf.Layers {
+	for _, layer := range shelf.layers {
 		layer.print_weights()
 	}
 }
@@ -45,7 +45,7 @@ func (shelf *Network) forward(mim *MiM, data []float64) {
 	mim.data_type_history[0] = OneD
 	mim.layers_out_flat[0] = data
 
-	for _, layer := range shelf.Layers {
+	for _, layer := range shelf.layers {
 		layer.forward(mim)
 	}
 }

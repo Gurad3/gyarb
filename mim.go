@@ -62,15 +62,15 @@ func (shelf *MiM) request_flat() *MiM {
 }
 
 func (shelf *MiM) init(net *Network) {
-	shelf.layersDimentions = make([][]int32, len(net.Layers))
+	shelf.layersDimentions = make([][]int32, len(net.layers))
 
-	shelf.layers_out_flat = make([][]float64, len(net.Layers))
-	shelf.layers_out_flat_non_activated = make([][]float64, len(net.Layers))
+	shelf.layers_out_flat = make([][]float64, len(net.layers))
+	shelf.layers_out_flat_non_activated = make([][]float64, len(net.layers))
 
-	shelf.layers_out_3d = make([][][][]float64, len(net.Layers))
-	shelf.layers_out_3d_non_activated = make([][][][]float64, len(net.Layers))
+	shelf.layers_out_3d = make([][][][]float64, len(net.layers))
+	shelf.layers_out_3d_non_activated = make([][][][]float64, len(net.layers))
 
-	for layerID, layer := range net.Layers {
+	for layerID, layer := range net.layers {
 		layerDim := layer.get_size()
 
 		switch len(layerDim) - 1 {

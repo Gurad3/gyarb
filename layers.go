@@ -15,9 +15,10 @@ type DenseLayer struct {
 	layerID         int
 	size            int
 	prev_layer_size int
+	layer_type      string
 
-	Weights [][]float64 `json:"weights"`
-	Bias    []float64   `json:"bias"`
+	weights [][]float64
+	bias    []float64
 
 	weights_gradiants [][]float64
 	bias_gradiants    []float64
@@ -27,6 +28,7 @@ type CNLayer struct {
 	act_interface Activation
 	layerID       int
 	size          []int
+	layer_type    string
 
 	weights [][][]float64
 	bias    [][]float64
@@ -38,10 +40,10 @@ type CNLayer struct {
 func (shelf *DenseLayer) forward(mim *MiM) {
 	data := *mim.request_flat().data_flat
 
-	for neuronID := range shelf.Bias {
-		neuronVal := shelf.Bias[neuronID]
+	for neuronID := range shelf.bias {
+		neuronVal := shelf.bias[neuronID]
 
-		for weightID, weight := range shelf.Weights[neuronID] {
+		for weightID, weight := range shelf.weights[neuronID] {
 			neuronVal += data[weightID] * weight
 		}
 		mim.layers_out_flat_non_activated[shelf.layerID][neuronID] = neuronVal
@@ -51,10 +53,11 @@ func (shelf *DenseLayer) forward(mim *MiM) {
 }
 
 func (shelf *DenseLayer) init(layerID int) {
-	//Init all layer arrays sizes, Set weights to 0
+	//Init all layer arrays sizes, Sets bias AND WEIGHTS to 0
+	shelf.layer_type = "DensLayer"
 
-	shelf.Bias = make([]float64, shelf.size)
-	shelf.Weights = make([][]float64, shelf.size)
+	shelf.bias = make([]float64, shelf.size)
+	shelf.weights = make([][]float64, shelf.size)
 
 	shelf.bias_gradiants = make([]float64, shelf.size)
 	shelf.weights_gradiants = make([][]float64, shelf.size)
@@ -62,7 +65,7 @@ func (shelf *DenseLayer) init(layerID int) {
 	for i := 0; i < shelf.size; i++ {
 
 		neuroWeights := make([]float64, shelf.prev_layer_size)
-		shelf.Weights[i] = neuroWeights
+		shelf.weights[i] = neuroWeights
 		shelf.weights_gradiants[i] = neuroWeights
 
 	}
@@ -71,20 +74,20 @@ func (shelf *DenseLayer) init(layerID int) {
 func (shelf *DenseLayer) init_new_weights(xavierRange float64) {
 	//Give each weights new random weights (Currentlu 0)
 
-	for neuronID := range shelf.Bias {
-		shelf.Bias[neuronID] = 0
+	for neuronID := range shelf.bias {
+		shelf.bias[neuronID] = 0
 
-		for weightID := range shelf.Weights[neuronID] {
+		for weightID := range shelf.weights[neuronID] {
 
-			shelf.Weights[neuronID][weightID] = initWeightXavierUniform(xavierRange)
+			shelf.weights[neuronID][weightID] = initWeightXavierUniform(xavierRange)
 		}
 	}
 }
 
 func (shelf *DenseLayer) print_weights() {
-	for neuronID := range shelf.Bias {
+	for neuronID := range shelf.bias {
 
-		fmt.Println(shelf.Weights[neuronID])
+		fmt.Println(shelf.weights[neuronID])
 
 	}
 }
