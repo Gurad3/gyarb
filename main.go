@@ -12,7 +12,7 @@ func main() {
 	net := new(Network)
 
 	net.learn_rate = 2
-	net.learn_rate_decay = 2
+	net.learn_rate_decay = 0.0001
 
 	net.cost_interface = &MeanSquare{}
 
