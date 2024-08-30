@@ -39,7 +39,7 @@ func load_from_net_data(net_data NetworkData) Network {
 			New_layer := DenseLayer{
 				act_interface:   Act_name_to_func(net_data.Layer_activations[i]),
 				size:            net_data.Layer_sizes[i][0],
-				prev_layer_size: len(net_data.Layer_biases[i]) / net_data.Layer_sizes[i][0],
+				prev_layer_size: len(net_data.Layer_weights[i]) / net_data.Layer_sizes[i][0],
 			}
 			New_layer.init(i + 1)
 			New_layer.load_weights(net_data.Layer_weights[i])
@@ -56,7 +56,7 @@ func load_from_net_data(net_data NetworkData) Network {
 	return *net
 }
 
-func save_to_net_data(net Network) NetworkData {
+func save_to_net_data(net *Network) NetworkData {
 
 	net_data := new(NetworkData)
 
@@ -84,19 +84,21 @@ func save_to_net_data(net Network) NetworkData {
 	return *net_data
 }
 
-func encode_to_json(netData NetworkData) {
+func encode_to_json(net *Network) {
+	netData := save_to_net_data(net)
 	net_file, _ := os.Create("saves/" + netData.File_name + ".json")
 	encoder := json.NewEncoder(net_file)
 	encoder.Encode(netData)
 }
 
-func load_from_json(path string) NetworkData {
+func load_from_json(path string) Network {
 	file, _ := os.Open(path)
 	decoder := json.NewDecoder(file)
 
-	net := new(NetworkData)
+	netData := new(NetworkData)
+	decoder.Decode(netData)
 
-	decoder.Decode(net)
-
-	return *net
+	//fmt.Println(netData.Layer_weights)
+	net := load_from_net_data(*netData)
+	return net
 }

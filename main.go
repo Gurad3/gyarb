@@ -5,10 +5,24 @@ import (
 )
 
 func main() {
-	fmt.Println("Hasdejdå")
-	fmt.Println("hej")
-	fmt.Println("hj")
+	net := tmpNewNet()
+	net.print_weights()
 
+	fmt.Println("-")
+	encode_to_json(net)
+
+	NewNet := load_from_json("saves/TestNet.json")
+	NewNet.print_weights()
+
+	//mim := new(MiM)
+	//mim.init(net)
+
+	// data := []float64{}
+	// net.forward(mim, data)
+
+}
+
+func tmpNewNet() *Network {
 	net := new(Network)
 
 	net.learn_rate = 2
@@ -16,39 +30,25 @@ func main() {
 	net.file_name = "TestNet"
 	net.cost_interface = &MeanSquare{}
 
-	net.input_size = 28 * 28
-	net.output_size = 10
+	net.input_size = 2
+	net.output_size = 4
 	net.layers = []Layer{
 
 		&DenseLayer{
 			act_interface:   &relU{},
-			size:            100,
-			prev_layer_size: 28 * 28,
+			size:            4,
+			prev_layer_size: 2,
 		},
 
 		&DenseLayer{
 			act_interface:   &relU{},
-			size:            10,
-			prev_layer_size: 100,
+			size:            2,
+			prev_layer_size: 4,
 		},
 	}
 
 	net.init()
 	net.init_new_weights()
 
-	// net.print_weights()
-
-	mim := new(MiM)
-
-	mim.init(net)
-	// data := []float64{}
-	// net.forward(mim, data)
-	// encode_to_json(*net)
-
-	newNetData := load_from_json("saves/TestNet.json")
-	// newNet.print_weights()
-
-	newNet := load_from_net_data(newNetData)
-	fmt.Println(newNet.layers[0])
-
+	return net
 }

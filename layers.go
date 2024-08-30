@@ -93,16 +93,31 @@ func (shelf *DenseLayer) init_new_weights(xavierRange float64) {
 }
 
 func (shelf *DenseLayer) load_weights(flat_weights []float64) {
+	for i := 0; i < shelf.size; i++ {
+		for i2 := 0; i2 < shelf.prev_layer_size; i2++ {
+			shelf.weights[i][i2] = flat_weights[shelf.prev_layer_size*i+i2]
+		}
+	}
 
 }
-func (shelf *DenseLayer) load_biases(flat_weights []float64) {
-
+func (shelf *DenseLayer) load_biases(flat_bias []float64) {
+	for i := 0; i < shelf.size; i++ {
+		shelf.bias[i] = flat_bias[i]
+	}
 }
 func (shelf *DenseLayer) get_weights() []float64 {
-	return []float64{}
+	flat_weights := make([]float64, shelf.prev_layer_size*shelf.size)
+
+	for i := 0; i < shelf.size; i++ {
+		for i2 := 0; i2 < shelf.prev_layer_size; i2++ {
+			flat_weights[shelf.prev_layer_size*i+i2] = shelf.weights[i][i2]
+		}
+	}
+
+	return flat_weights
 }
 func (shelf *DenseLayer) get_biases() []float64 {
-	return []float64{}
+	return shelf.bias
 }
 
 func (shelf *DenseLayer) print_weights() {
