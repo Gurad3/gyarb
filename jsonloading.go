@@ -41,6 +41,7 @@ func load_from_net_data(net_data NetworkData) Network {
 				size:            net_data.Layer_sizes[i][0],
 				prev_layer_size: len(net_data.Layer_biases[i]) / net_data.Layer_sizes[i][0],
 			}
+			New_layer.init(i + 1)
 			New_layer.load_weights(net_data.Layer_weights[i])
 			net.layers[i] = &New_layer
 
@@ -52,6 +53,34 @@ func load_from_net_data(net_data NetworkData) Network {
 	}
 
 	return *net
+}
+
+func save_to_net_data(net Network) NetworkData {
+
+	net_data := new(NetworkData)
+
+	net_data.File_name = net.file_name
+
+	net_data.Learn_rate = net.learn_rate
+	net_data.Learn_rate_decay = net.learn_rate_decay
+	net_data.Input_size = net.input_size
+	net_data.Output_size = net.output_size
+
+	layers_len := len(net.layers)
+	net_data.Layer_types = make([]string, layers_len)
+	net_data.Layer_activations = make([]string, layers_len)
+	net_data.Layer_biases = make([][]float64, layers_len)
+	net_data.Layer_weights = make([][]float64, layers_len)
+	net_data.Layer_sizes = make([][]int, layers_len)
+	for layerID, layer := range net.layers {
+		net_data.Layer_types[layerID] = layer.get_name()
+		net_data.Layer_activations[layerID] = layer.get_act_name()
+		net_data.Layer_biases[layerID] = layer.get_biases()
+		net_data.Layer_weights[layerID] = layer.get_weights()
+		net_data.Layer_sizes[layerID] = layer.get_size()
+	}
+
+	return *net_data
 }
 
 func encode_to_json(netData NetworkData) {

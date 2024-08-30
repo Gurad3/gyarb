@@ -6,9 +6,16 @@ type Layer interface {
 	forward(*MiM)
 	init(layerID int)
 	init_new_weights(xavierRange float64)
+
 	load_weights(flat_weights []float64)
+	load_biases(flat_biases []float64)
+	get_weights() []float64
+	get_biases() []float64
+
 	print_weights()
 	get_size() []int
+	get_name() string
+	get_act_name() string
 }
 
 type DenseLayer struct {
@@ -99,4 +106,10 @@ func (shelf *DenseLayer) print_weights() {
 
 func (shelf *DenseLayer) get_size() []int {
 	return []int{shelf.size}
+}
+func (shelf *DenseLayer) get_name() string {
+	return "DenseLayer"
+}
+func (shelf *DenseLayer) get_act_name() string {
+	return shelf.act_interface.get_name()
 }
