@@ -16,11 +16,10 @@ type NetworkData struct {
 	Layer_types       []string `json:"layer_types"`
 	Layer_activations []string `json:"layer_activations"`
 
+	Layer_sizes [][]int `json:"layer_sizes"`
 	//All flated
 	Layer_biases  [][]float64 `json:"layer_biases"`
 	Layer_weights [][]float64 `json:"layer_weights"`
-
-	Layer_sizes [][]int `json:"layer_sizes"`
 }
 
 func load_from_net_data(net_data NetworkData) Network {
@@ -32,12 +31,14 @@ func load_from_net_data(net_data NetworkData) Network {
 	net.input_size = net_data.Input_size
 	net.output_size = net_data.Output_size
 
+	net.cost_interface = cost_name_to_interface(net_data.Cost_interface)
+
 	net.layers = make([]Layer, len(net_data.Layer_types))
 
 	for i := 0; i < len(net_data.Layer_types); i++ {
 		if net_data.Layer_types[i] == "DenseLayer" {
 			New_layer := DenseLayer{
-				act_interface:   Act_name_to_func(net_data.Layer_activations[i]),
+				act_interface:   act_name_to_interface(net_data.Layer_activations[i]),
 				size:            net_data.Layer_sizes[i][0],
 				prev_layer_size: len(net_data.Layer_weights[i]) / net_data.Layer_sizes[i][0],
 			}
@@ -67,6 +68,8 @@ func save_to_net_data(net *Network) NetworkData {
 	net_data.Input_size = net.input_size
 	net_data.Output_size = net.output_size
 
+	net_data.Cost_interface = net.cost_interface.get_name()
+
 	layers_len := len(net.layers)
 	net_data.Layer_types = make([]string, layers_len)
 	net_data.Layer_activations = make([]string, layers_len)
@@ -91,7 +94,7 @@ func encode_to_json(net *Network) {
 	encoder.Encode(netData)
 }
 
-func load_from_json(path string) Network {
+func load_from_json(path string) *Network {
 	file, _ := os.Open(path)
 	decoder := json.NewDecoder(file)
 
@@ -100,5 +103,5 @@ func load_from_json(path string) Network {
 
 	//fmt.Println(netData.Layer_weights)
 	net := load_from_net_data(*netData)
-	return net
+	return &net
 }

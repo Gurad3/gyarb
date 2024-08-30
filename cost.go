@@ -6,6 +6,19 @@ type Cost interface {
 	call([]float64, []float64) float64
 
 	ddx(float64, float64) float64
+	get_name() string
+}
+
+func cost_name_to_interface(name string) Cost {
+	switch name {
+	case "meansquare":
+		return &MeanSquare{}
+
+	case "tmp":
+		return &MeanSquare{}
+
+	}
+	return &MeanSquare{}
 }
 
 type MeanSquare struct {
@@ -22,4 +35,7 @@ func (shelf *MeanSquare) call(actual_values []float64, target_values []float64) 
 
 func (shelf *MeanSquare) ddx(actual_val float64, target_val float64) float64 {
 	return actual_val - target_val
+}
+func (shelf *MeanSquare) get_name() string {
+	return "meansquare"
 }

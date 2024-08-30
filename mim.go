@@ -62,27 +62,28 @@ func (shelf *MiM) request_flat() *MiM {
 }
 
 func (shelf *MiM) init(net *Network) {
-	shelf.layersDimentions = make([][]int32, len(net.layers))
+	length := len(net.layers) + 1
 
-	shelf.layers_out_flat = make([][]float64, len(net.layers))
-	shelf.layers_out_flat_non_activated = make([][]float64, len(net.layers))
+	shelf.layersDimentions = make([][]int32, length)
+	shelf.data_type_history = make([]int32, length)
 
-	shelf.layers_out_3d = make([][][][]float64, len(net.layers))
-	shelf.layers_out_3d_non_activated = make([][][][]float64, len(net.layers))
+	shelf.layers_out_flat = make([][]float64, length)
+	shelf.layers_out_flat_non_activated = make([][]float64, length)
 
-	for layerID, layer := range net.layers {
+	shelf.layers_out_3d = make([][][][]float64, length)
+	shelf.layers_out_3d_non_activated = make([][][][]float64, length)
+
+	for fake_layer_id, layer := range net.layers {
 		layerDim := layer.get_size()
-
-		switch len(layerDim) - 1 {
+		layerID := fake_layer_id + 1
+		switch len(layerDim) - 1 { //OneD == 0 ?????
 
 		case OneD:
-			new1d := make([]float64, layerDim[0])
-			shelf.layers_out_flat[layerID] = new1d
-
+			shelf.layers_out_flat[layerID] = make([]float64, layerDim[0])
+			shelf.layers_out_flat_non_activated[layerID] = make([]float64, layerDim[0])
 		case ThreeD:
-			new1d := make([]float64, layerDim[0]*layerDim[1]*layerDim[2])
-			shelf.layers_out_flat[layerID] = new1d
-
+			shelf.layers_out_flat[layerID] = make([]float64, layerDim[0]*layerDim[1]*layerDim[2])
+			shelf.layers_out_flat_non_activated[layerID] = make([]float64, layerDim[0]*layerDim[1]*layerDim[2])
 		}
 	}
 

@@ -16,6 +16,8 @@ type Layer interface {
 	get_size() []int
 	get_name() string
 	get_act_name() string
+
+	debug_print()
 }
 
 type DenseLayer struct {
@@ -58,11 +60,15 @@ func (shelf *DenseLayer) forward(mim *MiM) {
 		mim.layers_out_flat[shelf.layerID][neuronID] = shelf.act_interface.call(neuronVal)
 	}
 	mim.data_flat = &mim.layers_out_flat[shelf.layerID]
+
+	mim.data_type = OneD
+	mim.data_type_history[shelf.layerID] = OneD
 }
 
 func (shelf *DenseLayer) init(layerID int) {
 	//Init all layer arrays sizes, Sets bias AND WEIGHTS to 0
 	shelf.layer_type = "DenseLayer"
+	shelf.layerID = layerID
 
 	shelf.bias = make([]float64, shelf.size)
 	shelf.weights = make([][]float64, shelf.size)
@@ -136,4 +142,9 @@ func (shelf *DenseLayer) get_name() string {
 }
 func (shelf *DenseLayer) get_act_name() string {
 	return shelf.act_interface.get_name()
+}
+
+func (shelf *DenseLayer) debug_print() {
+	fmt.Println(shelf.layerID)
+	fmt.Println(shelf.size)
 }

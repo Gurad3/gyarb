@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math"
 )
 
@@ -38,7 +39,7 @@ func (shelf *Network) print_weights() {
 	}
 }
 
-func (shelf *Network) forward(mim *MiM, data []float64) {
+func (shelf *Network) forward(mim *MiM, data []float64, labels []float64) {
 
 	mim.data_flat = &data
 	mim.data_type = OneD
@@ -47,5 +48,11 @@ func (shelf *Network) forward(mim *MiM, data []float64) {
 
 	for _, layer := range shelf.layers {
 		layer.forward(mim)
+		layer.debug_print()
 	}
+	mim.request_flat()
+	fmt.Println(*mim.data_flat)
+	fmt.Println(labels)
+	fmt.Println(shelf.cost_interface.call(*mim.data_flat, data))
+
 }

@@ -11,7 +11,7 @@ type Activation interface {
 	get_name() string
 }
 
-func Act_name_to_func(name string) Activation {
+func act_name_to_interface(name string) Activation {
 	switch name {
 	case "relu":
 		return &relU{}

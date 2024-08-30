@@ -5,21 +5,23 @@ import (
 )
 
 func main() {
-	net := tmpNewNet()
-	net.print_weights()
+	//net := tmpNewNet()
+	// net.print_weights()
 
 	fmt.Println("-")
-	encode_to_json(net)
 
-	NewNet := load_from_json("saves/TestNet.json")
-	NewNet.print_weights()
+	net := load_from_json("saves/TrainedMNIST.json")
+	//net.print_weights()
 
-	//mim := new(MiM)
-	//mim.init(net)
+	mim := new(MiM)
+	mim.init(net)
 
-	// data := []float64{}
-	// net.forward(mim, data)
+	//TrainDataLabel, TrainData, TestDataLabel, TestData := loadMnist()
 
+	_, _, TestDataLabel, TestData := loadMnist()
+	net.forward(mim, TestData[1], TestDataLabel[1])
+
+	//encode_to_json(net)
 }
 
 func tmpNewNet() *Network {
@@ -30,20 +32,20 @@ func tmpNewNet() *Network {
 	net.file_name = "TestNet"
 	net.cost_interface = &MeanSquare{}
 
-	net.input_size = 2
-	net.output_size = 4
+	net.input_size = 28 * 28
+	net.output_size = 10
 	net.layers = []Layer{
 
 		&DenseLayer{
 			act_interface:   &relU{},
-			size:            4,
-			prev_layer_size: 2,
+			size:            100,
+			prev_layer_size: 28 * 28,
 		},
 
 		&DenseLayer{
 			act_interface:   &relU{},
-			size:            2,
-			prev_layer_size: 4,
+			size:            10,
+			prev_layer_size: 100,
 		},
 	}
 
