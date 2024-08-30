@@ -95,6 +95,15 @@ func (shelf *DenseLayer) init_new_weights(xavierRange float64) {
 func (shelf *DenseLayer) load_weights(flat_weights []float64) {
 
 }
+func (shelf *DenseLayer) load_biases(flat_weights []float64) {
+
+}
+func (shelf *DenseLayer) get_weights() []float64 {
+	return []float64{}
+}
+func (shelf *DenseLayer) get_biases() []float64 {
+	return []float64{}
+}
 
 func (shelf *DenseLayer) print_weights() {
 	for neuronID := range shelf.bias {

@@ -43,6 +43,7 @@ func load_from_net_data(net_data NetworkData) Network {
 			}
 			New_layer.init(i + 1)
 			New_layer.load_weights(net_data.Layer_weights[i])
+			New_layer.load_biases(net_data.Layer_biases[i])
 			net.layers[i] = &New_layer
 
 		}
