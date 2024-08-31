@@ -5,12 +5,12 @@ import (
 )
 
 func main() {
-	//net := tmpNewNet()
+	net := tmpNewNet()
 	// net.print_weights()
 
 	fmt.Println("-")
 
-	net := load_from_json("saves/TrainedMNIST.json")
+	// := load_from_json("saves/TrainedMNIST.json")
 	//net.print_weights()
 
 	mim := new(MiM)

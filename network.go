@@ -56,3 +56,7 @@ func (shelf *Network) forward(mim *MiM, data []float64, labels []float64) {
 	fmt.Println(shelf.cost_interface.call(*mim.data_flat, data))
 
 }
+
+func (shelf *Network) get_output_ddx(mim *MiM, labels []float64) {
+
+}
