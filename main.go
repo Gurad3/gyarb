@@ -10,7 +10,7 @@ func main() {
 
 	fmt.Println("-")
 
-	// := load_from_json("saves/TrainedMNIST.json")
+	//net := load_from_json("saves/TrainedMNIST.json")
 	//net.print_weights()
 
 	mim := new(MiM)
