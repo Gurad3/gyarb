@@ -47,7 +47,7 @@ func (shelf *Network) forward(mim *MiM, data []float64) {
 
 	for _, layer := range shelf.layers {
 		layer.forward(mim)
-		layer.debug_print()
+		// layer.debug_print()
 	}
 }
 
@@ -55,25 +55,25 @@ func (shelf *Network) backprop(mim *MiM, labels []float64) {
 	mim.data_flat = shelf.get_output_ddx(mim, labels)
 	mim.data_type = OneD
 
-	for layerID := len(shelf.layers) - 1; layerID >= 0; layerID++ {
-		shelf.layers[layerID].backprop(mim)
+	for layerID := len(shelf.layers) - 1; layerID > 0; layerID-- {
+		shelf.layers[layerID].backprop(mim, shelf.layers[layerID-1].get_act_interface())
 	}
-
+	shelf.layers[0].backprop(mim, shelf.layers[0].get_act_interface())
 }
 
 func (shelf *Network) get_output_ddx(mim *MiM, labels []float64) *[]float64 {
 	gradiants := make([]float64, len(labels))
 
 	for outID, output := range *mim.request_flat().data_flat {
-		gradiants[outID] = shelf.layers[len(shelf.layers)-1].run_act_ddx(shelf.cost_interface.ddx(output, labels[outID]))
+		gradiants[outID] = shelf.layers[len(shelf.layers)-1].get_act_interface().call(shelf.cost_interface.ddx(output, labels[outID]))
 	}
 
 	return &gradiants
 }
 
-func (shelf *Network) apply_gradients() {
+func (shelf *Network) apply_gradients(batch_size int) {
 
 	for _, layer := range shelf.layers {
-		layer.apply_gradients()
+		layer.apply_gradients(tmpNewNet().learn_rate, float64(batch_size))
 	}
 }

@@ -30,7 +30,7 @@ func (shelf *MeanSquare) call(out_values []float64, target_values []float64) flo
 		sum += math.Pow(out_values[i]-target_values[i], 2)
 	}
 
-	return sum / (2 * float64(len(out_values)))
+	return sum
 }
 
 func (shelf *MeanSquare) ddx(out_val float64, target_val float64) float64 {

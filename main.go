@@ -16,10 +16,21 @@ func main() {
 	mim := new(MiM)
 	mim.init(net)
 
-	//TrainDataLabel, TrainData, TestDataLabel, TestData := loadMnist()
+	MNIST_TrainDataLabel, MNIST_TrainData, MNIST_TestDataLabel, MNIST_TestData := loadMnist()
 
-	_, _, _, TestData := loadMnist()
-	net.forward(mim, TestData[1])
+	td := trainer{
+		TrainData:      MNIST_TrainData,
+		TestData:       MNIST_TestData,
+		TrainDataLabel: MNIST_TrainDataLabel,
+		TestDataLabel:  MNIST_TestDataLabel,
+
+		batch_size:     10,
+		info_milestone: 4000,
+	}
+	net.train_network(mim, td)
+
+	//_, _, _, TestData := loadMnist()
+	//net.forward(mim, TestData[1])
 
 	//encode_to_json(net)
 }

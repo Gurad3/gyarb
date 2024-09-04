@@ -78,7 +78,7 @@ func save_to_net_data(net *Network) NetworkData {
 	net_data.Layer_sizes = make([][]int, layers_len)
 	for layerID, layer := range net.layers {
 		net_data.Layer_types[layerID] = layer.get_name()
-		net_data.Layer_activations[layerID] = layer.get_act_name()
+		net_data.Layer_activations[layerID] = layer.get_act_interface().get_name()
 		net_data.Layer_biases[layerID] = layer.get_biases()
 		net_data.Layer_weights[layerID] = layer.get_weights()
 		net_data.Layer_sizes[layerID] = layer.get_size()
