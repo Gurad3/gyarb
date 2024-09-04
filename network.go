@@ -2,6 +2,8 @@ package main
 
 import (
 	"math"
+	"math/rand"
+	"time"
 )
 
 type Network struct {
@@ -26,9 +28,10 @@ func (shelf *Network) init() {
 
 func (shelf *Network) init_new_weights() {
 	xavierRange := math.Sqrt(6 / float64(shelf.input_size+shelf.output_size))
+	r := rand.New(rand.NewSource(time.Now().Unix()))
 
 	for _, layer := range shelf.layers {
-		layer.init_new_weights(xavierRange)
+		layer.init_new_weights(xavierRange, *r)
 	}
 }
 
@@ -65,7 +68,11 @@ func (shelf *Network) get_output_ddx(mim *MiM, labels []float64) *[]float64 {
 	gradiants := make([]float64, len(labels))
 
 	for outID, output := range *mim.request_flat().data_flat {
-		gradiants[outID] = shelf.layers[len(shelf.layers)-1].get_act_interface().call(shelf.cost_interface.ddx(output, labels[outID]))
+		//gradiants[outID] = shelf.layers[len(shelf.layers)-1].get_act_interface().ddx(shelf.cost_interface.ddx(output, labels[outID]))
+
+		gradiants[outID] = shelf.layers[len(shelf.layers)-1].get_act_interface().ddx(mim.layers_out_flat_non_activated[len(shelf.layers)-1][outID])
+		gradiants[outID] *= shelf.cost_interface.ddx(output, labels[outID])
+
 	}
 
 	return &gradiants

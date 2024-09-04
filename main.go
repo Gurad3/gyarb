@@ -24,7 +24,7 @@ func main() {
 		TrainDataLabel: MNIST_TrainDataLabel,
 		TestDataLabel:  MNIST_TestDataLabel,
 
-		batch_size:     10,
+		batch_size:     100,
 		info_milestone: 4000,
 	}
 	net.train_network(mim, td)
@@ -38,7 +38,7 @@ func main() {
 func tmpNewNet() *Network {
 	net := new(Network)
 
-	net.learn_rate = 2
+	net.learn_rate = 0.2
 	net.learn_rate_decay = 0.0001
 	net.file_name = "TestNet"
 	net.cost_interface = &MeanSquare{}
@@ -48,13 +48,13 @@ func tmpNewNet() *Network {
 	net.layers = []Layer{
 
 		&DenseLayer{
-			act_interface:   &relU{},
+			act_interface:   &Sigmoid{},
 			size:            100,
 			prev_layer_size: 28 * 28,
 		},
 
 		&DenseLayer{
-			act_interface:   &relU{},
+			act_interface:   &Sigmoid{},
 			size:            10,
 			prev_layer_size: 100,
 		},

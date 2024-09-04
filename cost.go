@@ -34,7 +34,7 @@ func (shelf *MeanSquare) call(out_values []float64, target_values []float64) flo
 }
 
 func (shelf *MeanSquare) ddx(out_val float64, target_val float64) float64 {
-	return out_val - target_val
+	return (out_val - target_val) * 2
 }
 func (shelf *MeanSquare) get_name() string {
 	return "meansquare"

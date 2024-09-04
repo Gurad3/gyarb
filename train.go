@@ -52,7 +52,6 @@ func (shelf *Network) Test(mim *MiM, TestData [][]float64, TestLabels [][]float6
 
 	correct_choises := 0
 	for sampleID, sample := range TestData {
-
 		shelf.forward(mim, sample)
 		totalCost += shelf.cost_interface.call(*mim.request_flat().data_flat, TestLabels[sampleID])
 
@@ -62,7 +61,7 @@ func (shelf *Network) Test(mim *MiM, TestData [][]float64, TestLabels [][]float6
 	}
 
 	fmt.Println("Percantage Correct on Test Data: ", float64(correct_choises)/float64(len(TestLabels)))
-	fmt.Println("Cost: ", totalCost/float64(len(TestLabels)), totalCost)
+	fmt.Println("Cost: ", totalCost/float64(len(TestLabels)))
 
 	return totalCost / float64(len(TestLabels))
 }
@@ -72,6 +71,7 @@ func isCorrect(values []float64, target_values []float64) bool {
 	for id, v := range target_values {
 		if v == 1 {
 			higT = id
+			break
 		}
 	}
 	highV := 0.0
@@ -79,7 +79,12 @@ func isCorrect(values []float64, target_values []float64) bool {
 	for id, v := range values {
 		if v > highV {
 			highVID = id
+			highV = v
 		}
 	}
+
+	// fmt.Print("--")
+	// fmt.Println(higT == highVID, values, target_values)
+	// fmt.Print("--")
 	return higT == highVID
 }

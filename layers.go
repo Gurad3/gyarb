@@ -1,12 +1,15 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"math/rand"
+)
 
 type Layer interface {
 	forward(*MiM)
 	backprop(mim *MiM, prev_layer_act Activation)
 	init(layerID int)
-	init_new_weights(xavierRange float64)
+	init_new_weights(xavierRange float64, r rand.Rand)
 	apply_gradients(learn_rate float64, batch_size float64)
 
 	load_weights(flat_weights []float64)
@@ -91,7 +94,7 @@ func (shelf *DenseLayer) backprop(mim *MiM, prev_act_interface Activation) {
 			for neuronID := 0; neuronID < shelf.size; neuronID++ {
 				new_grade += shelf.weights[neuronID][prev_neuronID] * out_grade[neuronID]
 			}
-			new_grade = prev_act_interface.ddx(new_grade) * mim.layers_out_flat_non_activated[shelf.layerID-1][prev_neuronID]
+			new_grade = prev_act_interface.ddx(mim.layers_out_flat_non_activated[shelf.layerID-1][prev_neuronID]) * new_grade
 
 			mim.layers_out_flat[shelf.layerID-1][prev_neuronID] = new_grade
 		}
@@ -104,11 +107,11 @@ func (shelf *DenseLayer) backprop(mim *MiM, prev_act_interface Activation) {
 
 func (shelf *DenseLayer) apply_gradients(learn_rate float64, batch_size float64) {
 	for neuronID := range shelf.bias {
-		shelf.bias[neuronID] += shelf.bias_gradiants[neuronID] * learn_rate / batch_size
+		shelf.bias[neuronID] -= shelf.bias_gradiants[neuronID] * learn_rate / batch_size
 		shelf.bias_gradiants[neuronID] = 0
 
 		for weightID := range shelf.weights[neuronID] {
-			shelf.weights[neuronID][weightID] += shelf.weights_gradiants[neuronID][weightID] * learn_rate / batch_size
+			shelf.weights[neuronID][weightID] -= shelf.weights_gradiants[neuronID][weightID] * learn_rate / batch_size
 			shelf.weights_gradiants[neuronID][weightID] = 0
 		}
 	}
@@ -134,7 +137,7 @@ func (shelf *DenseLayer) init(layerID int) {
 	}
 }
 
-func (shelf *DenseLayer) init_new_weights(xavierRange float64) {
+func (shelf *DenseLayer) init_new_weights(xavierRange float64, r rand.Rand) {
 	//Give each weights new random weights (Currentlu 0)
 
 	for neuronID := range shelf.bias {
@@ -142,7 +145,7 @@ func (shelf *DenseLayer) init_new_weights(xavierRange float64) {
 
 		for weightID := range shelf.weights[neuronID] {
 
-			shelf.weights[neuronID][weightID] = initWeightXavierUniform(xavierRange)
+			shelf.weights[neuronID][weightID] = initWeightXavierUniform(xavierRange, r)
 		}
 	}
 }

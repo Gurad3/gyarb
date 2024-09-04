@@ -2,7 +2,7 @@ package main
 
 import (
 	"math"
-	"math/rand/v2"
+	"math/rand"
 )
 
 type Activation interface {
@@ -54,6 +54,6 @@ func (shelf *Sigmoid) ddx(val float64) float64 {
 	return sig * (1 - sig)
 }
 
-func initWeightXavierUniform(xavierRange float64) float64 {
-	return rand.Float64()*2*xavierRange - xavierRange
+func initWeightXavierUniform(xavierRange float64, r rand.Rand) float64 {
+	return r.Float64()*2*xavierRange - xavierRange
 }
