@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"math"
 )
 
@@ -39,7 +38,7 @@ func (shelf *Network) print_weights() {
 	}
 }
 
-func (shelf *Network) forward(mim *MiM, data []float64, labels []float64) {
+func (shelf *Network) forward(mim *MiM, data []float64) {
 
 	mim.data_flat = &data
 	mim.data_type = OneD
@@ -50,13 +49,31 @@ func (shelf *Network) forward(mim *MiM, data []float64, labels []float64) {
 		layer.forward(mim)
 		layer.debug_print()
 	}
-	mim.request_flat()
-	fmt.Println(*mim.data_flat)
-	fmt.Println(labels)
-	fmt.Println(shelf.cost_interface.call(*mim.data_flat, data))
+}
+
+func (shelf *Network) backprop(mim *MiM, labels []float64) {
+	mim.data_flat = shelf.get_output_ddx(mim, labels)
+	mim.data_type = OneD
+
+	for layerID := len(shelf.layers) - 1; layerID >= 0; layerID++ {
+		shelf.layers[layerID].backprop(mim)
+	}
 
 }
 
-func (shelf *Network) get_output_ddx(mim *MiM, labels []float64) {
+func (shelf *Network) get_output_ddx(mim *MiM, labels []float64) *[]float64 {
+	gradiants := make([]float64, len(labels))
 
+	for outID, output := range *mim.request_flat().data_flat {
+		gradiants[outID] = shelf.layers[len(shelf.layers)-1].run_act_ddx(shelf.cost_interface.ddx(output, labels[outID]))
+	}
+
+	return &gradiants
+}
+
+func (shelf *Network) apply_gradients() {
+
+	for _, layer := range shelf.layers {
+		layer.apply_gradients()
+	}
 }

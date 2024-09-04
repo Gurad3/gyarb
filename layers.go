@@ -4,8 +4,10 @@ import "fmt"
 
 type Layer interface {
 	forward(*MiM)
+	backprop(*MiM)
 	init(layerID int)
 	init_new_weights(xavierRange float64)
+	apply_gradients()
 
 	load_weights(flat_weights []float64)
 	load_biases(flat_biases []float64)
@@ -16,6 +18,7 @@ type Layer interface {
 	get_size() []int
 	get_name() string
 	get_act_name() string
+	run_act_ddx(float64) float64
 
 	debug_print()
 }
@@ -63,6 +66,29 @@ func (shelf *DenseLayer) forward(mim *MiM) {
 
 	mim.data_type = OneD
 	mim.data_type_history[shelf.layerID] = OneD
+}
+
+func (shelf *DenseLayer) backprop(mim *MiM) {
+	//Grad = mim.request_data(), Gradiants is Cost/out not Cost/Act(Out)
+	out_grade := mim.request_flat().data_flat
+
+	if shelf.layerID > 1 { //First layerID == 1, behövr inte räkna ut nästa lagers: Cost/Out om vi är på första lagret.
+		//MiM data_flat = nextLayerOut
+		mim.data_type = OneD
+	}
+
+}
+
+func (shelf *DenseLayer) apply_gradients() {
+	for neuronID := range shelf.bias {
+		shelf.bias[neuronID] += shelf.bias_gradiants[neuronID]
+		shelf.bias_gradiants[neuronID] = 0
+
+		for weightID := range shelf.weights[neuronID] {
+			shelf.weights[neuronID][weightID] += shelf.weights_gradiants[neuronID][weightID]
+			shelf.weights_gradiants[neuronID][weightID] = 0
+		}
+	}
 }
 
 func (shelf *DenseLayer) init(layerID int) {
@@ -142,6 +168,9 @@ func (shelf *DenseLayer) get_name() string {
 }
 func (shelf *DenseLayer) get_act_name() string {
 	return shelf.act_interface.get_name()
+}
+func (shelf *DenseLayer) run_act_ddx(val float64) float64 {
+	return shelf.act_interface.ddx(val)
 }
 
 func (shelf *DenseLayer) debug_print() {

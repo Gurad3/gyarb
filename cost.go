@@ -3,9 +3,9 @@ package main
 import "math"
 
 type Cost interface {
-	call([]float64, []float64) float64
+	call(out_values []float64, target_values []float64) float64
 
-	ddx(float64, float64) float64
+	ddx(out_val float64, target_val float64) float64
 	get_name() string
 }
 
@@ -24,17 +24,17 @@ func cost_name_to_interface(name string) Cost {
 type MeanSquare struct {
 }
 
-func (shelf *MeanSquare) call(actual_values []float64, target_values []float64) float64 {
+func (shelf *MeanSquare) call(out_values []float64, target_values []float64) float64 {
 	sum := 0.0
-	for i := range actual_values {
-		sum += math.Pow(actual_values[i]-target_values[i], 2)
+	for i := range out_values {
+		sum += math.Pow(out_values[i]-target_values[i], 2)
 	}
 
-	return sum / (2 * float64(len(actual_values)))
+	return sum / (2 * float64(len(out_values)))
 }
 
-func (shelf *MeanSquare) ddx(actual_val float64, target_val float64) float64 {
-	return actual_val - target_val
+func (shelf *MeanSquare) ddx(out_val float64, target_val float64) float64 {
+	return out_val - target_val
 }
 func (shelf *MeanSquare) get_name() string {
 	return "meansquare"

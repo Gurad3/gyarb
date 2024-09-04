@@ -18,8 +18,8 @@ func main() {
 
 	//TrainDataLabel, TrainData, TestDataLabel, TestData := loadMnist()
 
-	_, _, TestDataLabel, TestData := loadMnist()
-	net.forward(mim, TestData[1], TestDataLabel[1])
+	_, _, _, TestData := loadMnist()
+	net.forward(mim, TestData[1])
 
 	//encode_to_json(net)
 }
