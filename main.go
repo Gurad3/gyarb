@@ -34,7 +34,7 @@ func mnist(net *Network, mim *MiM) {
 
 		batch_size:        100,
 		info_milestone:    60000,
-		save_at_milestone: false,
+		save_at_milestone: true,
 	}
 	net.train_network(mim, td)
 }
