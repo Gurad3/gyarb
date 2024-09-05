@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
+	"time"
 )
 
 type trainer struct {
@@ -44,7 +46,7 @@ func (shelf *Network) train_network(mim *MiM, trainData trainer) {
 				shelf.backprop(mim, trainData.train_label_batches[batchID][sampleID])
 				if totalSamples%trainData.info_milestone == 0 {
 					shelf.Test(mim, trainData.TestData, trainData.TestDataLabel)
-					if trainData.save_at_milestone == true {
+					if trainData.save_at_milestone {
 						encode_to_json(shelf)
 					}
 
@@ -55,6 +57,8 @@ func (shelf *Network) train_network(mim *MiM, trainData trainer) {
 			shelf.apply_gradients(trainData.batch_size)
 
 		}
+
+		trainData.shuffle_batches()
 	}
 
 }
@@ -101,4 +105,14 @@ func isCorrect(values []float64, target_values []float64) bool {
 	// fmt.Println(higT == highVID, values, target_values)
 	// fmt.Print("--")
 	return higT == highVID
+}
+
+func (shelf *trainer) shuffle_batches() {
+	rng := rand.New(rand.NewSource(time.Now().Unix()))
+	for batch_index := range shelf.train_batches {
+		rand_index := rng.Int() % len(shelf.train_batches)
+
+		shelf.train_batches[batch_index], shelf.train_batches[rand_index] = shelf.train_batches[rand_index], shelf.train_batches[batch_index]
+		shelf.train_label_batches[batch_index], shelf.train_label_batches[rand_index] = shelf.train_label_batches[rand_index], shelf.train_label_batches[batch_index]
+	}
 }
