@@ -179,13 +179,11 @@ func (shelf *DenseLayer) get_biases() []float64 {
 }
 
 func (shelf *DenseLayer) print_weights() {
-	// for neuronID := range shelf.bias {
+	for neuronID := range shelf.bias {
+		fmt.Println(shelf.weights[neuronID])
+	}
 
-	// 	fmt.Println(shelf.weights[neuronID])
-
-	// }
-
-	fmt.Println(shelf.bias)
+	//fmt.Println(shelf.bias)
 }
 
 func (shelf *DenseLayer) get_size() []int {

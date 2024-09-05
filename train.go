@@ -71,13 +71,15 @@ func (shelf *Network) Test(mim *MiM, TestData [][]float64, TestLabels [][]float6
 		shelf.forward(mim, sample)
 		totalCost += shelf.cost_interface.call(*mim.request_flat().data_flat, TestLabels[sampleID])
 
+		fmt.Println("--")
+		fmt.Println(&sample, *mim.data_flat, TestLabels[sampleID], isCorrect(*mim.data_flat, TestLabels[sampleID]))
+		fmt.Println("--")
+
 		if isCorrect(*mim.data_flat, TestLabels[sampleID]) {
 			correct_choises += 1
 		}
 	}
-
-	fmt.Println(*mim.data_flat, TestLabels[len(TestLabels)-1], isCorrect(*mim.data_flat, TestLabels[len(TestLabels)-1]))
-
+	// fmt.Println(*mim.data_flat, TestLabels[len(TestLabels)-1], isCorrect(*mim.data_flat, TestLabels[len(TestLabels)-1]))
 	fmt.Println("Percantage Correct on Test Data: ", float64(correct_choises)/float64(len(TestLabels)))
 	fmt.Println("Cost: ", totalCost/float64(len(TestLabels)))
 

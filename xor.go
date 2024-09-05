@@ -8,7 +8,7 @@ func loadXor() ([][]float64, [][]float64, [][]float64, [][]float64) {
 		{0, 1},
 		{1, 0},
 		{1, 1},
-		{0, 1},
+		{0, 0},
 	}
 
 	labels := [][]float64{

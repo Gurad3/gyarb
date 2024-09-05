@@ -2,8 +2,8 @@ package main
 
 func main() {
 
-	net := tmpNewMNIST()
-	//net := tmpNewXOR()
+	//net := tmpNewMNIST()
+	net := tmpNewXOR()
 	// net.print_weights()
 
 	//net := load_from_json("saves/TrainedMNIST.json")
@@ -12,8 +12,8 @@ func main() {
 	mim := new(MiM)
 	mim.init(net)
 
-	//xor(net, mim)
-	mnist(net, mim)
+	xor(net, mim)
+	//mnist(net, mim)
 
 	//net.print_weights()
 
@@ -32,8 +32,9 @@ func mnist(net *Network, mim *MiM) {
 		TrainDataLabel: MNIST_TrainDataLabel,
 		TestDataLabel:  MNIST_TestDataLabel,
 
-		batch_size:     100,
-		info_milestone: 60000,
+		batch_size:        100,
+		info_milestone:    60000,
+		save_at_milestone: false,
 	}
 	net.train_network(mim, td)
 }
@@ -47,8 +48,9 @@ func xor(net *Network, mim *MiM) {
 		TrainDataLabel: XOR_TrainDataLabel,
 		TestDataLabel:  XOR_TestDataLabel,
 
-		batch_size:     4,
-		info_milestone: 50000,
+		batch_size:        4,
+		info_milestone:    60000,
+		save_at_milestone: false,
 	}
 	net.train_network(mim, td)
 
@@ -88,7 +90,7 @@ func tmpNewMNIST() *Network {
 func tmpNewXOR() *Network {
 	net := new(Network)
 
-	net.learn_rate = .2
+	net.learn_rate = .5
 	net.learn_rate_decay = 0.0001
 	net.file_name = "TestNet"
 	net.cost_interface = &MeanSquare{}
@@ -99,14 +101,14 @@ func tmpNewXOR() *Network {
 
 		&DenseLayer{
 			act_interface:   &relU{},
-			size:            4,
+			size:            8,
 			prev_layer_size: 2,
 		},
 
 		&DenseLayer{
 			act_interface:   &Sigmoid{},
 			size:            2,
-			prev_layer_size: 4,
+			prev_layer_size: 8,
 		},
 	}
 
