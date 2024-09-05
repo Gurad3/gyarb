@@ -130,9 +130,9 @@ func (shelf *DenseLayer) init(layerID int) {
 
 	for i := 0; i < shelf.size; i++ {
 
-		neuroWeights := make([]float64, shelf.prev_layer_size)
-		shelf.weights[i] = neuroWeights
-		shelf.weights_gradiants[i] = neuroWeights
+		// neuroWeights := make([]float64, shelf.prev_layer_size)
+		shelf.weights[i] = make([]float64, shelf.prev_layer_size)
+		shelf.weights_gradiants[i] = make([]float64, shelf.prev_layer_size)
 
 	}
 }

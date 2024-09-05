@@ -58,7 +58,7 @@ func (shelf *MiM) request_flat() *MiM {
 		shelf.data_flat = &new_flat
 
 	}
-
+	shelf.data_type = OneD
 	return shelf
 }
 

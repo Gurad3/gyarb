@@ -1,6 +1,8 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type trainer struct {
 	TrainData      [][]float64
@@ -11,9 +13,10 @@ type trainer struct {
 	train_batches       [][][]float64
 	train_label_batches [][][]float64
 
-	batch_size     int
-	info_milestone int
-	epochs         int
+	batch_size        int
+	info_milestone    int
+	save_at_milestone bool
+	epochs            int
 }
 
 func (shelf *Network) train_network(mim *MiM, trainData trainer) {
@@ -41,7 +44,12 @@ func (shelf *Network) train_network(mim *MiM, trainData trainer) {
 				shelf.backprop(mim, trainData.train_label_batches[batchID][sampleID])
 				if totalSamples%trainData.info_milestone == 0 {
 					shelf.Test(mim, trainData.TestData, trainData.TestDataLabel)
+					if trainData.save_at_milestone == true {
+						encode_to_json(shelf)
+					}
+
 				}
+				totalSamples++
 			}
 
 			shelf.apply_gradients(trainData.batch_size)
@@ -63,7 +71,9 @@ func (shelf *Network) Test(mim *MiM, TestData [][]float64, TestLabels [][]float6
 			correct_choises += 1
 		}
 	}
-	fmt.Println(*mim.data_flat, TestLabels[1], isCorrect(*mim.data_flat, TestLabels[1]))
+
+	fmt.Println(*mim.data_flat, TestLabels[len(TestLabels)-1], isCorrect(*mim.data_flat, TestLabels[len(TestLabels)-1]))
+
 	fmt.Println("Percantage Correct on Test Data: ", float64(correct_choises)/float64(len(TestLabels)))
 	fmt.Println("Cost: ", totalCost/float64(len(TestLabels)))
 
