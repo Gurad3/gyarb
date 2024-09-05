@@ -47,6 +47,7 @@ func (shelf *Network) forward(mim *MiM, data []float64) {
 	mim.data_type = OneD
 	mim.data_type_history[0] = OneD
 	mim.layers_out_flat[0] = data
+	mim.layers_out_flat_non_activated[0] = data
 
 	for _, layer := range shelf.layers {
 		layer.forward(mim)
@@ -70,7 +71,7 @@ func (shelf *Network) get_output_ddx(mim *MiM, labels []float64) *[]float64 {
 	for outID, output := range *mim.request_flat().data_flat {
 		//gradiants[outID] = shelf.layers[len(shelf.layers)-1].get_act_interface().ddx(shelf.cost_interface.ddx(output, labels[outID]))
 
-		gradiants[outID] = shelf.layers[len(shelf.layers)-1].get_act_interface().ddx(mim.layers_out_flat_non_activated[len(shelf.layers)-1][outID])
+		gradiants[outID] = shelf.layers[len(shelf.layers)-1].get_act_interface().ddx(mim.layers_out_flat_non_activated[len(shelf.layers)][outID])
 		gradiants[outID] *= shelf.cost_interface.ddx(output, labels[outID])
 
 	}

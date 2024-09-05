@@ -34,13 +34,16 @@ func (shelf *Network) train_network(mim *MiM, trainData trainer) {
 		for batchID, batch := range trainData.train_batches {
 			for sampleID, sample := range batch {
 				shelf.forward(mim, sample)
+
+				// shelf.print_weights()
+				// fmt.Println(mim.data_flat)
+
 				shelf.backprop(mim, trainData.train_label_batches[batchID][sampleID])
 				if totalSamples%trainData.info_milestone == 0 {
 					shelf.Test(mim, trainData.TestData, trainData.TestDataLabel)
 				}
 			}
 
-			shelf.print_weights()
 			shelf.apply_gradients(trainData.batch_size)
 
 		}
@@ -60,7 +63,7 @@ func (shelf *Network) Test(mim *MiM, TestData [][]float64, TestLabels [][]float6
 			correct_choises += 1
 		}
 	}
-
+	fmt.Println(*mim.data_flat, TestLabels[1], isCorrect(*mim.data_flat, TestLabels[1]))
 	fmt.Println("Percantage Correct on Test Data: ", float64(correct_choises)/float64(len(TestLabels)))
 	fmt.Println("Cost: ", totalCost/float64(len(TestLabels)))
 

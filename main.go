@@ -2,8 +2,8 @@ package main
 
 func main() {
 
-	//net := tmpNewMNIST()
-	net := tmpNewXOR()
+	net := tmpNewMNIST()
+	//net := tmpNewXOR()
 	// net.print_weights()
 
 	//net := load_from_json("saves/TrainedMNIST.json")
@@ -12,8 +12,8 @@ func main() {
 	mim := new(MiM)
 	mim.init(net)
 
-	xor(net, mim)
-	//mnist(net, mim)
+	//xor(net, mim)
+	mnist(net, mim)
 
 	//net.print_weights()
 
@@ -67,7 +67,7 @@ func tmpNewMNIST() *Network {
 	net.layers = []Layer{
 
 		&DenseLayer{
-			act_interface:   &Sigmoid{},
+			act_interface:   &relU{},
 			size:            100,
 			prev_layer_size: 28 * 28,
 		},
@@ -98,16 +98,11 @@ func tmpNewXOR() *Network {
 	net.layers = []Layer{
 
 		&DenseLayer{
-			act_interface:   &Sigmoid{},
+			act_interface:   &relU{},
 			size:            2,
 			prev_layer_size: 2,
 		},
 
-		&DenseLayer{
-			act_interface:   &Sigmoid{},
-			size:            2,
-			prev_layer_size: 2,
-		},
 		&DenseLayer{
 			act_interface:   &Sigmoid{},
 			size:            2,
