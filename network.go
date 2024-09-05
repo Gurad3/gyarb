@@ -81,6 +81,6 @@ func (shelf *Network) get_output_ddx(mim *MiM, labels []float64) *[]float64 {
 func (shelf *Network) apply_gradients(batch_size int) {
 
 	for _, layer := range shelf.layers {
-		layer.apply_gradients(tmpNewNet().learn_rate, float64(batch_size))
+		layer.apply_gradients(shelf.learn_rate, float64(batch_size))
 	}
 }

@@ -40,6 +40,7 @@ func (shelf *Network) train_network(mim *MiM, trainData trainer) {
 				}
 			}
 
+			shelf.print_weights()
 			shelf.apply_gradients(trainData.batch_size)
 
 		}
