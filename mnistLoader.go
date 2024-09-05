@@ -5,11 +5,20 @@ import (
 )
 
 func loadMnist() ([][]float64, [][]float64, [][]float64, [][]float64) {
-	TrainData := loadImageFile("./mnist/train-images.idx3-ubyte", 60_000, 16)
-	TestData := loadImageFile("./mnist/t10k-images.idx3-ubyte", 10_000, 16)
 
-	TrainDataLabel := loadLabelFile("./mnist/train-labels.idx1-ubyte", 60_000, 8)
-	TestDataLabel := loadLabelFile("./mnist/t10k-labels.idx1-ubyte", 10_000, 8)
+	folderLocation := "./mnist/"
+	TrainData := loadImageFile(folderLocation+"train-images.idx3-ubyte", 60_000, 16)
+	TestData := loadImageFile(folderLocation+"t10k-images.idx3-ubyte", 10_000, 16)
+
+	TrainDataLabel := loadLabelFile(folderLocation+"train-labels.idx1-ubyte", 60_000, 8)
+	TestDataLabel := loadLabelFile(folderLocation+"t10k-labels.idx1-ubyte", 10_000, 8)
+
+	// folderLocation := "./pymagic/emnistLetters/"
+	// TrainData := loadImageFile(folderLocation+"emnist-letters-train-images-idx3-ubyte", 88_800, 16)
+	// TestData := loadImageFile(folderLocation+"emnist-letters-test-images-idx3-ubyte", 14_800, 16)
+
+	// TrainDataLabel := loadLabelFile(folderLocation+"emnist-letters-train-labels-idx1-ubyte", 88_800, 8)
+	// TestDataLabel := loadLabelFile(folderLocation+"emnist-letters-test-labels-idx1-ubyte", 14_800, 8)
 
 	// rand.Seed(8)
 	// rand.Shuffle(len(TrainData), func(i, j int) {
