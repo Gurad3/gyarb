@@ -17,7 +17,7 @@ func Load_mnist() ([][]float64, [][]float64, [][]float64, [][]float64) {
 
 func Load_emnist_letters() ([][]float64, [][]float64, [][]float64, [][]float64) {
 
-	folderLocation := "./data_handler/emnistLetters/"
+	folderLocation := "./data_handler/big/emnistLetters/"
 	TrainData := loadImageFile(folderLocation+"emnist-letters-train-images-idx3-ubyte", 88_800, 16)
 	TestData := loadImageFile(folderLocation+"emnist-letters-test-images-idx3-ubyte", 14_800, 16)
 
