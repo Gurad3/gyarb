@@ -1,5 +1,7 @@
 package main
 
+import "ProjectX/data_handler"
+
 func main() {
 
 	net := tmpNewMNIST()
@@ -24,7 +26,7 @@ func main() {
 }
 
 func mnist(net *Network, mim *MiM) {
-	MNIST_TrainDataLabel, MNIST_TrainData, MNIST_TestDataLabel, MNIST_TestData := loadMnist()
+	MNIST_TrainDataLabel, MNIST_TrainData, MNIST_TestDataLabel, MNIST_TestData := data_handler.Load_mnist()
 
 	td := trainer{
 		TrainData:      MNIST_TrainData,
@@ -40,7 +42,7 @@ func mnist(net *Network, mim *MiM) {
 }
 
 func xor(net *Network, mim *MiM) {
-	XOR_TrainDataLabel, XOR_TrainData, XOR_TestDataLabel, XOR_TestData := loadXor()
+	XOR_TrainDataLabel, XOR_TrainData, XOR_TestDataLabel, XOR_TestData := data_handler.Load_xor()
 
 	td := trainer{
 		TrainData:      XOR_TrainData,
