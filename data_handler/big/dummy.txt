@@ -1,0 +1,1 @@
+Alla filer/mappar i big blir ingored av git (förutom dummy) här kan vi lägga stora train filer
