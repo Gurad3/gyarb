@@ -13,7 +13,7 @@ func loadMnist() ([][]float64, [][]float64, [][]float64, [][]float64) {
 	TrainDataLabel := loadLabelFile(folderLocation+"train-labels.idx1-ubyte", 60_000, 8)
 	TestDataLabel := loadLabelFile(folderLocation+"t10k-labels.idx1-ubyte", 10_000, 8)
 
-	// folderLocation := "./pymagic/emnistLetters/"
+	// folderLocation := "./pymagic/emnist_source_files/"
 	// TrainData := loadImageFile(folderLocation+"emnist-letters-train-images-idx3-ubyte", 88_800, 16)
 	// TestData := loadImageFile(folderLocation+"emnist-letters-test-images-idx3-ubyte", 14_800, 16)
 
@@ -66,6 +66,7 @@ func loadLabelFile(file string, size int, bsBytes int) [][]float64 {
 
 func getArrayFromNum(val int) []float64 {
 	newArray := make([]float64, 10)
+	// newArray := make([]float64, 37)
 	newArray[val] = 1
 	return newArray
 }
