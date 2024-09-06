@@ -1,2 +1,3 @@
 /pymagic/
-/data_handler/big/
+/data_handler/big/*
+!data_handler/big
