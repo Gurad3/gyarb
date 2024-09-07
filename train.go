@@ -25,7 +25,6 @@ func (shelf *Network) train_network(mim *MiM, trainData trainer) {
 
 	for i := 0; i < len(trainData.TrainData); i += trainData.batch_size {
 		end := i + trainData.batch_size
-
 		if end > len(trainData.TrainData) {
 			end = len(trainData.TrainData)
 		}

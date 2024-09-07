@@ -18,7 +18,6 @@ func main() {
 	mnist(net, mim)
 
 	//net.print_weights()
-
 	//_, _, _, TestData := loadMnist()
 	//net.forward(mim, TestData[1])
 
