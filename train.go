@@ -25,7 +25,6 @@ func (shelf *Network) train_network(mim *MiM, trainData trainer) {
 
 	for i := 0; i < len(trainData.TrainData); i += trainData.batch_size {
 		end := i + trainData.batch_size
-
 		if end > len(trainData.TrainData) {
 			end = len(trainData.TrainData)
 		}
@@ -74,7 +73,6 @@ func (shelf *Network) Test(mim *MiM, TestData [][]float64, TestLabels [][]float6
 		// fmt.Println("--")
 		// fmt.Println(&sample, *mim.data_flat, TestLabels[sampleID], isCorrect(*mim.data_flat, TestLabels[sampleID]))
 		// fmt.Println("--")
-
 		if isCorrect(*mim.data_flat, TestLabels[sampleID]) {
 			correct_choises += 1
 		}
