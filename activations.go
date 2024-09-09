@@ -14,25 +14,27 @@ type Activation interface {
 func act_name_to_interface(name string) Activation {
 	switch name {
 	case "relu":
-		return &relU{}
+		return &RelU{}
 
 	case "sigmoid":
 		return &Sigmoid{}
 
+	case "tanh":
+		return &TanH{}
 	}
-	return &relU{}
+	return &RelU{}
 }
 
-type relU struct {
+type RelU struct {
 }
 
-func (shelf *relU) get_name() string {
+func (shelf *RelU) get_name() string {
 	return "relu"
 }
-func (shelf *relU) call(val float64) float64 {
+func (shelf *RelU) call(val float64) float64 {
 	return max(0, val)
 }
-func (shelf *relU) ddx(val float64) float64 {
+func (shelf *RelU) ddx(val float64) float64 {
 	if val > 0 {
 		return 1
 	} else {
@@ -52,6 +54,22 @@ func (shelf *Sigmoid) call(val float64) float64 {
 func (shelf *Sigmoid) ddx(val float64) float64 {
 	sig := shelf.call(val)
 	return sig * (1 - sig)
+}
+
+type TanH struct{}
+
+func (shelf *TanH) get_name() string {
+	return "tanh"
+}
+func (shelf *TanH) call(val float64) float64 {
+	posExp := math.Exp(val)
+	negExp := math.Exp(-val)
+	return (posExp - negExp) / (posExp + negExp)
+}
+
+func (shelf *TanH) ddx(val float64) float64 {
+
+	return 1 - math.Pow(shelf.call(val), 2)
 }
 
 func initWeightXavierUniform(xavierRange float64, r rand.Rand) float64 {

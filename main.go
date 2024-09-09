@@ -70,7 +70,7 @@ func tmpNewMNIST() *Network {
 	net.layers = []Layer{
 
 		&DenseLayer{
-			act_interface:   &relU{},
+			act_interface:   &RelU{},
 			size:            200,
 			prev_layer_size: 28 * 28,
 		},
@@ -101,7 +101,7 @@ func tmpNewXOR() *Network {
 	net.layers = []Layer{
 
 		&DenseLayer{
-			act_interface:   &relU{},
+			act_interface:   &RelU{},
 			size:            8,
 			prev_layer_size: 2,
 		},
