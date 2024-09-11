@@ -39,7 +39,7 @@ type DenseLayer struct {
 	bias_gradiants    []float64
 }
 
-type CNLayer struct {
+type ConvLayer struct {
 	act_interface Activation
 	layerID       int
 	size          []int
@@ -50,4 +50,8 @@ type CNLayer struct {
 
 	weights_gradiants [][][]float64
 	bias_gradiants    [][]float64
+
+	kernal_size  int
+	kernal_depth int
+	input_depth  int
 }
