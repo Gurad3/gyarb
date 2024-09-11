@@ -2,7 +2,6 @@ package main
 
 import (
 	"math"
-	"math/rand"
 )
 
 type Activation interface {
@@ -15,12 +14,12 @@ func act_name_to_interface(name string) Activation {
 	switch name {
 	case "relu":
 		return &RelU{}
-
 	case "sigmoid":
 		return &Sigmoid{}
-
 	case "tanh":
 		return &TanH{}
+	case "siLU":
+		return &SiLU{}
 	}
 	return &RelU{}
 }
@@ -72,6 +71,16 @@ func (shelf *TanH) ddx(val float64) float64 {
 	return 1 - math.Pow(shelf.call(val), 2)
 }
 
-func initWeightXavierUniform(xavierRange float64, r rand.Rand) float64 {
-	return r.Float64()*2*xavierRange - xavierRange
+type SiLU struct{}
+
+func (shelf *SiLU) get_name() string {
+	return "SiLU"
+}
+func (shelf *SiLU) call(val float64) float64 {
+	return val / (1 + math.Exp(-val))
+}
+
+func (shelf *SiLU) ddx(val float64) float64 {
+	negExp := math.Exp(-val)
+	return (1 + negExp + val*negExp) / math.Pow((1+negExp), 2)
 }

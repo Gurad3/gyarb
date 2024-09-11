@@ -1,5 +1,7 @@
 package main
 
+import "math/rand"
+
 type Cost interface {
 	call(out_values []float64, target_values []float64) float64
 
@@ -37,4 +39,8 @@ func (shelf *MeanSquare) ddx(out_val float64, target_val float64) float64 {
 }
 func (shelf *MeanSquare) get_name() string {
 	return "meansquare"
+}
+
+func initWeightXavierUniform(xavierRange float64, r rand.Rand) float64 {
+	return r.Float64()*2*xavierRange - xavierRange
 }
