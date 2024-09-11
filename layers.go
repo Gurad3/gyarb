@@ -55,3 +55,4 @@ type ConvLayer struct {
 	kernal_depth int
 	input_depth  int
 }
+

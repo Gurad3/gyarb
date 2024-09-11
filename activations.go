@@ -18,7 +18,7 @@ func act_name_to_interface(name string) Activation {
 		return &Sigmoid{}
 	case "tanh":
 		return &TanH{}
-	case "siLU":
+	case "SiLU":
 		return &SiLU{}
 	}
 	return &RelU{}
