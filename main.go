@@ -11,11 +11,8 @@ func main() {
 	//net := load_from_json("saves/TrainedMNIST.json")
 	//net.print_weights()
 
-	mim := new(MiM)
-	mim.init(net)
-
 	//xor(net, mim)
-	mnist(net, mim)
+	mnist(net)
 
 	//net.print_weights()
 	//_, _, _, TestData := loadMnist()
@@ -24,7 +21,7 @@ func main() {
 	//encode_to_json(net)
 }
 
-func mnist(net *Network, mim *MiM) {
+func mnist(net *Network) {
 	MNIST_TrainDataLabel, MNIST_TrainData, MNIST_TestDataLabel, MNIST_TestData := data_handler.Load_mnist()
 
 	td := trainer{
@@ -37,10 +34,10 @@ func mnist(net *Network, mim *MiM) {
 		info_milestone:    60000,
 		save_at_milestone: false,
 	}
-	net.train_network(mim, td)
+	net.train_network(td)
 }
 
-func xor(net *Network, mim *MiM) {
+func xor(net *Network) {
 	XOR_TrainDataLabel, XOR_TrainData, XOR_TestDataLabel, XOR_TestData := data_handler.Load_xor()
 
 	td := trainer{
@@ -53,7 +50,7 @@ func xor(net *Network, mim *MiM) {
 		info_milestone:    60000,
 		save_at_milestone: false,
 	}
-	net.train_network(mim, td)
+	net.train_network(td)
 
 }
 
