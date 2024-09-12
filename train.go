@@ -21,7 +21,9 @@ type trainer struct {
 	epochs            int
 }
 
-func (shelf *Network) train_network(mim *MiM, trainData trainer) {
+func (shelf *Network) train_network(trainData trainer) {
+	mim := new(MiM)
+	mim.init(shelf)
 
 	for i := 0; i < len(trainData.TrainData); i += trainData.batch_size {
 		end := i + trainData.batch_size
