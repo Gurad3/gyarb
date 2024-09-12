@@ -118,3 +118,46 @@ func (shelf *trainer) shuffle_batches() {
 		shelf.train_label_batches[batch_index], shelf.train_label_batches[rand_index] = shelf.train_label_batches[rand_index], shelf.train_label_batches[batch_index]
 	}
 }
+
+func (shelf *Network) train_network_multi(trainData trainer) {
+	mim := new(MiM)
+	mim.init(shelf)
+
+	for i := 0; i < len(trainData.TrainData); i += trainData.batch_size {
+		end := i + trainData.batch_size
+		if end > len(trainData.TrainData) {
+			end = len(trainData.TrainData)
+		}
+		trainData.train_batches = append(trainData.train_batches, trainData.TrainData[i:end])
+		trainData.train_label_batches = append(trainData.train_label_batches, trainData.TrainDataLabel[i:end])
+	}
+
+	totalSamples := 0
+
+	for {
+		for batchID, batch := range trainData.train_batches {
+			for sampleID, sample := range batch {
+				shelf.forward(mim, sample)
+
+				// shelf.print_weights()
+				// fmt.Println(mim.data_flat)
+
+				shelf.backprop(mim, trainData.train_label_batches[batchID][sampleID])
+				if totalSamples%trainData.info_milestone == 0 {
+					shelf.Test(mim, trainData.TestData, trainData.TestDataLabel)
+					if trainData.save_at_milestone {
+						encode_to_json(shelf)
+					}
+
+				}
+				totalSamples++
+			}
+
+			shelf.apply_gradients(trainData.batch_size)
+
+		}
+
+		trainData.shuffle_batches()
+	}
+
+}
