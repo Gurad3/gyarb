@@ -30,12 +30,12 @@ func mnist(net *Network) {
 		TrainDataLabel: MNIST_TrainDataLabel,
 		TestDataLabel:  MNIST_TestDataLabel,
 
-		batch_size:        100,
+		batch_size:        50,
 		info_milestone:    60000,
 		save_at_milestone: false,
 	}
-	// net.train_network(td)
-	net.train_network_multi(td)
+
+	net.train_network(td, true)
 }
 
 func xor(net *Network) {
@@ -51,7 +51,7 @@ func xor(net *Network) {
 		info_milestone:    60000,
 		save_at_milestone: false,
 	}
-	net.train_network(td)
+	net.train_network(td, false)
 
 }
 
@@ -69,14 +69,14 @@ func tmpNewMNIST() *Network {
 
 		&DenseLayer{
 			act_interface:   &RelU{},
-			size:            100,
+			size:            200,
 			prev_layer_size: 28 * 28,
 		},
 
 		&DenseLayer{
 			act_interface:   &Sigmoid{},
 			size:            10,
-			prev_layer_size: 100,
+			prev_layer_size: 200,
 		},
 	}
 

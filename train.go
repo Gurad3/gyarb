@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"sync"
 	"time"
 )
 
@@ -21,9 +22,7 @@ type trainer struct {
 	epochs            int
 }
 
-func (shelf *Network) train_network(trainData trainer) {
-	mim := new(MiM)
-	mim.init(shelf)
+func (shelf *Network) train_network(trainData trainer, threded bool) {
 
 	for i := 0; i < len(trainData.TrainData); i += trainData.batch_size {
 		end := i + trainData.batch_size
@@ -35,33 +34,71 @@ func (shelf *Network) train_network(trainData trainer) {
 	}
 
 	totalSamples := 0
+	mim := new(MiM)
+	mim.init(shelf)
 
-	for {
-		for batchID, batch := range trainData.train_batches {
-			for sampleID, sample := range batch {
-				shelf.forward(mim, sample)
+	if threded {
+		mimArray := make([]MiM, trainData.batch_size)
+		for i := 0; i < trainData.batch_size; i++ {
+			mimArray[i].init(shelf)
+		}
+		var wg sync.WaitGroup
 
-				// shelf.print_weights()
-				// fmt.Println(mim.data_flat)
+		for {
+			for batchID, batch := range trainData.train_batches {
+				wg.Add(trainData.batch_size)
+				for sampleID, sample := range batch {
+					go shelf.tmpRun(&mimArray[sampleID], sample, trainData.train_label_batches[batchID][sampleID], &wg)
 
-				shelf.backprop(mim, trainData.train_label_batches[batchID][sampleID])
-				if totalSamples%trainData.info_milestone == 0 {
-					shelf.Test(mim, trainData.TestData, trainData.TestDataLabel)
-					if trainData.save_at_milestone {
-						encode_to_json(shelf)
+					if totalSamples%trainData.info_milestone == 0 {
+						shelf.Test(mim, trainData.TestData, trainData.TestDataLabel)
+						//fmt.Println("Epoch")
+						if trainData.save_at_milestone {
+							encode_to_json(shelf)
+						}
 					}
-
+					totalSamples++
 				}
-				totalSamples++
+				wg.Wait()
+				shelf.apply_gradients(trainData.batch_size)
+
 			}
 
-			shelf.apply_gradients(trainData.batch_size)
-
+			trainData.shuffle_batches()
 		}
-
-		trainData.shuffle_batches()
+	} else {
+		for {
+			for batchID, batch := range trainData.train_batches {
+				for sampleID, sample := range batch {
+					shelf.forward(mim, sample)
+					// shelf.print_weights()
+					// fmt.Println(mim.data_flat)
+					shelf.backprop(mim, trainData.train_label_batches[batchID][sampleID])
+					if totalSamples%trainData.info_milestone == 0 {
+						shelf.Test(mim, trainData.TestData, trainData.TestDataLabel)
+						//fmt.Println("Epoch")
+						if trainData.save_at_milestone {
+							encode_to_json(shelf)
+						}
+					}
+					totalSamples++
+				}
+				shelf.apply_gradients(trainData.batch_size)
+			}
+			trainData.shuffle_batches()
+		}
 	}
 
+}
+
+func (shelf *Network) tmpRun(mim *MiM, sample []float64, label []float64, wg *sync.WaitGroup) {
+
+	shelf.forward(mim, sample)
+	// shelf.print_weights()
+	// fmt.Println(mim.data_flat)
+	shelf.backprop(mim, label)
+
+	defer wg.Done()
 }
 
 func (shelf *Network) Test(mim *MiM, TestData [][]float64, TestLabels [][]float64) float64 {
@@ -117,58 +154,4 @@ func (shelf *trainer) shuffle_batches() {
 		shelf.train_batches[batch_index], shelf.train_batches[rand_index] = shelf.train_batches[rand_index], shelf.train_batches[batch_index]
 		shelf.train_label_batches[batch_index], shelf.train_label_batches[rand_index] = shelf.train_label_batches[rand_index], shelf.train_label_batches[batch_index]
 	}
-}
-
-func (shelf *Network) train_network_multi(trainData trainer) {
-	mim := new(MiM)
-	mim.init(shelf)
-
-	for i := 0; i < len(trainData.TrainData); i += trainData.batch_size {
-		end := i + trainData.batch_size
-		if end > len(trainData.TrainData) {
-			end = len(trainData.TrainData)
-		}
-		trainData.train_batches = append(trainData.train_batches, trainData.TrainData[i:end])
-		trainData.train_label_batches = append(trainData.train_label_batches, trainData.TrainDataLabel[i:end])
-	}
-
-	totalSamples := 0
-
-	mimArray := make([]MiM, trainData.batch_size)
-	for i := 0; i < trainData.batch_size; i++ {
-		mimArray[i].init(shelf)
-	}
-
-	for {
-		for batchID, batch := range trainData.train_batches {
-			for sampleID, sample := range batch {
-
-				go shelf.tmpRun(mim, sample, trainData.train_label_batches[batchID][sampleID])
-
-				if totalSamples%trainData.info_milestone == 0 {
-					shelf.Test(mim, trainData.TestData, trainData.TestDataLabel)
-					if trainData.save_at_milestone {
-						encode_to_json(shelf)
-					}
-
-				}
-				totalSamples++
-			}
-
-			shelf.apply_gradients(trainData.batch_size)
-
-		}
-
-		trainData.shuffle_batches()
-	}
-
-}
-
-func (shelf *Network) tmpRun(mim *MiM, sample []float64, label []float64) {
-
-	shelf.forward(mim, sample)
-	// shelf.print_weights()
-	// fmt.Println(mim.data_flat)
-	shelf.backprop(mim, label)
-
 }
