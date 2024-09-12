@@ -20,19 +20,22 @@ type MiM struct {
 	layers_out_flat_non_activated [][]float64
 	layers_out_3d_non_activated   [][][][]float64
 
-	layersDimentions [][]int32
+	layers_dimentions [][]int
 }
 
-func (shelf *MiM) request_3d(x int32, y int32, z int32) *MiM {
+func (shelf *MiM) request_3d(layerID int) *MiM {
 	switch shelf.data_type {
 	case OneD:
-		arr3D := make([][][]float64, x)
+
+		//X,Y,Z = prev_layer_dim[0,1,2]
+		prev_layer_dim := shelf.layers_dimentions[layerID-1]
+		arr3D := make([][][]float64, prev_layer_dim[0])
 		index := 0
-		for i := int32(0); i < x; i++ {
-			arr3D[i] = make([][]float64, y)
-			for j := int32(0); j < y; j++ {
-				arr3D[i][j] = make([]float64, z)
-				for k := int32(0); k < z; k++ {
+		for i := int(0); i < prev_layer_dim[0]; i++ {
+			arr3D[i] = make([][]float64, prev_layer_dim[1])
+			for j := int(0); j < prev_layer_dim[1]; j++ {
+				arr3D[i][j] = make([]float64, prev_layer_dim[2])
+				for k := int(0); k < prev_layer_dim[2]; k++ {
 					arr3D[i][j][k] = (*shelf.data_flat)[index]
 					index++
 				}
@@ -65,7 +68,7 @@ func (shelf *MiM) request_flat() *MiM {
 func (shelf *MiM) init(net *Network) {
 	length := len(net.layers) + 1
 
-	shelf.layersDimentions = make([][]int32, length)
+	shelf.layers_dimentions = make([][]int, length)
 	shelf.data_type_history = make([]int32, length)
 
 	shelf.layers_out_flat = make([][]float64, length)
@@ -86,6 +89,7 @@ func (shelf *MiM) init(net *Network) {
 			shelf.layers_out_flat[layerID] = make([]float64, layerDim[0]*layerDim[1]*layerDim[2])
 			shelf.layers_out_flat_non_activated[layerID] = make([]float64, layerDim[0]*layerDim[1]*layerDim[2])
 		}
+		shelf.layers_dimentions[layerID] = layerDim
 	}
 
 }

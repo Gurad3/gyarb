@@ -1,9 +1,109 @@
 package main
 
-import "errors"
+import (
+	"errors"
+	"math/rand"
+)
+
+type ConvLayer struct {
+	act_interface Activation
+	layerID       int
+	out_size      []int
+	layer_type    string
+
+	depth       int
+	kernal_size int
+
+	input_depth  int
+	input_width  int
+	input_height int
+
+	output_width  int
+	output_height int
+	kernals       [][][][]float64
+	bias          [][][]float64
+
+	kernals_gradiants [][][][]float64
+	bias_gradiants    [][][]float64
+}
 
 func (shelf *ConvLayer) init(layerID int) {
+	//Init all layer arrays sizes, Sets bias AND WEIGHTS to 0
+	shelf.layer_type = "ConvLayer"
 	shelf.layerID = layerID
+
+	shelf.output_width = shelf.input_width - shelf.kernal_size + 1
+	shelf.output_height = shelf.input_height - shelf.kernal_size + 1
+
+	shelf.out_size = []int{shelf.depth, shelf.output_height, shelf.output_width}
+
+	shelf.bias = make([][][]float64, shelf.depth)
+	shelf.kernals = make([][][][]float64, shelf.depth)
+
+	shelf.bias_gradiants = make([][][]float64, shelf.depth)
+	shelf.kernals_gradiants = make([][][][]float64, shelf.depth)
+
+	for i := 0; i < shelf.depth; i++ {
+		//Kernals
+		shelf.kernals[i] = make([][][]float64, shelf.input_depth)
+		shelf.kernals_gradiants[i] = make([][][]float64, shelf.input_depth)
+
+		for j := 0; j < shelf.input_depth; j++ {
+			shelf.kernals[i][j] = make([][]float64, shelf.kernal_size)
+			shelf.kernals_gradiants[i][j] = make([][]float64, shelf.kernal_size)
+
+			for k := 0; k < shelf.kernal_size; k++ {
+				shelf.kernals[i][j][k] = make([]float64, shelf.kernal_size)
+				shelf.kernals_gradiants[i][j][k] = make([]float64, shelf.kernal_size)
+
+			}
+		}
+
+		//bias
+		shelf.bias[i] = make([][]float64, shelf.output_height)
+		shelf.bias_gradiants[i] = make([][]float64, shelf.output_height)
+		for j := 0; j < shelf.output_height; j++ {
+			shelf.bias[i][j] = make([]float64, shelf.output_width)
+			shelf.bias_gradiants[i][j] = make([]float64, shelf.output_width)
+		}
+	}
+}
+
+func (shelf *ConvLayer) init_new_weights(xavierRange float64, r rand.Rand) {
+	//Give each weights new random weights (Currentlu 0)
+
+	for i := 0; i < shelf.depth; i++ {
+		//Kernals
+		for j := 0; j < shelf.input_depth; j++ {
+			for k := 0; k < shelf.kernal_size; k++ {
+				for l := 0; l < shelf.kernal_size; l++ {
+					shelf.kernals[i][j][k][l] = initWeightXavierUniform(xavierRange, r)
+				}
+			}
+		}
+	}
+}
+
+func (shelf *ConvLayer) forward(mim *MiM) {
+	mim.layers_out_3d_non_activated[shelf.layerID] = shelf.bias
+
+	mim.request_3d(shelf.layerID)
+	for i := 0; i < shelf.depth; i++ {
+		for j := 0; j < shelf.input_depth; j++ {
+			conv, _ := correlateOrConvolve2d((*mim.data_3d)[j], shelf.kernals[i][j], false, "valid", 0)
+
+			for k, k2 := range mim.layers_out_3d_non_activated[shelf.layerID][i] {
+				for l := range k2 {
+					mim.layers_out_3d_non_activated[shelf.layerID][i][k][l] += conv[k][l]
+					mim.layers_out_3d[shelf.layerID][i][k][l] = shelf.act_interface.call(mim.layers_out_3d_non_activated[shelf.layerID][i][k][l])
+				}
+			}
+
+		}
+	}
+
+	mim.data_3d = &mim.layers_out_3d[shelf.layerID]
+	mim.data_type = ThreeD
 }
 
 // flipKernel flips the kernel (matrix) horizontally and vertically for convolution.
@@ -21,7 +121,7 @@ func flipKernel(kernel [][]float64) [][]float64 {
 }
 
 // correlateOrConvolve2d computes the 2D cross-correlation or convolution of two 2D slices with specified modes.
-func correlateOrConvolve2d(in1, in2 [][]float64, convolution bool, mode string, fillvalue float64) ([][]float64, error) {
+func correlateOrConvolve2d(in1 [][]float64, in2 [][]float64, convolution bool, mode string, fillvalue float64) ([][]float64, error) {
 	rows1 := len(in1)
 	cols1 := len(in1[0])
 	rows2 := len(in2)
@@ -85,3 +185,35 @@ func correlateOrConvolve2d(in1, in2 [][]float64, convolution bool, mode string, 
 
 	return output, nil
 }
+
+// class Convolutional(Layer):
+//     def __init__(self, input_shape, kernel_size, depth):
+//         input_depth, input_height, input_width = input_shape
+//         self.depth = depth
+//         self.input_shape = input_shape
+//         self.input_depth = input_depth
+//         self.output_shape = (depth, input_height - kernel_size + 1, input_width - kernel_size + 1)
+//         self.kernels_shape = (depth, input_depth, kernel_size, kernel_size)
+//         self.kernels = np.random.randn(*self.kernels_shape)
+//         self.biases = np.random.randn(*self.output_shape)
+
+//     def forward(self, input):
+//         self.input = input
+//         self.output = np.copy(self.biases)
+//         for i in range(self.depth):
+//             for j in range(self.input_depth):
+//                 self.output[i] += signal.correlate2d(self.input[j], self.kernels[i, j], "valid")
+//         return self.output
+
+//     def backward(self, output_gradient, learning_rate):
+//         kernels_gradient = np.zeros(self.kernels_shape)
+//         input_gradient = np.zeros(self.input_shape)
+
+//         for i in range(self.depth):
+//             for j in range(self.input_depth):
+//                 kernels_gradient[i, j] = signal.correlate2d(self.input[j], output_gradient[i], "valid")
+//                 input_gradient[j] += signal.convolve2d(output_gradient[i], self.kernels[i, j], "full")
+
+//         self.kernels -= learning_rate * kernels_gradient
+//         self.biases -= learning_rate * output_gradient
+//         return input_gradient
