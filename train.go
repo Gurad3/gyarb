@@ -134,15 +134,17 @@ func (shelf *Network) train_network_multi(trainData trainer) {
 
 	totalSamples := 0
 
+	mimArray := make([]MiM, trainData.batch_size)
+	for i := 0; i < trainData.batch_size; i++ {
+		mimArray[i].init(shelf)
+	}
+
 	for {
 		for batchID, batch := range trainData.train_batches {
 			for sampleID, sample := range batch {
-				shelf.forward(mim, sample)
 
-				// shelf.print_weights()
-				// fmt.Println(mim.data_flat)
+				go shelf.tmpRun(mim, sample, trainData.train_label_batches[batchID][sampleID])
 
-				shelf.backprop(mim, trainData.train_label_batches[batchID][sampleID])
 				if totalSamples%trainData.info_milestone == 0 {
 					shelf.Test(mim, trainData.TestData, trainData.TestDataLabel)
 					if trainData.save_at_milestone {
@@ -159,5 +161,14 @@ func (shelf *Network) train_network_multi(trainData trainer) {
 
 		trainData.shuffle_batches()
 	}
+
+}
+
+func (shelf *Network) tmpRun(mim *MiM, sample []float64, label []float64) {
+
+	shelf.forward(mim, sample)
+	// shelf.print_weights()
+	// fmt.Println(mim.data_flat)
+	shelf.backprop(mim, label)
 
 }

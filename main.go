@@ -34,7 +34,8 @@ func mnist(net *Network) {
 		info_milestone:    60000,
 		save_at_milestone: false,
 	}
-	net.train_network(td)
+	// net.train_network(td)
+	net.train_network_multi(td)
 }
 
 func xor(net *Network) {
@@ -68,14 +69,14 @@ func tmpNewMNIST() *Network {
 
 		&DenseLayer{
 			act_interface:   &RelU{},
-			size:            200,
+			size:            100,
 			prev_layer_size: 28 * 28,
 		},
 
 		&DenseLayer{
 			act_interface:   &Sigmoid{},
 			size:            10,
-			prev_layer_size: 200,
+			prev_layer_size: 100,
 		},
 	}
 
