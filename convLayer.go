@@ -12,7 +12,7 @@ type ConvLayer struct {
 	layer_type    string
 
 	depth       int
-	kernal_size int
+	kernel_size int
 
 	input_depth  int
 	input_width  int
@@ -32,8 +32,8 @@ func (shelf *ConvLayer) init(layerID int) {
 	shelf.layer_type = "ConvLayer"
 	shelf.layerID = layerID
 
-	shelf.output_width = shelf.input_width - shelf.kernal_size + 1
-	shelf.output_height = shelf.input_height - shelf.kernal_size + 1
+	shelf.output_width = shelf.input_width - shelf.kernel_size + 1
+	shelf.output_height = shelf.input_height - shelf.kernel_size + 1
 
 	shelf.out_size = []int{shelf.depth, shelf.output_height, shelf.output_width}
 
@@ -49,12 +49,12 @@ func (shelf *ConvLayer) init(layerID int) {
 		shelf.kernels_gradients[i] = make([][][]float64, shelf.input_depth)
 
 		for j := 0; j < shelf.input_depth; j++ {
-			shelf.kernels[i][j] = make([][]float64, shelf.kernal_size)
-			shelf.kernels_gradients[i][j] = make([][]float64, shelf.kernal_size)
+			shelf.kernels[i][j] = make([][]float64, shelf.kernel_size)
+			shelf.kernels_gradients[i][j] = make([][]float64, shelf.kernel_size)
 
-			for k := 0; k < shelf.kernal_size; k++ {
-				shelf.kernels[i][j][k] = make([]float64, shelf.kernal_size)
-				shelf.kernels_gradients[i][j][k] = make([]float64, shelf.kernal_size)
+			for k := 0; k < shelf.kernel_size; k++ {
+				shelf.kernels[i][j][k] = make([]float64, shelf.kernel_size)
+				shelf.kernels_gradients[i][j][k] = make([]float64, shelf.kernel_size)
 
 			}
 		}
@@ -75,8 +75,8 @@ func (shelf *ConvLayer) init_new_weights(xavierRange float64, r rand.Rand) {
 	for i := 0; i < shelf.depth; i++ {
 		//kernels
 		for j := 0; j < shelf.input_depth; j++ {
-			for k := 0; k < shelf.kernal_size; k++ {
-				for l := 0; l < shelf.kernal_size; l++ {
+			for k := 0; k < shelf.kernel_size; k++ {
+				for l := 0; l < shelf.kernel_size; l++ {
 					shelf.kernels[i][j][k][l] = initWeightXavierUniform(xavierRange, r)
 				}
 			}
