@@ -20,11 +20,11 @@ type ConvLayer struct {
 
 	output_width  int
 	output_height int
-	kernals       [][][][]float64
+	kernels       [][][][]float64
 	bias          [][][]float64
 
-	kernals_gradiants [][][][]float64
-	bias_gradiants    [][][]float64
+	kernels_gradients [][][][]float64
+	bias_gradients    [][][]float64
 }
 
 func (shelf *ConvLayer) init(layerID int) {
@@ -38,33 +38,33 @@ func (shelf *ConvLayer) init(layerID int) {
 	shelf.out_size = []int{shelf.depth, shelf.output_height, shelf.output_width}
 
 	shelf.bias = make([][][]float64, shelf.depth)
-	shelf.kernals = make([][][][]float64, shelf.depth)
+	shelf.kernels = make([][][][]float64, shelf.depth)
 
-	shelf.bias_gradiants = make([][][]float64, shelf.depth)
-	shelf.kernals_gradiants = make([][][][]float64, shelf.depth)
+	shelf.bias_gradients = make([][][]float64, shelf.depth)
+	shelf.kernels_gradients = make([][][][]float64, shelf.depth)
 
 	for i := 0; i < shelf.depth; i++ {
-		//Kernals
-		shelf.kernals[i] = make([][][]float64, shelf.input_depth)
-		shelf.kernals_gradiants[i] = make([][][]float64, shelf.input_depth)
+		//kernels
+		shelf.kernels[i] = make([][][]float64, shelf.input_depth)
+		shelf.kernels_gradients[i] = make([][][]float64, shelf.input_depth)
 
 		for j := 0; j < shelf.input_depth; j++ {
-			shelf.kernals[i][j] = make([][]float64, shelf.kernal_size)
-			shelf.kernals_gradiants[i][j] = make([][]float64, shelf.kernal_size)
+			shelf.kernels[i][j] = make([][]float64, shelf.kernal_size)
+			shelf.kernels_gradients[i][j] = make([][]float64, shelf.kernal_size)
 
 			for k := 0; k < shelf.kernal_size; k++ {
-				shelf.kernals[i][j][k] = make([]float64, shelf.kernal_size)
-				shelf.kernals_gradiants[i][j][k] = make([]float64, shelf.kernal_size)
+				shelf.kernels[i][j][k] = make([]float64, shelf.kernal_size)
+				shelf.kernels_gradients[i][j][k] = make([]float64, shelf.kernal_size)
 
 			}
 		}
 
 		//bias
 		shelf.bias[i] = make([][]float64, shelf.output_height)
-		shelf.bias_gradiants[i] = make([][]float64, shelf.output_height)
+		shelf.bias_gradients[i] = make([][]float64, shelf.output_height)
 		for j := 0; j < shelf.output_height; j++ {
 			shelf.bias[i][j] = make([]float64, shelf.output_width)
-			shelf.bias_gradiants[i][j] = make([]float64, shelf.output_width)
+			shelf.bias_gradients[i][j] = make([]float64, shelf.output_width)
 		}
 	}
 }
@@ -73,11 +73,11 @@ func (shelf *ConvLayer) init_new_weights(xavierRange float64, r rand.Rand) {
 	//Give each weights new random weights (Currentlu 0)
 
 	for i := 0; i < shelf.depth; i++ {
-		//Kernals
+		//kernels
 		for j := 0; j < shelf.input_depth; j++ {
 			for k := 0; k < shelf.kernal_size; k++ {
 				for l := 0; l < shelf.kernal_size; l++ {
-					shelf.kernals[i][j][k][l] = initWeightXavierUniform(xavierRange, r)
+					shelf.kernels[i][j][k][l] = initWeightXavierUniform(xavierRange, r)
 				}
 			}
 		}
@@ -90,7 +90,7 @@ func (shelf *ConvLayer) forward(mim *MiM) {
 	mim.request_3d(shelf.layerID)
 	for i := 0; i < shelf.depth; i++ {
 		for j := 0; j < shelf.input_depth; j++ {
-			conv, _ := correlateOrConvolve2d((*mim.data_3d)[j], shelf.kernals[i][j], false, "valid", 0)
+			conv, _ := correlateOrConvolve2d((*mim.data_3d)[j], shelf.kernels[i][j], false, "valid", 0)
 
 			for k, k2 := range mim.layers_out_3d_non_activated[shelf.layerID][i] {
 				for l := range k2 {
