@@ -43,6 +43,7 @@ func (shelf *ConvLayer) init(layerID int) {
 	shelf.bias_gradients = make([][][]float64, shelf.depth)
 	shelf.kernels_gradients = make([][][][]float64, shelf.depth)
 
+	shelf.bias = make([][][]float64, shelf.depth)
 	for i := 0; i < shelf.depth; i++ {
 		//kernels
 		shelf.kernels[i] = make([][][]float64, shelf.input_depth)
@@ -104,6 +105,36 @@ func (shelf *ConvLayer) forward(mim *MiM) {
 
 	mim.data_3d = &mim.layers_out_3d[shelf.layerID]
 	mim.data_type = ThreeD
+}
+
+func (shelf *ConvLayer) backprop(mim *MiM, prev_layer_act Activation) {
+	output_gradient := *mim.request_3d(shelf.layerID).data_3d
+
+	next_gradint := make([][][]float64, len(mim.layers_out_3d[shelf.layerID-1]))
+	for i := 0; i < len(mim.layers_out_3d[shelf.layerID-1]); i++ {
+		next_gradint[i] = make([][]float64, len(mim.layers_out_3d[shelf.layerID-1][i]))
+
+		for i2 := 0; i2 < len(mim.layers_out_3d[shelf.layerID-1][i]); i2++ {
+			next_gradint[i][i2] = make([]float64, len(mim.layers_out_3d[shelf.layerID-1][i][i2]))
+		}
+	}
+
+	for i := 0; i < shelf.depth; i++ {
+		for j := 0; j < shelf.input_depth; j++ {
+
+			kernalCorr, _ := correlateOrConvolve2d(prevLyerOut[j], output_gradient[i], false, "valid", 0)
+			input_convlove, _ := correlateOrConvolve2d(output_gradient[i], shelf.kernels[i][j], true, "full", 0)
+
+			for k, k2 := range mim.layers_out_3d[shelf.layerID-1][i] {
+				for l := range k2 {
+					mim.layers_out_3d[shelf.layerID-1][j][k][l] += input_convlove[k][l]
+
+					shelf.kernels_gradients[i][j][k][l] += kernalCorr[k][l]
+				}
+			}
+
+		}
+	}
 }
 
 // flipKernel flips the kernel (matrix) horizontally and vertically for convolution.
