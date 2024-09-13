@@ -110,12 +110,12 @@ func (shelf *ConvLayer) forward(mim *MiM) {
 func (shelf *ConvLayer) backprop(mim *MiM, prev_layer_act Activation) {
 	output_gradient := *mim.request_3d(shelf.layerID).data_3d
 
-	next_gradint := make([][][]float64, len(mim.layers_out_3d[shelf.layerID-1]))
+	next_gradient := make([][][]float64, len(mim.layers_out_3d[shelf.layerID-1]))
 	for i := 0; i < len(mim.layers_out_3d[shelf.layerID-1]); i++ {
-		next_gradint[i] = make([][]float64, len(mim.layers_out_3d[shelf.layerID-1][i]))
+		next_gradient[i] = make([][]float64, len(mim.layers_out_3d[shelf.layerID-1][i]))
 
 		for i2 := 0; i2 < len(mim.layers_out_3d[shelf.layerID-1][i]); i2++ {
-			next_gradint[i][i2] = make([]float64, len(mim.layers_out_3d[shelf.layerID-1][i][i2]))
+			next_gradient[i][i2] = make([]float64, len(mim.layers_out_3d[shelf.layerID-1][i][i2]))
 		}
 	}
 
