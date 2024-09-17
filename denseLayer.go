@@ -142,7 +142,7 @@ func (shelf *DenseLayer) get_size() []int {
 	return []int{shelf.size}
 }
 func (shelf *DenseLayer) get_name() string {
-	return "DenseLayer"
+	return shelf.layer_type
 }
 
 func (shelf *DenseLayer) get_act_interface() Activation {

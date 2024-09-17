@@ -35,7 +35,7 @@ func mnist(net *Network) {
 		save_at_milestone: false,
 	}
 
-	net.train_network(td, true)
+	net.train_network(td, false)
 }
 
 func xor(net *Network) {
@@ -65,18 +65,27 @@ func tmpNewMNIST() *Network {
 
 	net.input_size = 28 * 28
 	net.output_size = 10
+
 	net.layers = []Layer{
+		&ConvLayer{
+			act_interface: &RelU{},
+			kernel_size:   4,
+			input_height:  28,
+			input_width:   28,
+			input_depth:   1,
+			depth:         4,
+		},
 
 		&DenseLayer{
 			act_interface:   &RelU{},
-			size:            200,
+			size:            100,
 			prev_layer_size: 28 * 28,
 		},
 
 		&DenseLayer{
 			act_interface:   &Sigmoid{},
 			size:            10,
-			prev_layer_size: 200,
+			prev_layer_size: 100,
 		},
 	}
 

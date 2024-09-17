@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"math/rand"
 )
 
@@ -92,7 +93,7 @@ func (shelf *ConvLayer) forward(mim *MiM) {
 	for i := 0; i < shelf.depth; i++ {
 		for j := 0; j < shelf.input_depth; j++ {
 			conv, _ := correlateOrConvolve2d((*mim.data_3d)[j], shelf.kernels[i][j], false, "valid", 0)
-
+			fmt.Println(conv)
 			for k, k2 := range mim.layers_out_3d_non_activated[shelf.layerID][i] {
 				for l := range k2 {
 					mim.layers_out_3d_non_activated[shelf.layerID][i][k][l] += conv[k][l]
@@ -102,7 +103,7 @@ func (shelf *ConvLayer) forward(mim *MiM) {
 
 		}
 	}
-
+	fmt.Println(len(mim.layers_out_3d[shelf.layerID]))
 	mim.data_3d = &mim.layers_out_3d[shelf.layerID]
 	mim.data_type = ThreeD
 }
@@ -122,7 +123,7 @@ func (shelf *ConvLayer) backprop(mim *MiM, prev_layer_act Activation) {
 	for i := 0; i < shelf.depth; i++ {
 		for j := 0; j < shelf.input_depth; j++ {
 
-			kernalCorr, _ := correlateOrConvolve2d(prevLyerOut[j], output_gradient[i], false, "valid", 0)
+			kernalCorr, _ := correlateOrConvolve2d(mim.layers_out_3d[shelf.layerID-1][j], output_gradient[i], false, "valid", 0)
 			input_convlove, _ := correlateOrConvolve2d(output_gradient[i], shelf.kernels[i][j], true, "full", 0)
 
 			for k, k2 := range mim.layers_out_3d[shelf.layerID-1][i] {
@@ -215,6 +216,40 @@ func correlateOrConvolve2d(in1 [][]float64, in2 [][]float64, convolution bool, m
 	}
 
 	return output, nil
+}
+
+func (shelf *ConvLayer) apply_gradients(learn_rate float64, batch_size float64) {
+
+}
+
+func (shelf *ConvLayer) load_weights(flat_weights []float64) {
+
+}
+func (shelf *ConvLayer) load_biases(flat_weights []float64) {
+
+}
+func (shelf *ConvLayer) get_weights() []float64 {
+	return []float64{}
+}
+func (shelf *ConvLayer) get_biases() []float64 {
+	return []float64{}
+}
+func (shelf *ConvLayer) print_weights() {
+
+}
+
+func (shelf *ConvLayer) get_act_interface() Activation {
+	return shelf.act_interface
+}
+func (shelf *ConvLayer) get_size() []int {
+	return shelf.out_size
+}
+func (shelf *ConvLayer) get_name() string {
+	return shelf.layer_type
+}
+
+func (shelf *ConvLayer) debug_print() {
+
 }
 
 // class Convolutional(Layer):

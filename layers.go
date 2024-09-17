@@ -5,10 +5,10 @@ import (
 )
 
 type Layer interface {
-	forward(*MiM)
-	backprop(mim *MiM, prev_layer_act Activation)
-	init(layerID int)
-	init_new_weights(xavierRange float64, r rand.Rand)
+	forward(*MiM)                                      // Har
+	backprop(mim *MiM, prev_layer_act Activation)      // Har
+	init(layerID int)                                  // Har
+	init_new_weights(xavierRange float64, r rand.Rand) // Har
 	apply_gradients(learn_rate float64, batch_size float64)
 
 	load_weights(flat_weights []float64)

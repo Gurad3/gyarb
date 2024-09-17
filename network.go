@@ -44,11 +44,28 @@ func (shelf *Network) print_weights() {
 
 func (shelf *Network) forward(mim *MiM, data []float64) {
 
+	// 1d
 	mim.data_flat = &data
 	mim.data_type = OneD
 	mim.data_type_history[0] = OneD
 	mim.layers_out_flat[0] = data
 	mim.layers_out_flat_non_activated[0] = data
+
+	// 3d
+
+	threeDIn := make([][][]float64, 1)
+	threeDIn[0] = make([][]float64, 28)
+	for x := 0; x < 28; x++ {
+		threeDIn[0][x] = make([]float64, 28)
+		for y := 0; y < 28; y++ {
+			threeDIn[0][x][y] = data[x*28+y]
+		}
+	}
+
+	mim.data_3d = &threeDIn
+	mim.layers_out_3d[0] = threeDIn
+	mim.layers_out_3d_non_activated[0] = threeDIn
+	mim.data_type = ThreeD
 
 	for _, layer := range shelf.layers {
 		layer.forward(mim)
