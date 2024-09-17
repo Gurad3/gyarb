@@ -23,12 +23,12 @@ type MiM struct {
 	layers_dimentions [][]int
 }
 
-func (shelf *MiM) request_3d(layerID int) *MiM {
+func (shelf *MiM) request_3d(layerID int, dir int) *MiM {
 	switch shelf.data_type {
 	case OneD:
 
 		//X,Y,Z = prev_layer_dim[0,1,2]
-		prev_layer_dim := shelf.layers_dimentions[layerID-1]
+		prev_layer_dim := shelf.layers_dimentions[layerID+1*dir]
 		arr3D := make([][][]float64, prev_layer_dim[0])
 		index := 0
 		for i := int(0); i < prev_layer_dim[0]; i++ {
