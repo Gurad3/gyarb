@@ -7,6 +7,7 @@ import (
 
 func (shelf *DenseLayer) forward(mim *MiM) {
 	data := *mim.request_flat().data_flat
+
 	mim.layers_out_flat[shelf.layerID-1] = data
 
 	for neuronID := range shelf.bias {
@@ -22,6 +23,8 @@ func (shelf *DenseLayer) forward(mim *MiM) {
 
 	mim.data_type = OneD
 	mim.data_type_history[shelf.layerID] = OneD
+
+	// fmt.Println(shelf.weights[0][0:3])
 }
 
 func (shelf *DenseLayer) backprop(mim *MiM, prev_act_interface Activation) {
@@ -52,6 +55,7 @@ func (shelf *DenseLayer) backprop(mim *MiM, prev_act_interface Activation) {
 		}
 
 		mim.data_flat = &mim.layers_out_flat[shelf.layerID-1]
+		// fmt.Println(mim.data_flat)
 		mim.data_type = OneD
 	}
 

@@ -102,6 +102,7 @@ func (shelf *Network) tmpRun(mim *MiM, sample []float64, label []float64, wg *sy
 }
 
 func (shelf *Network) Test(mim *MiM, TestData [][]float64, TestLabels [][]float64) float64 {
+	// return 0
 	totalCost := 0.0
 
 	correct_choises := 0

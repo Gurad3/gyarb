@@ -69,8 +69,10 @@ func (shelf *Network) forward(mim *MiM, data []float64) {
 
 	for _, layer := range shelf.layers {
 		layer.forward(mim)
+
 		// layer.debug_print()
 	}
+	// fmt.Println(mim.data_flat)
 }
 
 func (shelf *Network) backprop(mim *MiM, labels []float64) {

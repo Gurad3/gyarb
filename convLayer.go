@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"math/rand"
 )
 
@@ -87,7 +88,7 @@ func (shelf *ConvLayer) init_new_weights(xavierRange float64, r rand.Rand) {
 func (shelf *ConvLayer) forward(mim *MiM) {
 	mim.layers_out_3d_non_activated[shelf.layerID] = shelf.bias
 
-	mim.request_3d(shelf.layerID, -1)
+	mim.request_3d(shelf.layerID - 1)
 	for i := 0; i < shelf.depth; i++ {
 		for j := 0; j < shelf.input_depth; j++ {
 			conv, _ := correlateOrConvolve2d((*mim.data_3d)[j], shelf.kernels[i][j], false, "valid", 0)
@@ -104,10 +105,11 @@ func (shelf *ConvLayer) forward(mim *MiM) {
 	// fmt.Println(len(mim.layers_out_3d[shelf.layerID]))
 	mim.data_3d = &mim.layers_out_3d[shelf.layerID]
 	mim.data_type = ThreeD
+
 }
 
 func (shelf *ConvLayer) backprop(mim *MiM, prev_layer_act Activation) {
-	output_gradient := *mim.request_3d(shelf.layerID, 0).data_3d
+	output_gradient := *mim.request_3d(shelf.layerID).data_3d
 
 	next_gradient := make([][][]float64, len(mim.layers_out_3d[shelf.layerID-1]))
 	for i := 0; i < len(mim.layers_out_3d[shelf.layerID-1]); i++ {
@@ -117,8 +119,15 @@ func (shelf *ConvLayer) backprop(mim *MiM, prev_layer_act Activation) {
 			next_gradient[i][i2] = make([]float64, len(mim.layers_out_3d[shelf.layerID-1][i][i2]))
 		}
 	}
-
+	//fmt.Println(output_gradient[0][0])
 	for i := 0; i < shelf.depth; i++ {
+		for j := 0; j < shelf.output_height; j++ {
+			for k := 0; k < shelf.output_width; k++ {
+				shelf.bias_gradients[i][j][k] += output_gradient[i][j][k]
+
+			}
+		}
+
 		for j := 0; j < shelf.input_depth; j++ {
 
 			kernalCorr, _ := correlateOrConvolve2d(mim.layers_out_3d[shelf.layerID-1][j], output_gradient[i], false, "valid", 0)
@@ -127,8 +136,8 @@ func (shelf *ConvLayer) backprop(mim *MiM, prev_layer_act Activation) {
 
 			for k, k2 := range mim.layers_out_3d[shelf.layerID-1][j] {
 				for l := range k2 {
-
-					mim.layers_out_3d[shelf.layerID-1][j][k][l] += input_convlove[k][l]
+					//mim.layers_out_3d[shelf.layerID-1][j][k][l] += input_convlove[k][l]
+					next_gradient[j][k][l] += input_convlove[k][l] * prev_layer_act.ddx(mim.layers_out_3d[shelf.layerID-1][j][k][l])
 
 				}
 			}
@@ -143,6 +152,9 @@ func (shelf *ConvLayer) backprop(mim *MiM, prev_layer_act Activation) {
 
 		}
 	}
+	mim.layers_out_3d[shelf.layerID-1] = next_gradient
+	mim.data_3d = &mim.layers_out_3d[shelf.layerID-1]
+	mim.data_type = ThreeD
 }
 
 // flipKernel flips the kernel (matrix) horizontally and vertically for convolution.
@@ -232,6 +244,7 @@ func (shelf *ConvLayer) apply_gradients(learn_rate float64, batch_size float64) 
 			for k := 0; k < shelf.kernel_size; k++ {
 				for l := 0; l < shelf.kernel_size; l++ {
 					shelf.kernels[i][j][k][l] -= shelf.kernels_gradients[i][j][k][l] * mult
+					// fmt.Println("w", shelf.kernels[i][j][k][l], shelf.kernels_gradients[i][j][k][l]*mult)
 					shelf.kernels_gradients[i][j][k][l] = 0
 				}
 			}
@@ -240,6 +253,7 @@ func (shelf *ConvLayer) apply_gradients(learn_rate float64, batch_size float64) 
 		for j := 0; j < shelf.output_height; j++ {
 			for k := 0; k < shelf.output_width; k++ {
 				shelf.bias[i][j][k] -= shelf.bias_gradients[i][j][k]
+				//fmt.Println("b", shelf.bias[i][j][k], shelf.bias_gradients[i][j][k])
 				shelf.bias_gradients[i][j][k] = 0
 			}
 		}
@@ -274,7 +288,7 @@ func (shelf *ConvLayer) get_name() string {
 }
 
 func (shelf *ConvLayer) debug_print() {
-
+	fmt.Println(shelf.kernels[0][0][0])
 }
 
 // class Convolutional(Layer):

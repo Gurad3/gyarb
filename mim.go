@@ -23,12 +23,12 @@ type MiM struct {
 	layers_dimentions [][]int
 }
 
-func (shelf *MiM) request_3d(layerID int, dir int) *MiM {
+func (shelf *MiM) request_3d(layerID int) *MiM {
 	switch shelf.data_type {
 	case OneD:
 
 		//X,Y,Z = prev_layer_dim[0,1,2]
-		prev_layer_dim := shelf.layers_dimentions[layerID+1*dir]
+		prev_layer_dim := shelf.layers_dimentions[layerID]
 		arr3D := make([][][]float64, prev_layer_dim[0])
 		index := 0
 		for i := int(0); i < prev_layer_dim[0]; i++ {
@@ -37,12 +37,15 @@ func (shelf *MiM) request_3d(layerID int, dir int) *MiM {
 				arr3D[i][j] = make([]float64, prev_layer_dim[2])
 				for k := int(0); k < prev_layer_dim[2]; k++ {
 					arr3D[i][j][k] = (*shelf.data_flat)[index]
+					// fmt.Println((*shelf.data_flat)[index])
 					index++
 				}
 			}
 		}
 		shelf.data_3d = &arr3D
 	}
+	shelf.data_type = ThreeD
+
 	return shelf
 }
 
@@ -50,14 +53,14 @@ func (shelf *MiM) request_flat() *MiM {
 	switch shelf.data_type {
 	case ThreeD:
 
-		new_flat := make([]float64, len(*shelf.data_3d)*len((*shelf.data_3d)[0])*len((*shelf.data_3d)[0][0]))
-
+		//new_flat := make([]float64, len(*shelf.data_3d)*len((*shelf.data_3d)[0])*len((*shelf.data_3d)[0][0]))
+		new_flat := make([]float64, 0, len(*shelf.data_3d)*len((*shelf.data_3d)[0])*len((*shelf.data_3d)[0][0]))
 		for i := 0; i < len(*shelf.data_3d); i++ {
 			for j := 0; j < len((*shelf.data_3d)[0]); j++ {
+
 				new_flat = append(new_flat, (*shelf.data_3d)[i][j]...)
 			}
 		}
-
 		shelf.data_flat = &new_flat
 
 	}
