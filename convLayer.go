@@ -105,7 +105,6 @@ func (shelf *ConvLayer) forward(mim *MiM) {
 	// fmt.Println(len(mim.layers_out_3d[shelf.layerID]))
 	mim.data_3d = &mim.layers_out_3d[shelf.layerID]
 	mim.data_type = ThreeD
-
 }
 
 func (shelf *ConvLayer) backprop(mim *MiM, prev_layer_act Activation) {
@@ -124,7 +123,6 @@ func (shelf *ConvLayer) backprop(mim *MiM, prev_layer_act Activation) {
 		for j := 0; j < shelf.output_height; j++ {
 			for k := 0; k < shelf.output_width; k++ {
 				shelf.bias_gradients[i][j][k] += output_gradient[i][j][k]
-
 			}
 		}
 
