@@ -1,8 +1,6 @@
 package main
 
 import (
-	"errors"
-	"fmt"
 	"math/rand"
 )
 
@@ -21,11 +19,16 @@ type ConvLayer struct {
 
 	output_width  int
 	output_height int
-	kernels       [][][][]float64
-	bias          [][][]float64
 
-	kernels_gradients [][][][]float64
-	bias_gradients    [][][]float64
+	kernels [][]Kernel
+}
+
+type Kernel struct {
+	window [][]float64
+	bias   float64
+
+	window_gradients [][]float64
+	bias_gradient    float64
 }
 
 func (shelf *ConvLayer) init(layerID int) {
@@ -38,35 +41,25 @@ func (shelf *ConvLayer) init(layerID int) {
 
 	shelf.out_size = []int{shelf.depth, shelf.output_height, shelf.output_width}
 
-	shelf.bias = make([][][]float64, shelf.depth)
-	shelf.kernels = make([][][][]float64, shelf.depth)
-
-	shelf.bias_gradients = make([][][]float64, shelf.depth)
-	shelf.kernels_gradients = make([][][][]float64, shelf.depth)
+	shelf.kernels = make([][]Kernel, shelf.depth)
 
 	for i := 0; i < shelf.depth; i++ {
 		//kernels
-		shelf.kernels[i] = make([][][]float64, shelf.input_depth)
-		shelf.kernels_gradients[i] = make([][][]float64, shelf.input_depth)
+		shelf.kernels[i] = make([]Kernel, shelf.input_depth)
 
 		for j := 0; j < shelf.input_depth; j++ {
-			shelf.kernels[i][j] = make([][]float64, shelf.kernel_size)
-			shelf.kernels_gradients[i][j] = make([][]float64, shelf.kernel_size)
+			shelf.kernels[i][j].bias = 0
+			shelf.kernels[i][j].bias_gradient = 0
+			shelf.kernels[i][j].window = make([][]float64, shelf.kernel_size)
+			shelf.kernels[i][j].window_gradients = make([][]float64, shelf.kernel_size)
 
 			for k := 0; k < shelf.kernel_size; k++ {
-				shelf.kernels[i][j][k] = make([]float64, shelf.kernel_size)
-				shelf.kernels_gradients[i][j][k] = make([]float64, shelf.kernel_size)
+				shelf.kernels[i][j].window[k] = make([]float64, shelf.kernel_size)
+				shelf.kernels[i][j].window_gradients[k] = make([]float64, shelf.kernel_size)
 
 			}
 		}
 
-		//bias
-		shelf.bias[i] = make([][]float64, shelf.output_height)
-		shelf.bias_gradients[i] = make([][]float64, shelf.output_height)
-		for j := 0; j < shelf.output_height; j++ {
-			shelf.bias[i][j] = make([]float64, shelf.output_width)
-			shelf.bias_gradients[i][j] = make([]float64, shelf.output_width)
-		}
 	}
 }
 
@@ -74,15 +67,18 @@ func (shelf *ConvLayer) init_new_weights(xavierRange float64, r rand.Rand) {
 	//Give each weights new random weights (Currentlu 0)
 
 	for i := 0; i < shelf.depth; i++ {
-		//kernels
 		for j := 0; j < shelf.input_depth; j++ {
 			for k := 0; k < shelf.kernel_size; k++ {
 				for l := 0; l < shelf.kernel_size; l++ {
-					shelf.kernels[i][j][k][l] = initWeightXavierUniform(xavierRange, r)
+					shelf.kernels[i][j].window[k][l] = initWeightXavierUniform(xavierRange, r)
 				}
 			}
 		}
 	}
+}
+
+func forward2(mim *MiM) {
+
 }
 
 func (shelf *ConvLayer) forward(mim *MiM) {
@@ -155,6 +151,22 @@ func (shelf *ConvLayer) backprop(mim *MiM, prev_layer_act Activation) {
 	mim.data_type = ThreeD
 }
 
+func (shelf *Kernel) correlation(matrix [][]float64, target *[][]float64) {
+
+	for i := 0; i < len(matrix)-len(shelf.window)+1; i++ {
+		for j := 0; j < len(matrix[0])-len(shelf.window[0])+1; j++ {
+			sum := shelf.bias
+			for k := 0; k < len(shelf.window); k++ {
+				for l := 0; l < len(shelf.window[0]); l++ {
+					sum += matrix[i+k][j+l] * shelf.window[k][l]
+				}
+			}
+
+			(*target)[i][j] = sum
+		}
+	}
+}
+
 // flipKernel flips the kernel (matrix) horizontally and vertically for convolution.
 func flipKernel(kernel [][]float64) [][]float64 {
 	rows := len(kernel)
@@ -169,91 +181,18 @@ func flipKernel(kernel [][]float64) [][]float64 {
 	return flipped
 }
 
-// correlateOrConvolve2d computes the 2D cross-correlation or convolution of two 2D slices with specified modes.
-func correlateOrConvolve2d(in1 [][]float64, in2 [][]float64, convolution bool, mode string, fillvalue float64) ([][]float64, error) {
-	rows1 := len(in1)
-	cols1 := len(in1[0])
-	rows2 := len(in2)
-	cols2 := len(in2[0])
-
-	if mode == "valid" && (rows1 < rows2 || cols1 < cols2) {
-		return nil, errors.New("input matrix dimensions are smaller than kernel dimensions for 'valid' mode")
-	}
-
-	// Flip the kernel for convolution.
-	if convolution {
-		in2 = flipKernel(in2)
-	}
-
-	// Determine the output size based on the mode.
-	var outRows, outCols int
-	switch mode {
-	case "full":
-		outRows = rows1 + rows2 - 1
-		outCols = cols1 + cols2 - 1
-	case "valid":
-		outRows = rows1 - rows2 + 1
-		outCols = cols1 - cols2 + 1
-	default:
-		return nil, errors.New("unsupported mode; use 'full' or 'valid'")
-	}
-
-	// Initialize the output array with the fill value.
-	output := make([][]float64, outRows)
-	for i := range output {
-		output[i] = make([]float64, outCols)
-		for j := range output[i] {
-			output[i][j] = fillvalue
-		}
-	}
-
-	// Perform the 2D correlation or convolution.
-	for i := 0; i < outRows; i++ {
-		for j := 0; j < outCols; j++ {
-			sum := 0.0
-			for m := 0; m < rows2; m++ {
-				for n := 0; n < cols2; n++ {
-					rowIndex := i + m
-					colIndex := j + n
-
-					if mode == "full" {
-						// Check boundary conditions for 'full' mode.
-						if rowIndex >= rows1 || colIndex >= cols1 || rowIndex < 0 || colIndex < 0 {
-							continue
-						}
-						sum += in1[rowIndex][colIndex] * in2[m][n]
-					} else if mode == "valid" {
-						// Direct index access for 'valid' mode.
-						sum += in1[i+m][j+n] * in2[m][n]
-					}
-				}
-			}
-			output[i][j] = sum
-		}
-	}
-
-	return output, nil
-}
-
 func (shelf *ConvLayer) apply_gradients(learn_rate float64, batch_size float64) {
 	mult := learn_rate / batch_size
 	for i := 0; i < shelf.depth; i++ {
 		for j := 0; j < shelf.input_depth; j++ {
 			for k := 0; k < shelf.kernel_size; k++ {
 				for l := 0; l < shelf.kernel_size; l++ {
-					shelf.kernels[i][j][k][l] -= shelf.kernels_gradients[i][j][k][l] * mult
-					// fmt.Println("w", shelf.kernels[i][j][k][l], shelf.kernels_gradients[i][j][k][l]*mult)
-					shelf.kernels_gradients[i][j][k][l] = 0
+					shelf.kernels[i][j].window[k][l] -= shelf.kernels[i][j].window_gradients[k][l] * mult
+					shelf.kernels[i][j].window_gradients[k][l] = 0
 				}
 			}
-		}
-
-		for j := 0; j < shelf.output_height; j++ {
-			for k := 0; k < shelf.output_width; k++ {
-				shelf.bias[i][j][k] -= shelf.bias_gradients[i][j][k]
-				//fmt.Println("b", shelf.bias[i][j][k], shelf.bias_gradients[i][j][k])
-				shelf.bias_gradients[i][j][k] = 0
-			}
+			shelf.kernels[i][j].bias -= shelf.kernels[i][j].bias_gradient
+			shelf.kernels[i][j].bias_gradient = 0
 		}
 	}
 
@@ -286,7 +225,7 @@ func (shelf *ConvLayer) get_name() string {
 }
 
 func (shelf *ConvLayer) debug_print() {
-	fmt.Println(shelf.kernels[0][0][0])
+
 }
 
 // class Convolutional(Layer):
