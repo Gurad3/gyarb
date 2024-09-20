@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"math"
 	"math/rand"
 	"time"
@@ -72,7 +71,7 @@ func (shelf *Network) forward(mim *MiM, data []float64) {
 
 		// layer.debug_print()
 	}
-	// fmt.Println(mim.data_flat)
+
 }
 
 func (shelf *Network) backprop(mim *MiM, labels []float64) {
@@ -92,17 +91,6 @@ func (shelf *Network) get_output_ddx(mim *MiM, labels []float64) *[]float64 {
 		//gradiants[outID] = shelf.layers[len(shelf.layers)-1].get_act_interface().ddx(shelf.cost_interface.ddx(output, labels[outID]))
 
 		//fmt.Println(len(shelf.layers), len(mim.layers_out_flat_non_activated), len(mim.layers_out_flat_non_activated[len(shelf.layers)]))
-
-		if len(shelf.layers)-1 == 10 {
-			fmt.Println(1, len(shelf.layers))
-		}
-		if len(shelf.layers) == 10 {
-			fmt.Println(2, len(shelf.layers), len(mim.layers_out_flat_non_activated))
-		}
-		if outID == 10 {
-			fmt.Println(len(*mim.data_flat))
-			fmt.Println(3, len(mim.layers_out_flat_non_activated[len(shelf.layers)]))
-		}
 
 		gradiants[outID] = shelf.layers[len(shelf.layers)-1].get_act_interface().ddx(mim.layers_out_flat_non_activated[len(shelf.layers)][outID])
 		gradiants[outID] *= shelf.cost_interface.ddx(output, labels[outID])

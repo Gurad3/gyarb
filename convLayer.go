@@ -70,7 +70,9 @@ func (shelf *ConvLayer) init_new_weights(xavierRange float64, r rand.Rand) {
 		for j := 0; j < shelf.input_depth; j++ {
 			for k := 0; k < shelf.kernel_size; k++ {
 				for l := 0; l < shelf.kernel_size; l++ {
-					shelf.filters[i].kernels[j][k][l] = initWeightXavierUniform(xavierRange, r)
+					//shelf.filters[i].kernels[j][k][l] = initWeightXavierUniform(xavierRange, r)
+
+					shelf.filters[i].kernels[j][k][l] = tmp_manualKernel[i][k][l]
 				}
 			}
 		}
@@ -84,16 +86,20 @@ func forward2(mim *MiM) {
 func (shelf *ConvLayer) forward(mim *MiM) {
 
 	matrix := mim.request_3d(shelf.layerID - 1).data_3d
-	
-	for _, filter := range shelf.filters {
-		filter.correlation(matrix, &mim.layers_out_3d[][])
+
+	for i, filter := range shelf.filters {
+		filter.correlation(matrix, &mim.layers_out_3d[shelf.layerID][i], &mim.layers_out_3d_non_activated[shelf.layerID][i], &shelf.act_interface)
 	}
-	
+
 	mim.data_3d = &mim.layers_out_3d[shelf.layerID]
 	mim.data_type = ThreeD
 }
 
 func (shelf *ConvLayer) backprop(mim *MiM, prev_layer_act Activation) {
+
+}
+
+/*func (shelf *ConvLayer) backprop(mim *MiM, prev_layer_act Activation) {
 	output_gradient := *mim.request_3d(shelf.layerID).data_3d
 
 	next_gradient := make([][][]float64, len(mim.layers_out_3d[shelf.layerID-1]))
@@ -139,12 +145,13 @@ func (shelf *ConvLayer) backprop(mim *MiM, prev_layer_act Activation) {
 	mim.layers_out_3d[shelf.layerID-1] = next_gradient
 	mim.data_3d = &mim.layers_out_3d[shelf.layerID-1]
 	mim.data_type = ThreeD
-}
+}*/
 
 func (shelf *Filter) correlation(matrix *[][][]float64, target_activated *[][]float64, target_non_activated *[][]float64, activation *Activation) {
+	for i := 0; i < len((*matrix)[0])-len(shelf.kernels[0])+1; i++ {
 
-	for i := 0; i < len(*matrix)-len(shelf.kernels[0])+1; i++ {
-		for j := 0; j < len((*matrix)[0])-len(shelf.kernels[0][0])+1; j++ {
+		for j := 0; j < len((*matrix)[0][0])-len(shelf.kernels[0][0])+1; j++ {
+
 			sum := shelf.bias
 			for kernel_index := 0; kernel_index < len(shelf.kernels); kernel_index++ {
 				for k := 0; k < len(shelf.kernels[kernel_index]); k++ {
@@ -155,6 +162,7 @@ func (shelf *Filter) correlation(matrix *[][][]float64, target_activated *[][]fl
 			}
 			(*target_activated)[i][j] = (*activation).call(sum)
 			(*target_non_activated)[i][j] = sum
+			// fmt.Println(sum)
 		}
 	}
 }

@@ -53,12 +53,17 @@ func (shelf *MiM) request_flat() *MiM {
 	switch shelf.data_type {
 	case ThreeD:
 
-		//new_flat := make([]float64, len(*shelf.data_3d)*len((*shelf.data_3d)[0])*len((*shelf.data_3d)[0][0]))
-		new_flat := make([]float64, 0, len(*shelf.data_3d)*len((*shelf.data_3d)[0])*len((*shelf.data_3d)[0][0]))
+		new_flat := make([]float64, len(*shelf.data_3d)*len((*shelf.data_3d)[0])*len((*shelf.data_3d)[0][0]))
+		//new_flat := make([]float64, 0, len(*shelf.data_3d)*len((*shelf.data_3d)[0])*len((*shelf.data_3d)[0][0]))
+		f := 0
 		for i := 0; i < len(*shelf.data_3d); i++ {
 			for j := 0; j < len((*shelf.data_3d)[0]); j++ {
 
-				new_flat = append(new_flat, (*shelf.data_3d)[i][j]...)
+				//new_flat = append(new_flat, (*shelf.data_3d)[i][j]...)
+				for k := 0; k < len((*shelf.data_3d)[0][0]); k++ {
+					new_flat[f] = (*shelf.data_3d)[i][j][k]
+					f++
+				}
 			}
 		}
 		shelf.data_flat = &new_flat

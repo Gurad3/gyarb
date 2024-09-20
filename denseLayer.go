@@ -7,7 +7,7 @@ import (
 
 func (shelf *DenseLayer) forward(mim *MiM) {
 	data := *mim.request_flat().data_flat
-
+	// fmt.Println(data[444:450])
 	mim.layers_out_flat[shelf.layerID-1] = data
 
 	for neuronID := range shelf.bias {
