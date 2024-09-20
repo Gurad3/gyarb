@@ -20,14 +20,14 @@ type ConvLayer struct {
 	output_width  int
 	output_height int
 
-	kernels [][]Kernel
+	filters []Filter
 }
 
-type Kernel struct {
-	window [][]float64
-	bias   float64
+type Filter struct {
+	kernels [][][]float64
+	bias    float64
 
-	window_gradients [][]float64
+	kernel_gradients [][][]float64
 	bias_gradient    float64
 }
 
@@ -41,22 +41,22 @@ func (shelf *ConvLayer) init(layerID int) {
 
 	shelf.out_size = []int{shelf.depth, shelf.output_height, shelf.output_width}
 
-	shelf.kernels = make([][]Kernel, shelf.depth)
+	shelf.filters = make([]Filter, shelf.depth)
 
 	for i := 0; i < shelf.depth; i++ {
 		//kernels
-		shelf.kernels[i] = make([]Kernel, shelf.input_depth)
-
+		shelf.filters[i].kernels = make([][][]float64, shelf.input_depth)
+		shelf.filters[i].kernel_gradients = make([][][]float64, shelf.input_depth)
+		shelf.filters[i].bias = 0
+		shelf.filters[i].bias_gradient = 0
 		for j := 0; j < shelf.input_depth; j++ {
-			shelf.kernels[i][j].bias = 0
-			shelf.kernels[i][j].bias_gradient = 0
-			shelf.kernels[i][j].window = make([][]float64, shelf.kernel_size)
-			shelf.kernels[i][j].window_gradients = make([][]float64, shelf.kernel_size)
+
+			shelf.filters[i].kernels[j] = make([][]float64, shelf.kernel_size)
+			shelf.filters[i].kernel_gradients[j] = make([][]float64, shelf.kernel_size)
 
 			for k := 0; k < shelf.kernel_size; k++ {
-				shelf.kernels[i][j].window[k] = make([]float64, shelf.kernel_size)
-				shelf.kernels[i][j].window_gradients[k] = make([]float64, shelf.kernel_size)
-
+				shelf.filters[i].kernels[j][k] = make([]float64, shelf.kernel_size)
+				shelf.filters[i].kernel_gradients[j][k] = make([]float64, shelf.kernel_size)
 			}
 		}
 
@@ -70,7 +70,7 @@ func (shelf *ConvLayer) init_new_weights(xavierRange float64, r rand.Rand) {
 		for j := 0; j < shelf.input_depth; j++ {
 			for k := 0; k < shelf.kernel_size; k++ {
 				for l := 0; l < shelf.kernel_size; l++ {
-					shelf.kernels[i][j].window[k][l] = initWeightXavierUniform(xavierRange, r)
+					shelf.filters[i].kernels[j][k][l] = initWeightXavierUniform(xavierRange, r)
 				}
 			}
 		}
@@ -82,23 +82,13 @@ func forward2(mim *MiM) {
 }
 
 func (shelf *ConvLayer) forward(mim *MiM) {
-	mim.layers_out_3d_non_activated[shelf.layerID] = shelf.bias
 
-	mim.request_3d(shelf.layerID - 1)
-	for i := 0; i < shelf.depth; i++ {
-		for j := 0; j < shelf.input_depth; j++ {
-			conv, _ := correlateOrConvolve2d((*mim.data_3d)[j], shelf.kernels[i][j], false, "valid", 0)
-
-			for k, k2 := range mim.layers_out_3d_non_activated[shelf.layerID][i] {
-				for l := range k2 {
-					mim.layers_out_3d_non_activated[shelf.layerID][i][k][l] += conv[k][l]
-					mim.layers_out_3d[shelf.layerID][i][k][l] = shelf.act_interface.call(mim.layers_out_3d_non_activated[shelf.layerID][i][k][l])
-				}
-			}
-
-		}
+	matrix := mim.request_3d(shelf.layerID - 1).data_3d
+	
+	for _, filter := range shelf.filters {
+		filter.correlation(matrix, &mim.layers_out_3d[][])
 	}
-	// fmt.Println(len(mim.layers_out_3d[shelf.layerID]))
+	
 	mim.data_3d = &mim.layers_out_3d[shelf.layerID]
 	mim.data_type = ThreeD
 }
@@ -151,18 +141,20 @@ func (shelf *ConvLayer) backprop(mim *MiM, prev_layer_act Activation) {
 	mim.data_type = ThreeD
 }
 
-func (shelf *Kernel) correlation(matrix [][]float64, target *[][]float64) {
+func (shelf *Filter) correlation(matrix *[][][]float64, target_activated *[][]float64, target_non_activated *[][]float64, activation *Activation) {
 
-	for i := 0; i < len(matrix)-len(shelf.window)+1; i++ {
-		for j := 0; j < len(matrix[0])-len(shelf.window[0])+1; j++ {
+	for i := 0; i < len(*matrix)-len(shelf.kernels[0])+1; i++ {
+		for j := 0; j < len((*matrix)[0])-len(shelf.kernels[0][0])+1; j++ {
 			sum := shelf.bias
-			for k := 0; k < len(shelf.window); k++ {
-				for l := 0; l < len(shelf.window[0]); l++ {
-					sum += matrix[i+k][j+l] * shelf.window[k][l]
+			for kernel_index := 0; kernel_index < len(shelf.kernels); kernel_index++ {
+				for k := 0; k < len(shelf.kernels[kernel_index]); k++ {
+					for l := 0; l < len(shelf.kernels[kernel_index][0]); l++ {
+						sum += (*matrix)[kernel_index][i+k][j+l] * shelf.kernels[kernel_index][k][l]
+					}
 				}
 			}
-
-			(*target)[i][j] = sum
+			(*target_activated)[i][j] = (*activation).call(sum)
+			(*target_non_activated)[i][j] = sum
 		}
 	}
 }
@@ -187,13 +179,14 @@ func (shelf *ConvLayer) apply_gradients(learn_rate float64, batch_size float64) 
 		for j := 0; j < shelf.input_depth; j++ {
 			for k := 0; k < shelf.kernel_size; k++ {
 				for l := 0; l < shelf.kernel_size; l++ {
-					shelf.kernels[i][j].window[k][l] -= shelf.kernels[i][j].window_gradients[k][l] * mult
-					shelf.kernels[i][j].window_gradients[k][l] = 0
+					shelf.filters[i].kernels[j][k][l] -= shelf.filters[i].kernel_gradients[j][k][l] * mult
+					shelf.filters[i].kernel_gradients[j][k][l] = 0
 				}
 			}
-			shelf.kernels[i][j].bias -= shelf.kernels[i][j].bias_gradient
-			shelf.kernels[i][j].bias_gradient = 0
+
 		}
+		shelf.filters[i].bias -= shelf.filters[i].bias_gradient
+		shelf.filters[i].bias_gradient = 0
 	}
 
 }
