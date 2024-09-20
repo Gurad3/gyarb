@@ -73,10 +73,15 @@ func (shelf *DenseLayer) apply_gradients(learn_rate float64, batch_size float64)
 	}
 }
 
-func (shelf *DenseLayer) init(layerID int) {
+func (shelf *DenseLayer) init(layerID int, prev_layer_size []int) {
 	//Init all layer arrays sizes, Sets bias AND WEIGHTS to 0
 	shelf.layer_type = "DenseLayer"
 	shelf.layerID = layerID
+
+	shelf.prev_layer_size = 1
+	for _, v := range prev_layer_size {
+		shelf.prev_layer_size *= v
+	}
 
 	shelf.bias = make([]float64, shelf.size)
 	shelf.weights = make([][]float64, shelf.size)
@@ -154,6 +159,5 @@ func (shelf *DenseLayer) get_act_interface() Activation {
 }
 
 func (shelf *DenseLayer) debug_print() {
-	fmt.Println(shelf.layerID)
-	fmt.Println(shelf.size)
+	fmt.Println(shelf.prev_layer_size)
 }

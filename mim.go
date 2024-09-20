@@ -11,8 +11,8 @@ type MiM struct {
 	//data_2d   *[][]float64
 	data_3d *[][][]float64
 
-	data_type         int32
-	data_type_history []int32
+	data_type         int
+	data_type_history []int
 
 	layers_out_flat [][]float64 //First = input data
 	layers_out_3d   [][][][]float64
@@ -80,7 +80,7 @@ func (shelf *MiM) init(net *Network) {
 
 	shelf.layers_dimentions[0] = []int{1, 28, 28} // TODO GLÖM INTE BORT
 
-	shelf.data_type_history = make([]int32, length)
+	shelf.data_type_history = make([]int, length)
 
 	shelf.layers_out_flat = make([][]float64, length)
 	shelf.layers_out_flat_non_activated = make([][]float64, length)

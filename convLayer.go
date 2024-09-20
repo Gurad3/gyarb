@@ -31,10 +31,14 @@ type Filter struct {
 	bias_gradient    float64
 }
 
-func (shelf *ConvLayer) init(layerID int) {
+func (shelf *ConvLayer) init(layerID int, prev_layer_size []int) {
 	//Init all layer arrays sizes, Sets bias AND WEIGHTS to 0
 	shelf.layer_type = "ConvLayer"
 	shelf.layerID = layerID
+
+	shelf.input_depth = prev_layer_size[0]
+	shelf.input_width = prev_layer_size[1]
+	shelf.input_height = prev_layer_size[2]
 
 	shelf.output_width = shelf.input_width - shelf.kernel_size + 1
 	shelf.output_height = shelf.input_height - shelf.kernel_size + 1

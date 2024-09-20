@@ -58,55 +58,39 @@ func xor(net *Network) {
 func tmpNewMNIST() *Network {
 	net := new(Network)
 
-	net.learn_rate = .2
+	net.learn_rate = .15
 	net.learn_rate_decay = 0.0001
 	net.file_name = "NewTrainedMNIST_2"
 	net.cost_interface = &MeanSquare{}
 
-	net.input_size = 28 * 28
+	net.input_shape = []int{1, 28, 28}
 	net.output_size = 10
 
 	net.layers = []Layer{
 		&ConvLayer{
 			act_interface: &RelU{},
 			kernel_size:   3,
-			input_height:  28,
-			input_width:   28,
-			input_depth:   1,
 			depth:         2,
 		},
 
-		// &ConvLayer{
-		// 	act_interface: &RelU{},
-		// 	kernel_size:   3,
-		// 	input_height:  28 - 3 + 1,
-		// 	input_width:   28 - 3 + 1,
-		// 	input_depth:   2,
-		// 	depth:         4,
-		// },
-
-		// &DenseLayer{
-		// 	act_interface:   &RelU{},
-		// 	size:            100,
-		// 	prev_layer_size: 4 * (28 - 6 + 2) * (28 - 6 + 2),
-		// },
-
-		&DenseLayer{
-			act_interface:   &Sigmoid{},
-			size:            100,
-			prev_layer_size: 2 * (28 - 3 + 1) * (28 - 3 + 1),
+		&ConvLayer{
+			act_interface: &RelU{},
+			kernel_size:   3,
+			depth:         4,
 		},
 
-		// &DenseLayer{
-		// 	act_interface:   &RelU{},
-		// 	size:            100,
-		// 	prev_layer_size: 28 * 28,
-		// },
+		&DenseLayer{
+			act_interface: &RelU{},
+			size:          200,
+		},
+		&DenseLayer{
+			act_interface: &RelU{},
+			size:          20,
+		},
 
 		&DenseLayer{
-			act_interface:   &Sigmoid{},
-			size:            10,
-			prev_layer_size: 100,
+			act_interface: &Sigmoid{},
+			size:          10,
 		},
 	}
 

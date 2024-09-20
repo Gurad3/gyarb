@@ -13,6 +13,7 @@ type Network struct {
 	learn_rate_decay float64
 	momentum         float64
 
+	input_shape []int
 	input_size  int
 	output_size int
 
@@ -21,8 +22,16 @@ type Network struct {
 }
 
 func (shelf *Network) init() {
+
+	prev_layer_size := shelf.input_shape
+	shelf.input_size = 1
+	for _, v := range shelf.input_shape {
+		shelf.input_size *= v
+	}
+
 	for layerID, layer := range shelf.layers {
-		layer.init(layerID + 1)
+		layer.init(layerID+1, prev_layer_size)
+		prev_layer_size = layer.get_size()
 	}
 }
 
@@ -44,32 +53,38 @@ func (shelf *Network) print_weights() {
 func (shelf *Network) forward(mim *MiM, data []float64) {
 
 	// 1d
-	mim.data_flat = &data
-	mim.data_type = OneD
-	mim.data_type_history[0] = OneD
-	mim.layers_out_flat[0] = data
-	mim.layers_out_flat_non_activated[0] = data
+	mim.data_type = len(shelf.input_shape) - 1
+	mim.data_type_history[0] = mim.data_type
 
-	// 3d
+	switch mim.data_type {
+	case OneD:
+		mim.data_flat = &data
 
-	threeDIn := make([][][]float64, 1)
-	threeDIn[0] = make([][]float64, 28)
-	for x := 0; x < 28; x++ {
-		threeDIn[0][x] = make([]float64, 28)
-		for y := 0; y < 28; y++ {
-			threeDIn[0][x][y] = data[x*28+y]
+		mim.layers_out_flat[0] = data
+		mim.layers_out_flat_non_activated[0] = data
+
+	case ThreeD:
+		threeDIn := make([][][]float64, shelf.input_shape[0])
+		for depth := 0; depth < shelf.input_shape[0]; depth++ {
+			threeDIn[depth] = make([][]float64, shelf.input_shape[1])
+			for x := 0; x < shelf.input_shape[1]; x++ {
+				threeDIn[0][x] = make([]float64, shelf.input_shape[2])
+				for y := 0; y < shelf.input_shape[2]; y++ {
+					threeDIn[0][x][y] = data[depth*shelf.input_shape[0]+x*shelf.input_shape[1]+y]
+				}
+			}
 		}
+		mim.data_3d = &threeDIn
+		mim.layers_out_3d[0] = threeDIn
+		mim.layers_out_3d_non_activated[0] = threeDIn
+
 	}
 
-	mim.data_3d = &threeDIn
-	mim.layers_out_3d[0] = threeDIn
-	mim.layers_out_3d_non_activated[0] = threeDIn
-	mim.data_type = ThreeD
-
+	// fmt.Println("---")
 	for _, layer := range shelf.layers {
 		layer.forward(mim)
-
-		// layer.debug_print()
+		//layer.debug_print()
+		// fmt.Println(layer.get_size())
 	}
 
 }

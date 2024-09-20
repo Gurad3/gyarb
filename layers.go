@@ -7,7 +7,7 @@ import (
 type Layer interface {
 	forward(*MiM)                                      // Har
 	backprop(mim *MiM, prev_layer_act Activation)      // Har
-	init(layerID int)                                  // Har
+	init(layerID int, prev_layer_size []int)           // Har
 	init_new_weights(xavierRange float64, r rand.Rand) // Har
 	apply_gradients(learn_rate float64, batch_size float64)
 

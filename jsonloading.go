@@ -38,11 +38,12 @@ func load_from_net_data(net_data NetworkData) Network {
 	for i := 0; i < len(net_data.Layer_types); i++ {
 		if net_data.Layer_types[i] == "DenseLayer" {
 			New_layer := DenseLayer{
-				act_interface:   act_name_to_interface(net_data.Layer_activations[i]),
-				size:            net_data.Layer_sizes[i][0],
-				prev_layer_size: len(net_data.Layer_weights[i]) / net_data.Layer_sizes[i][0],
+				act_interface: act_name_to_interface(net_data.Layer_activations[i]),
+				size:          net_data.Layer_sizes[i][0],
 			}
-			New_layer.init(i + 1)
+			prev_layer_size := len(net_data.Layer_weights[i]) / net_data.Layer_sizes[i][0]
+
+			New_layer.init(i+1, []int{prev_layer_size})
 			New_layer.load_weights(net_data.Layer_weights[i])
 			New_layer.load_biases(net_data.Layer_biases[i])
 			net.layers[i] = &New_layer
