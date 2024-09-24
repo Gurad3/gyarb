@@ -64,7 +64,7 @@ func tmpNewMNIST() *Network {
 	net.cost_interface = &MeanSquare{}
 
 	net.input_shape = []int{1, 28, 28}
-	//net.input_shape = []int{28 * 28}
+	// net.input_shape = []int{28 * 28}
 	net.output_size = 10
 
 	net.layers = []Layer{
