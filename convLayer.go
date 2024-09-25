@@ -96,7 +96,25 @@ func (shelf *ConvLayer) forward(mim *MiM) {
 }
 
 func (shelf *ConvLayer) backprop(mim *MiM, prev_layer_act Activation) {
+	mim.request_3d(shelf.layerID)
 
+	for _, filter := range shelf.filters {
+		filter.compute_loss_kernel_gradient(mim, shelf.output_width, shelf.output_height, shelf.layerID)
+	}
+}
+func (shelf *Filter) compute_loss_kernel_gradient(mim *MiM, O_W int, O_H int, layerID int) {
+
+	for i := 0; i < len(shelf.kernels[0]); i++ {
+		for j := 0; j < len(shelf.kernels[0][0]); j++ {
+			for k := 0; k < O_H; k++ {
+				for l := 0; l < O_W; l++ {
+					for c := 0; c < len(shelf.kernels); c++ {
+						shelf.kernel_gradients[c][i][j] += mim.layers_out_3d[layerID-1][c][i+k][j+l] * dout[k][l]
+					}
+				}
+			}
+		}
+	}
 }
 
 func (shelf *ConvLayer) compute_loss_kernel_gradient(mim *MiM) [][]float64 {
