@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math/rand"
 )
 
@@ -96,45 +97,54 @@ func (shelf *ConvLayer) forward(mim *MiM) {
 }
 
 func (shelf *ConvLayer) backprop(mim *MiM, prev_layer_act Activation) {
+
 	mim.request_3d(shelf.layerID)
 
-	for _, filter := range shelf.filters {
-		filter.compute_loss_kernel_gradient(mim, shelf.output_width, shelf.output_height, shelf.layerID)
+	for f, filter := range shelf.filters {
+		filter.compute_loss_kernel_gradient(mim, shelf.output_width, shelf.output_height, shelf.layerID, f)
 	}
 }
-func (shelf *Filter) compute_loss_kernel_gradient(mim *MiM, O_W int, O_H int, layerID int) {
+func (shelf *Filter) compute_loss_kernel_gradient(mim *MiM, O_W int, O_H int, layerID int, filterID int) {
 
 	for i := 0; i < len(shelf.kernels[0]); i++ {
 		for j := 0; j < len(shelf.kernels[0][0]); j++ {
 			for k := 0; k < O_H; k++ {
 				for l := 0; l < O_W; l++ {
 					for c := 0; c < len(shelf.kernels); c++ {
-						shelf.kernel_gradients[c][i][j] += mim.layers_out_3d[layerID-1][c][i+k][j+l] * dout[k][l]
+						shelf.kernel_gradients[c][i][j] += mim.layers_out_3d[layerID-1][c][i+k][j+l] * (*mim.data_3d)[filterID][k][l]
+						// fmt.Println((*mim.data_3d)[filterID][k][l])
 					}
 				}
 			}
 		}
 	}
+
+	for k := 0; k < O_H; k++ {
+		for l := 0; l < O_W; l++ {
+			shelf.bias_gradient += (*mim.data_3d)[filterID][k][l]
+		}
+	}
 }
 
-func (shelf *ConvLayer) compute_loss_kernel_gradient(mim *MiM) [][]float64 {
-	// Compute convolution between the input this layer recieved, and the matrix respresenting
-	// the partial derivates of the Cost function with respect to this layers output.
+/*
+	func (shelf *ConvLayer) compute_loss_kernel_gradient(mim *MiM) [][]float64 {
+		// Compute convolution between the input this layer recieved, and the matrix respresenting
+		// the partial derivates of the Cost function with respect to this layers output.
 
-	// Convolve är placeholder. TODO ersätt med actual logik för att computa.
-	return convolve(mim.layers_out_3d[shelf.layerID-1], dCda)
-}
+		// Convolve är placeholder. TODO ersätt med actual logik för att computa.
+		return convolve(mim.layers_out_3d[shelf.layerID-1], dCda)
+	}
 
-func (shelf *ConvLayer) compute_output_gradient() [][]float64 {
-	// Kommer skickas vidare bakåt till nästa lager i backpropagation följden.
-	// Outputen här blir matrisen som representerar partiella derivatorna för Cost med respekt till
-	// lagrets output. Detta kommer då sedan användas i `compute_loss_kernel_gradient()`.
+	func (shelf *ConvLayer) compute_output_gradient() [][]float64 {
+		// Kommer skickas vidare bakåt till nästa lager i backpropagation följden.
+		// Outputen här blir matrisen som representerar partiella derivatorna för Cost med respekt till
+		// lagrets output. Detta kommer då sedan användas i `compute_loss_kernel_gradient()`.
 
-	// Använder även det föregående lagrets `compute_output_gradient`
+		// Använder även det föregående lagrets `compute_output_gradient`
 
-	return full_convolve()
-}
-
+		return full_convolve()
+	}
+*/
 func (shelf *Filter) correlation(matrix *[][][]float64, target_activated *[][]float64, target_non_activated *[][]float64, activation *Activation) {
 	for i := 0; i < len((*matrix)[0])-len(shelf.kernels[0])+1; i++ {
 
@@ -214,7 +224,8 @@ func (shelf *ConvLayer) get_name() string {
 }
 
 func (shelf *ConvLayer) debug_print() {
-
+	fmt.Println(shelf.filters[0].kernels)
+	fmt.Println(shelf.filters[0].kernel_gradients)
 }
 
 // class Convolutional(Layer):

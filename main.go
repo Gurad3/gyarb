@@ -48,7 +48,7 @@ func xor(net *Network) {
 		TestDataLabel:  XOR_TestDataLabel,
 
 		batch_size:        4,
-		info_milestone:    60000,
+		info_milestone:    10_000,
 		save_at_milestone: false,
 	}
 	net.train_network(td, true)
