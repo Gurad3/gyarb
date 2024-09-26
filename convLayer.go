@@ -90,8 +90,11 @@ func (shelf *ConvLayer) forward(mim *MiM) {
 
 	matrix := mim.request_flat().data_flat
 
-	for _, filter := range shelf.filters {
-		filter.correlation(matrix, &mim.layers_out_flat[shelf.layerID], &mim.layers_out_flat_non_activated[shelf.layerID], &shelf.act_interface, shelf.input_shape, shelf.out_size[1:])
+	for f, filter := range shelf.filters {
+		outRangeStart := f * shelf.output_width * shelf.output_height
+		outRangeEnd := (f + 1) * shelf.output_width * shelf.output_height
+		filter.correlation(matrix, mim.layers_out_flat[shelf.layerID][outRangeStart:outRangeEnd], mim.layers_out_flat_non_activated[shelf.layerID], &shelf.act_interface, shelf.input_shape, shelf.out_size[1:])
+
 	}
 
 	//mim.data_3d = &mim.layers_out_3d[shelf.layerID]
@@ -99,6 +102,7 @@ func (shelf *ConvLayer) forward(mim *MiM) {
 
 	mim.data_flat = &mim.layers_out_flat[shelf.layerID]
 	mim.data_type = OneD
+	//fmt.Println(mim.data_flat)
 }
 
 func (shelf *ConvLayer) backprop(mim *MiM, prev_layer_act Activation) {
@@ -151,7 +155,7 @@ func (shelf *Filter) compute_loss_kernel_gradient(mim *MiM, O_W int, O_H int, la
 	}
 */
 
-func (shelf *Filter) correlation(matrix *[]float64, target_activated *[]float64, target_non_activated *[]float64, activation *Activation, input_shape []int, out_shape []int) {
+func (shelf *Filter) correlation(matrix *[]float64, target_activated []float64, target_non_activated []float64, activation *Activation, input_shape []int, out_shape []int) {
 	for i := 0; i < out_shape[0]; i++ {
 
 		for j := 0; j < out_shape[1]; j++ {
@@ -159,7 +163,7 @@ func (shelf *Filter) correlation(matrix *[]float64, target_activated *[]float64,
 			sum := shelf.bias
 
 			for kernel_index := 0; kernel_index < len(shelf.kernels); kernel_index++ {
-				kernel_offset := kernel_index * len(shelf.kernels) * len(shelf.kernels[0])
+				kernel_offset := kernel_index * input_shape[1] * input_shape[2]
 				for k := 0; k < len(shelf.kernels[kernel_index]); k++ {
 
 					for l := 0; l < len(shelf.kernels[kernel_index][0]); l++ {
@@ -173,8 +177,8 @@ func (shelf *Filter) correlation(matrix *[]float64, target_activated *[]float64,
 			//(*target_activated)[i][j] = (*activation).call(sum)
 			//(*target_non_activated)[i][j] = sum
 
-			(*target_activated)[i*out_shape[0]+j] = (*activation).call(sum)
-			(*target_non_activated)[i*out_shape[0]+j] = sum
+			target_activated[i*out_shape[0]+j] = (*activation).call(sum)
+			target_non_activated[i*out_shape[0]+j] = sum
 			// fmt.Println(sum)
 		}
 	}
