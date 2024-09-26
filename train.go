@@ -109,7 +109,7 @@ func (shelf *Network) Test(mim *MiM, TestData [][]float64, TestLabels [][]float6
 	correct_choises := 0
 	for sampleID, sample := range TestData {
 		shelf.forward(mim, sample)
-		totalCost += shelf.cost_interface.call(*mim.request_flat().data_flat, TestLabels[sampleID])
+		totalCost += shelf.cost_interface.call(*mim.data_flat, TestLabels[sampleID])
 
 		// fmt.Println("--")
 		// fmt.Println(&sample, *mim.data_flat, TestLabels[sampleID], isCorrect(*mim.data_flat, TestLabels[sampleID]))

@@ -52,34 +52,10 @@ func (shelf *Network) print_weights() {
 
 func (shelf *Network) forward(mim *MiM, data []float64) {
 
-	// 1d
-	//mim.data_type = len(shelf.input_shape) - 1
-	mim.data_type = OneD
-	mim.data_type_history[0] = mim.data_type
+	mim.data_flat = &data
 
-	switch mim.data_type {
-	case OneD:
-		mim.data_flat = &data
-
-		mim.layers_out_flat[0] = data
-		mim.layers_out_flat_non_activated[0] = data
-
-	case ThreeD:
-		threeDIn := make([][][]float64, shelf.input_shape[0])
-		for depth := 0; depth < shelf.input_shape[0]; depth++ {
-			threeDIn[depth] = make([][]float64, shelf.input_shape[1])
-			for x := 0; x < shelf.input_shape[1]; x++ {
-				threeDIn[0][x] = make([]float64, shelf.input_shape[2])
-				for y := 0; y < shelf.input_shape[2]; y++ {
-					threeDIn[0][x][y] = data[depth*shelf.input_shape[0]+x*shelf.input_shape[1]+y]
-				}
-			}
-		}
-		mim.data_3d = &threeDIn
-		mim.layers_out_3d[0] = threeDIn
-		mim.layers_out_3d_non_activated[0] = threeDIn
-
-	}
+	mim.layers_out[0] = data
+	mim.layers_out_non_activated[0] = data
 
 	// fmt.Println("---")
 	for _, layer := range shelf.layers {
@@ -92,7 +68,6 @@ func (shelf *Network) forward(mim *MiM, data []float64) {
 
 func (shelf *Network) backprop(mim *MiM, labels []float64) {
 	mim.data_flat = shelf.get_output_ddx(mim, labels)
-	mim.data_type = OneD
 
 	for layerID := len(shelf.layers) - 1; layerID > 0; layerID-- {
 		shelf.layers[layerID].backprop(mim, shelf.layers[layerID-1].get_act_interface())
@@ -103,12 +78,8 @@ func (shelf *Network) backprop(mim *MiM, labels []float64) {
 func (shelf *Network) get_output_ddx(mim *MiM, labels []float64) *[]float64 {
 	gradiants := make([]float64, len(labels))
 
-	for outID, output := range *mim.request_flat().data_flat {
-		//gradiants[outID] = shelf.layers[len(shelf.layers)-1].get_act_interface().ddx(shelf.cost_interface.ddx(output, labels[outID]))
-
-		//fmt.Println(len(shelf.layers), len(mim.layers_out_flat_non_activated), len(mim.layers_out_flat_non_activated[len(shelf.layers)]))
-
-		gradiants[outID] = shelf.layers[len(shelf.layers)-1].get_act_interface().ddx(mim.layers_out_flat_non_activated[len(shelf.layers)][outID])
+	for outID, output := range *mim.data_flat {
+		gradiants[outID] = shelf.layers[len(shelf.layers)-1].get_act_interface().ddx(mim.layers_out_non_activated[len(shelf.layers)][outID])
 		gradiants[outID] *= shelf.cost_interface.ddx(output, labels[outID])
 
 	}

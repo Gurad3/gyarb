@@ -88,40 +88,40 @@ func (shelf *ConvLayer) init_new_weights(xavierRange float64, r rand.Rand) {
 
 func (shelf *ConvLayer) forward(mim *MiM) {
 
-	matrix := mim.request_flat().data_flat
+	matrix := mim.data_flat
 
 	for f, filter := range shelf.filters {
 		outRangeStart := f * shelf.output_width * shelf.output_height
 		outRangeEnd := (f + 1) * shelf.output_width * shelf.output_height
-		filter.correlation(matrix, mim.layers_out_flat[shelf.layerID][outRangeStart:outRangeEnd], mim.layers_out_flat_non_activated[shelf.layerID], &shelf.act_interface, shelf.input_shape, shelf.out_size[1:])
+		filter.correlation(matrix, mim.layers_out[shelf.layerID][outRangeStart:outRangeEnd], mim.layers_out_non_activated[shelf.layerID], &shelf.act_interface, shelf.input_shape, shelf.out_size[1:])
 
 	}
 
 	//mim.data_3d = &mim.layers_out_3d[shelf.layerID]
 	//mim.data_type = ThreeD
 
-	mim.data_flat = &mim.layers_out_flat[shelf.layerID]
-	mim.data_type = OneD
+	mim.data_flat = &mim.layers_out[shelf.layerID]
 	//fmt.Println(mim.data_flat)
 }
 
 func (shelf *ConvLayer) backprop(mim *MiM, prev_layer_act Activation) {
 
-	mim.request_3d(shelf.layerID)
+	//mim.request_3d(shelf.layerID)
 
 	// for f, filter := range shelf.filters {
 	// 	filter.compute_loss_kernel_gradient(mim, shelf.output_width, shelf.output_height, shelf.layerID, f)
 	//}
 }
 func (shelf *Filter) compute_loss_kernel_gradient(mim *MiM, O_W int, O_H int, layerID int, filterID int) {
+	// Compute convolution between the input this layer recieved, and the matrix respresenting
+	// the partial derivates of the Cost function with respect to this layers output.
 
 	for i := 0; i < len(shelf.kernels[0]); i++ {
 		for j := 0; j < len(shelf.kernels[0][0]); j++ {
 			for k := 0; k < O_H; k++ {
 				for l := 0; l < O_W; l++ {
 					for c := 0; c < len(shelf.kernels); c++ {
-						shelf.kernel_gradients[c][i][j] += mim.layers_out_3d[layerID-1][c][i+k][j+l] * (*mim.data_3d)[filterID][k][l]
-						// fmt.Println((*mim.data_3d)[filterID][k][l])
+						//shelf.kernel_gradients[c][i][j] += mim.layers_out_3d[layerID-1][c][i+k][j+l] * (*mim.data_3d)[filterID][k][l]
 					}
 				}
 			}
@@ -130,21 +130,12 @@ func (shelf *Filter) compute_loss_kernel_gradient(mim *MiM, O_W int, O_H int, la
 
 	for k := 0; k < O_H; k++ {
 		for l := 0; l < O_W; l++ {
-			shelf.bias_gradient += (*mim.data_3d)[filterID][k][l]
+			//shelf.bias_gradient += (*mim.data_3d)[filterID][k][l]
 		}
 	}
 }
 
-/*
-	func (shelf *ConvLayer) compute_loss_kernel_gradient(mim *MiM) [][]float64 {
-		// Compute convolution between the input this layer recieved, and the matrix respresenting
-		// the partial derivates of the Cost function with respect to this layers output.
-
-		// Convolve är placeholder. TODO ersätt med actual logik för att computa.
-		return convolve(mim.layers_out_3d[shelf.layerID-1], dCda)
-	}
-
-	func (shelf *ConvLayer) compute_output_gradient() [][]float64 {
+/*	func (shelf *ConvLayer) compute_output_gradient() [][]float64 {
 		// Kommer skickas vidare bakåt till nästa lager i backpropagation följden.
 		// Outputen här blir matrisen som representerar partiella derivatorna för Cost med respekt till
 		// lagrets output. Detta kommer då sedan användas i `compute_loss_kernel_gradient()`.
@@ -246,82 +237,3 @@ func (shelf *ConvLayer) debug_print() {
 	fmt.Println(shelf.filters[0].kernels)
 	fmt.Println(shelf.filters[0].kernel_gradients)
 }
-
-// class Convolutional(Layer):
-//     def __init__(self, input_shape, kernel_size, depth):
-//         input_depth, input_height, input_width = input_shape
-//         self.depth = depth
-//         self.input_shape = input_shape
-//         self.input_depth = input_depth
-//         self.output_shape = (depth, input_height - kernel_size + 1, input_width - kernel_size + 1)
-//         self.kernels_shape = (depth, input_depth, kernel_size, kernel_size)
-//         self.kernels = np.random.randn(*self.kernels_shape)
-//         self.biases = np.random.randn(*self.output_shape)
-
-//     def forward(self, input):
-//         self.input = input
-//         self.output = np.copy(self.biases)
-//         for i in range(self.depth):
-//             for j in range(self.input_depth):
-//                 self.output[i] += signal.correlate2d(self.input[j], self.kernels[i, j], "valid")
-//         return self.output
-
-//     def backward(self, output_gradient, learning_rate):
-//         kernels_gradient = np.zeros(self.kernels_shape)
-//         input_gradient = np.zeros(self.input_shape)
-
-//         for i in range(self.depth):
-//             for j in range(self.input_depth):
-//                 kernels_gradient[i, j] = signal.correlate2d(self.input[j], output_gradient[i], "valid")
-//                 input_gradient[j] += signal.convolve2d(output_gradient[i], self.kernels[i, j], "full")
-
-//         self.kernels -= learning_rate * kernels_gradient
-//         self.biases -= learning_rate * output_gradient
-//         return input_gradient
-/*func (shelf *ConvLayer) backprop(mim *MiM, prev_layer_act Activation) {
-	output_gradient := *mim.request_3d(shelf.layerID).data_3d
-
-	next_gradient := make([][][]float64, len(mim.layers_out_3d[shelf.layerID-1]))
-	for i := 0; i < len(mim.layers_out_3d[shelf.layerID-1]); i++ {
-		next_gradient[i] = make([][]float64, len(mim.layers_out_3d[shelf.layerID-1][i]))
-
-		for i2 := 0; i2 < len(mim.layers_out_3d[shelf.layerID-1][i]); i2++ {
-			next_gradient[i][i2] = make([]float64, len(mim.layers_out_3d[shelf.layerID-1][i][i2]))
-		}
-	}
-	//fmt.Println(output_gradient[0][0])
-	for i := 0; i < shelf.depth; i++ {
-		for j := 0; j < shelf.output_height; j++ {
-			for k := 0; k < shelf.output_width; k++ {
-				shelf.bias_gradients[i][j][k] += output_gradient[i][j][k]
-			}
-		}
-
-		for j := 0; j < shelf.input_depth; j++ {
-
-			kernalCorr, _ := correlateOrConvolve2d(mim.layers_out_3d[shelf.layerID-1][j], output_gradient[i], false, "valid", 0)
-			// fmt.Println(len(output_gradient), i)
-			input_convlove, _ := correlateOrConvolve2d(output_gradient[i], shelf.kernels[i][j], true, "full", 0)
-
-			for k, k2 := range mim.layers_out_3d[shelf.layerID-1][j] {
-				for l := range k2 {
-					//mim.layers_out_3d[shelf.layerID-1][j][k][l] += input_convlove[k][l]
-					next_gradient[j][k][l] += input_convlove[k][l] * prev_layer_act.ddx(mim.layers_out_3d[shelf.layerID-1][j][k][l])
-
-				}
-			}
-
-			for k, k2 := range kernalCorr {
-				for l := range k2 {
-
-					shelf.kernels_gradients[i][j][k][l] += kernalCorr[k][l]
-
-				}
-			}
-
-		}
-	}
-	mim.layers_out_3d[shelf.layerID-1] = next_gradient
-	mim.data_3d = &mim.layers_out_3d[shelf.layerID-1]
-	mim.data_type = ThreeD
-}*/

@@ -6,9 +6,8 @@ import (
 )
 
 func (shelf *DenseLayer) forward(mim *MiM) {
-	data := *mim.request_flat().data_flat
-	// fmt.Println(data[444:450])
-	mim.layers_out_flat[shelf.layerID-1] = data
+	data := *mim.data_flat
+	mim.layers_out[shelf.layerID-1] = data
 
 	for neuronID := range shelf.bias {
 		neuronVal := shelf.bias[neuronID]
@@ -16,25 +15,21 @@ func (shelf *DenseLayer) forward(mim *MiM) {
 		for weightID, weight := range shelf.weights[neuronID] {
 			neuronVal += data[weightID] * weight
 		}
-		mim.layers_out_flat_non_activated[shelf.layerID][neuronID] = neuronVal
-		mim.layers_out_flat[shelf.layerID][neuronID] = shelf.act_interface.call(neuronVal)
+		mim.layers_out_non_activated[shelf.layerID][neuronID] = neuronVal
+		mim.layers_out[shelf.layerID][neuronID] = shelf.act_interface.call(neuronVal)
 	}
-	mim.data_flat = &mim.layers_out_flat[shelf.layerID]
+	mim.data_flat = &mim.layers_out[shelf.layerID]
 
-	mim.data_type = OneD
-	mim.data_type_history[shelf.layerID] = OneD
-
-	// fmt.Println(shelf.weights[0][0:3])
 }
 
 func (shelf *DenseLayer) backprop(mim *MiM, prev_act_interface Activation) {
 	//Grad = mim.request_data(), Gradiants is Cost/out not Cost/Act(Out)
-	out_grade := *mim.request_flat().data_flat
+	out_grade := *mim.data_flat
 
 	for neuronID := range out_grade {
 
 		for weightID := range shelf.weights[neuronID] {
-			shelf.weights_gradiants[neuronID][weightID] += out_grade[neuronID] * mim.layers_out_flat[shelf.layerID-1][weightID]
+			shelf.weights_gradiants[neuronID][weightID] += out_grade[neuronID] * mim.layers_out[shelf.layerID-1][weightID]
 		}
 
 		shelf.bias_gradiants[neuronID] += out_grade[neuronID]
@@ -49,14 +44,12 @@ func (shelf *DenseLayer) backprop(mim *MiM, prev_act_interface Activation) {
 			for neuronID := 0; neuronID < shelf.size; neuronID++ {
 				new_grade += shelf.weights[neuronID][prev_neuronID] * out_grade[neuronID]
 			}
-			new_grade = prev_act_interface.ddx(mim.layers_out_flat_non_activated[shelf.layerID-1][prev_neuronID]) * new_grade
+			new_grade = prev_act_interface.ddx(mim.layers_out_non_activated[shelf.layerID-1][prev_neuronID]) * new_grade
 
-			mim.layers_out_flat[shelf.layerID-1][prev_neuronID] = new_grade
+			mim.layers_out[shelf.layerID-1][prev_neuronID] = new_grade
 		}
 
-		mim.data_flat = &mim.layers_out_flat[shelf.layerID-1]
-		// fmt.Println(mim.data_flat)
-		mim.data_type = OneD
+		mim.data_flat = &mim.layers_out[shelf.layerID-1]
 	}
 
 }
@@ -90,8 +83,6 @@ func (shelf *DenseLayer) init(layerID int, prev_layer_size []int) {
 	shelf.weights_gradiants = make([][]float64, shelf.size)
 
 	for i := 0; i < shelf.size; i++ {
-
-		// neuroWeights := make([]float64, shelf.prev_layer_size)
 		shelf.weights[i] = make([]float64, shelf.prev_layer_size)
 		shelf.weights_gradiants[i] = make([]float64, shelf.prev_layer_size)
 
