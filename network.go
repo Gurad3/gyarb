@@ -3,7 +3,6 @@ package main
 import (
 	"math"
 	"math/rand"
-	"time"
 )
 
 type Network struct {
@@ -37,8 +36,8 @@ func (shelf *Network) init() {
 
 func (shelf *Network) init_new_weights() {
 	xavierRange := math.Sqrt(6 / float64(shelf.input_size+shelf.output_size))
-	r := rand.New(rand.NewSource(time.Now().Unix()))
-
+	//r := rand.New(rand.NewSource(time.Now().Unix()))
+	r := rand.New(rand.NewSource(2))
 	for _, layer := range shelf.layers {
 		layer.init_new_weights(xavierRange, *r)
 	}

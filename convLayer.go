@@ -122,7 +122,8 @@ func (shelf *Filter) compute_loss_kernel_gradient(mim *MiM, O_W int, O_H int, la
 				for l := 0; l < O_W; l++ {
 					for c := 0; c < len(shelf.kernels); c++ {
 						//shelf.kernel_gradients[c][i][j] += mim.layers_out_3d[layerID-1][c][i+k][j+l] * (*mim.data_3d)[filterID][k][l]
-						shelf.kernel_gradients[c][i][j] += mim.layers_out[layerID-1][c*inp_shape[1]*inp_shape[2]+(i+k)*inp_shape[1]+j+l] * (*mim.data_flat)[filterID][k][l]
+
+						//shelf.kernel_gradients[c][i][j] += mim.layers_out[layerID-1][c*inp_shape[1]*inp_shape[2]+(i+k)*inp_shape[1]+j+l] * (*mim.data_flat)[filterID][k][l]
 					}
 				}
 			}

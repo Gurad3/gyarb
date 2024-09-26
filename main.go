@@ -1,6 +1,8 @@
 package main
 
-import "ProjectX/data_handler"
+import (
+	"ProjectX/data_handler"
+)
 
 func main() {
 
@@ -19,6 +21,7 @@ func main() {
 	//net.forward(mim, TestData[1])
 
 	//encode_to_json(net)
+
 }
 
 func mnist(net *Network) {

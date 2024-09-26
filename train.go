@@ -43,8 +43,8 @@ func (shelf *Network) train_network(trainData trainer, threded bool) {
 			mimArray[i].init(shelf)
 		}
 		var wg sync.WaitGroup
-
-		for {
+		b := 0
+		for b < 2 {
 			for batchID, batch := range trainData.train_batches {
 				wg.Add(trainData.batch_size)
 				for sampleID, sample := range batch {
@@ -53,20 +53,26 @@ func (shelf *Network) train_network(trainData trainer, threded bool) {
 					if totalSamples%trainData.info_milestone == 0 {
 						shelf.Test(mim, trainData.TestData, trainData.TestDataLabel)
 						//fmt.Println("Epoch")
+						b++
 
 						if trainData.save_at_milestone {
 							encode_to_json(shelf)
 						}
 					}
 					totalSamples++
+
 				}
 				wg.Wait()
 				shelf.apply_gradients(trainData.batch_size)
-
+				if b == 2 {
+					break
+				}
 			}
 
 			trainData.shuffle_batches()
+
 		}
+		wg.Wait()
 	} else {
 		for {
 			for batchID, batch := range trainData.train_batches {
@@ -93,13 +99,12 @@ func (shelf *Network) train_network(trainData trainer, threded bool) {
 }
 
 func (shelf *Network) tmpRun(mim *MiM, sample []float64, label []float64, wg *sync.WaitGroup) {
-
+	defer wg.Done()
 	shelf.forward(mim, sample)
 	// shelf.print_weights()
 	// fmt.Println(mim.data_flat)
 	shelf.backprop(mim, label)
 
-	defer wg.Done()
 }
 
 func (shelf *Network) Test(mim *MiM, TestData [][]float64, TestLabels [][]float64) float64 {
