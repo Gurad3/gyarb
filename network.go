@@ -53,7 +53,8 @@ func (shelf *Network) print_weights() {
 func (shelf *Network) forward(mim *MiM, data []float64) {
 
 	// 1d
-	mim.data_type = len(shelf.input_shape) - 1
+	//mim.data_type = len(shelf.input_shape) - 1
+	mim.data_type = OneD
 	mim.data_type_history[0] = mim.data_type
 
 	switch mim.data_type {

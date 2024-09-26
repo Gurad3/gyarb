@@ -9,6 +9,7 @@ type ConvLayer struct {
 	act_interface Activation
 	layerID       int
 	out_size      []int
+	input_shape   []int
 	layer_type    string
 
 	depth       int
@@ -40,6 +41,7 @@ func (shelf *ConvLayer) init(layerID int, prev_layer_size []int) {
 	shelf.input_depth = prev_layer_size[0]
 	shelf.input_width = prev_layer_size[1]
 	shelf.input_height = prev_layer_size[2]
+	shelf.input_shape = prev_layer_size
 
 	shelf.output_width = shelf.input_width - shelf.kernel_size + 1
 	shelf.output_height = shelf.input_height - shelf.kernel_size + 1
@@ -86,23 +88,26 @@ func (shelf *ConvLayer) init_new_weights(xavierRange float64, r rand.Rand) {
 
 func (shelf *ConvLayer) forward(mim *MiM) {
 
-	matrix := mim.request_3d(shelf.layerID - 1).data_3d
+	matrix := mim.request_flat().data_flat
 
-	for i, filter := range shelf.filters {
-		filter.correlation(matrix, &mim.layers_out_3d[shelf.layerID][i], &mim.layers_out_3d_non_activated[shelf.layerID][i], &shelf.act_interface)
+	for _, filter := range shelf.filters {
+		filter.correlation(matrix, &mim.layers_out_flat[shelf.layerID], &mim.layers_out_flat_non_activated[shelf.layerID], &shelf.act_interface, shelf.input_shape, shelf.out_size[1:])
 	}
 
-	mim.data_3d = &mim.layers_out_3d[shelf.layerID]
-	mim.data_type = ThreeD
+	//mim.data_3d = &mim.layers_out_3d[shelf.layerID]
+	//mim.data_type = ThreeD
+
+	mim.data_flat = &mim.layers_out_flat[shelf.layerID]
+	mim.data_type = OneD
 }
 
 func (shelf *ConvLayer) backprop(mim *MiM, prev_layer_act Activation) {
 
 	mim.request_3d(shelf.layerID)
 
-	for f, filter := range shelf.filters {
-		filter.compute_loss_kernel_gradient(mim, shelf.output_width, shelf.output_height, shelf.layerID, f)
-	}
+	// for f, filter := range shelf.filters {
+	// 	filter.compute_loss_kernel_gradient(mim, shelf.output_width, shelf.output_height, shelf.layerID, f)
+	//}
 }
 func (shelf *Filter) compute_loss_kernel_gradient(mim *MiM, O_W int, O_H int, layerID int, filterID int) {
 
@@ -145,21 +150,31 @@ func (shelf *Filter) compute_loss_kernel_gradient(mim *MiM, O_W int, O_H int, la
 		return full_convolve()
 	}
 */
-func (shelf *Filter) correlation(matrix *[][][]float64, target_activated *[][]float64, target_non_activated *[][]float64, activation *Activation) {
-	for i := 0; i < len((*matrix)[0])-len(shelf.kernels[0])+1; i++ {
 
-		for j := 0; j < len((*matrix)[0][0])-len(shelf.kernels[0][0])+1; j++ {
+func (shelf *Filter) correlation(matrix *[]float64, target_activated *[]float64, target_non_activated *[]float64, activation *Activation, input_shape []int, out_shape []int) {
+	for i := 0; i < out_shape[0]; i++ {
+
+		for j := 0; j < out_shape[1]; j++ {
 
 			sum := shelf.bias
+
 			for kernel_index := 0; kernel_index < len(shelf.kernels); kernel_index++ {
+				kernel_offset := kernel_index * len(shelf.kernels) * len(shelf.kernels[0])
 				for k := 0; k < len(shelf.kernels[kernel_index]); k++ {
+
 					for l := 0; l < len(shelf.kernels[kernel_index][0]); l++ {
-						sum += (*matrix)[kernel_index][i+k][j+l] * shelf.kernels[kernel_index][k][l]
+
+						//sum += (*matrix)[kernel_index][i+k][j+l] * shelf.kernels[kernel_index][k][l]
+
+						sum += (*matrix)[kernel_offset+(i+k)*input_shape[1]+(j+l)] * shelf.kernels[kernel_index][k][l]
 					}
 				}
 			}
-			(*target_activated)[i][j] = (*activation).call(sum)
-			(*target_non_activated)[i][j] = sum
+			//(*target_activated)[i][j] = (*activation).call(sum)
+			//(*target_non_activated)[i][j] = sum
+
+			(*target_activated)[i*out_shape[0]+j] = (*activation).call(sum)
+			(*target_non_activated)[i*out_shape[0]+j] = sum
 			// fmt.Println(sum)
 		}
 	}
