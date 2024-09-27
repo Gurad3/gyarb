@@ -52,8 +52,8 @@ func (shelf *Network) train_network(trainData trainer, threded bool) {
 
 					if totalSamples%trainData.info_milestone == 0 {
 						shelf.Test(mim, trainData.TestData, trainData.TestDataLabel)
-						//fmt.Println("Epoch")
-						b++
+
+						//b++
 
 						if trainData.save_at_milestone {
 							encode_to_json(shelf)
