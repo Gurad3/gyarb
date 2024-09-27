@@ -1,0 +1,6 @@
+
+go test
+go test -cpuprofile profiling/cpu.prof -memprofile profiling/mem.prof
+
+go tool pprof -http=localhost:8001 profiling/cpu.prof
+go tool pprof -http=localhost:8001 profiling/mem.prof

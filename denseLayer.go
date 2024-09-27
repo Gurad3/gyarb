@@ -7,16 +7,17 @@ import (
 
 func (shelf *DenseLayer) forward(mim *MiM) {
 	data := *mim.data_flat
-	mim.layers_out[shelf.layerID-1] = data
 
-	for neuronID := range shelf.bias {
-		neuronVal := shelf.bias[neuronID]
+	layer_out_non_activated := mim.layers_out_non_activated[shelf.layerID]
+	layer_out := mim.layers_out[shelf.layerID]
+	for neuronID, neuronVal := range shelf.bias {
 
 		for weightID, weight := range shelf.weights[neuronID] {
 			neuronVal += data[weightID] * weight
 		}
-		mim.layers_out_non_activated[shelf.layerID][neuronID] = neuronVal
-		mim.layers_out[shelf.layerID][neuronID] = shelf.act_interface.call(neuronVal)
+
+		layer_out_non_activated[neuronID] = neuronVal
+		layer_out[neuronID] = shelf.act_interface.call(neuronVal)
 	}
 	mim.data_flat = &mim.layers_out[shelf.layerID]
 
@@ -26,13 +27,19 @@ func (shelf *DenseLayer) backprop(mim *MiM, prev_act_interface Activation) {
 	//Grad = mim.request_data(), Gradiants is Cost/out not Cost/Act(Out)
 	out_grade := *mim.data_flat
 
-	for neuronID := range out_grade {
+	prevLayerOut := mim.layers_out[shelf.layerID-1]
 
-		for weightID := range shelf.weights[neuronID] {
-			shelf.weights_gradiants[neuronID][weightID] += out_grade[neuronID] * mim.layers_out[shelf.layerID-1][weightID]
+	for neuronID, neuronGradient := range out_grade {
+
+		neuronWeights := shelf.weights_gradiants[neuronID]
+
+		for weightID, prevLayer := range prevLayerOut {
+
+			neuronWeights[weightID] += neuronGradient * prevLayer
+
 		}
 
-		shelf.bias_gradiants[neuronID] += out_grade[neuronID]
+		shelf.bias_gradiants[neuronID] += neuronGradient
 	}
 
 	if shelf.layerID > 1 { //First layerID == 1, behövr inte räkna ut nästa lagers: Cost/Out om vi är på första lagret.
@@ -44,9 +51,8 @@ func (shelf *DenseLayer) backprop(mim *MiM, prev_act_interface Activation) {
 			for neuronID := 0; neuronID < shelf.size; neuronID++ {
 				new_grade += shelf.weights[neuronID][prev_neuronID] * out_grade[neuronID]
 			}
-			new_grade = prev_act_interface.ddx(mim.layers_out_non_activated[shelf.layerID-1][prev_neuronID]) * new_grade
 
-			mim.layers_out[shelf.layerID-1][prev_neuronID] = new_grade
+			prevLayerOut[prev_neuronID] = new_grade * prev_act_interface.ddx(mim.layers_out_non_activated[shelf.layerID-1][prev_neuronID])
 		}
 
 		mim.data_flat = &mim.layers_out[shelf.layerID-1]
@@ -55,14 +61,23 @@ func (shelf *DenseLayer) backprop(mim *MiM, prev_act_interface Activation) {
 }
 
 func (shelf *DenseLayer) apply_gradients(learn_rate float64, batch_size float64) {
+	mult := learn_rate / batch_size
 	for neuronID := range shelf.bias {
-		shelf.bias[neuronID] -= shelf.bias_gradiants[neuronID] * learn_rate / batch_size
+		shelf.bias[neuronID] -= shelf.bias_gradiants[neuronID] * mult
 		shelf.bias_gradiants[neuronID] = 0
 
-		for weightID := range shelf.weights[neuronID] {
-			shelf.weights[neuronID][weightID] -= shelf.weights_gradiants[neuronID][weightID] * learn_rate / batch_size
-			shelf.weights_gradiants[neuronID][weightID] = 0
+		wt := shelf.weights[neuronID]
+		wtg := shelf.weights_gradiants[neuronID]
+
+		for weightID, wtgv := range wtg {
+			wt[weightID] -= wtgv * mult
+			wtg[weightID] = 0
 		}
+
+		// for weightID := range shelf.weights[neuronID] {
+		// 	shelf.weights[neuronID][weightID] -= shelf.weights_gradiants[neuronID][weightID] * mult
+		// 	shelf.weights_gradiants[neuronID][weightID] = 0
+		// }
 	}
 }
 

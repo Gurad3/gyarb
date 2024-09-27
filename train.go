@@ -44,7 +44,7 @@ func (shelf *Network) train_network(trainData trainer, threded bool) {
 		}
 		var wg sync.WaitGroup
 		b := 0
-		for b < 2 {
+		for b < 4 {
 			for batchID, batch := range trainData.train_batches {
 				wg.Add(trainData.batch_size)
 				for sampleID, sample := range batch {
@@ -64,7 +64,7 @@ func (shelf *Network) train_network(trainData trainer, threded bool) {
 				}
 				wg.Wait()
 				shelf.apply_gradients(trainData.batch_size)
-				if b == 2 {
+				if b == 4 {
 					break
 				}
 			}

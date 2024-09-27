@@ -88,12 +88,12 @@ func (shelf *ConvLayer) init_new_weights(xavierRange float64, r rand.Rand) {
 
 func (shelf *ConvLayer) forward(mim *MiM) {
 
-	matrix := mim.data_flat
+	matrix := *mim.data_flat
 
 	for f, filter := range shelf.filters {
 		outRangeStart := f * shelf.output_width * shelf.output_height
 		outRangeEnd := (f + 1) * shelf.output_width * shelf.output_height
-		filter.correlation(matrix, mim.layers_out[shelf.layerID][outRangeStart:outRangeEnd], mim.layers_out_non_activated[shelf.layerID], &shelf.act_interface, shelf.input_shape, shelf.out_size[1:])
+		filter.correlation(matrix, mim.layers_out[shelf.layerID][outRangeStart:outRangeEnd], mim.layers_out_non_activated[shelf.layerID], shelf.act_interface, shelf.input_shape, shelf.out_size[1:])
 
 	}
 
@@ -148,7 +148,8 @@ func (shelf *Filter) compute_loss_kernel_gradient(mim *MiM, O_W int, O_H int, la
 	}
 */
 
-func (shelf *Filter) correlation(matrix *[]float64, target_activated []float64, target_non_activated []float64, activation *Activation, input_shape []int, out_shape []int) {
+func (shelf *Filter) correlation(matrix []float64, target_activated []float64, target_non_activated []float64, activation Activation, input_shape []int, out_shape []int) {
+
 	for i := 0; i < out_shape[0]; i++ {
 
 		for j := 0; j < out_shape[1]; j++ {
@@ -163,14 +164,14 @@ func (shelf *Filter) correlation(matrix *[]float64, target_activated []float64, 
 
 						//sum += (*matrix)[kernel_index][i+k][j+l] * shelf.kernels[kernel_index][k][l]
 
-						sum += (*matrix)[kernel_offset+(i+k)*input_shape[1]+(j+l)] * shelf.kernels[kernel_index][k][l]
+						sum += matrix[kernel_offset+(i+k)*input_shape[1]+(j+l)] * shelf.kernels[kernel_index][k][l]
 					}
 				}
 			}
 			//(*target_activated)[i][j] = (*activation).call(sum)
 			//(*target_non_activated)[i][j] = sum
 
-			target_activated[i*out_shape[0]+j] = (*activation).call(sum)
+			target_activated[i*out_shape[0]+j] = activation.call(sum)
 			target_non_activated[i*out_shape[0]+j] = sum
 			// fmt.Println(sum)
 		}
