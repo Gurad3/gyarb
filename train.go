@@ -44,7 +44,7 @@ func (shelf *Network) train_network(trainData trainer, threded bool) {
 		}
 		var wg sync.WaitGroup
 		b := 0
-		for b < 4 {
+		for b < 2 {
 			for batchID, batch := range trainData.train_batches {
 				wg.Add(trainData.batch_size)
 				for sampleID, sample := range batch {
@@ -53,7 +53,7 @@ func (shelf *Network) train_network(trainData trainer, threded bool) {
 					if totalSamples%trainData.info_milestone == 0 {
 						shelf.Test(mim, trainData.TestData, trainData.TestDataLabel)
 
-						//b++
+						b++
 
 						if trainData.save_at_milestone {
 							encode_to_json(shelf)
@@ -64,7 +64,7 @@ func (shelf *Network) train_network(trainData trainer, threded bool) {
 				}
 				wg.Wait()
 				shelf.apply_gradients(trainData.batch_size)
-				if b == 4 {
+				if b == 2 {
 					break
 				}
 			}

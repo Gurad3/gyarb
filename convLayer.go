@@ -77,9 +77,9 @@ func (shelf *ConvLayer) init_new_weights(xavierRange float64, r rand.Rand) {
 		for j := 0; j < shelf.input_depth; j++ {
 			for k := 0; k < shelf.kernel_size; k++ {
 				for l := 0; l < shelf.kernel_size; l++ {
-					shelf.filters[i].kernels[j][k][l] = initWeightXavierUniform(xavierRange, r)
+					//shelf.filters[i].kernels[j][k][l] = initWeightXavierUniform(xavierRange, r)
 
-					//shelf.filters[i].kernels[j][k][l] = tmp_manualKernel[i][k][l]
+					shelf.filters[i].kernels[j][k][l] = tmp_manualKernel[i][k][l]
 				}
 			}
 		}
@@ -105,7 +105,7 @@ func (shelf *ConvLayer) forward(mim *MiM) {
 }
 
 func (shelf *ConvLayer) backprop(mim *MiM, prev_layer_act Activation) {
-
+	return
 	for f, filter := range shelf.filters {
 		filter.compute_loss_kernel_gradient(mim, shelf.output_width, shelf.output_height, shelf.layerID, f, shelf.input_shape)
 	}

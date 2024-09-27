@@ -75,7 +75,7 @@ func tmpNewMNIST() *Network {
 		&ConvLayer{
 			act_interface: &RelU{},
 			kernel_size:   3,
-			depth:         4,
+			depth:         2,
 		},
 
 		&DenseLayer{
