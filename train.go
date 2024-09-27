@@ -127,6 +127,8 @@ func (shelf *Network) Test(mim *MiM, TestData [][]float64, TestLabels [][]float6
 	fmt.Println("Percantage Correct on Test Data: ", float64(correct_choises)/float64(len(TestLabels)))
 	fmt.Println("Cost: ", totalCost/float64(len(TestLabels)))
 
+	//shelf.layers[0].debug_print()
+
 	return totalCost / float64(len(TestLabels))
 }
 

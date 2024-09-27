@@ -77,9 +77,9 @@ func (shelf *ConvLayer) init_new_weights(xavierRange float64, r rand.Rand) {
 		for j := 0; j < shelf.input_depth; j++ {
 			for k := 0; k < shelf.kernel_size; k++ {
 				for l := 0; l < shelf.kernel_size; l++ {
-					//shelf.filters[i].kernels[j][k][l] = initWeightXavierUniform(xavierRange, r)
+					shelf.filters[i].kernels[j][k][l] = initWeightXavierUniform(xavierRange, r)
 
-					shelf.filters[i].kernels[j][k][l] = tmp_manualKernel[i][k][l]
+					//shelf.filters[i].kernels[j][k][l] = tmp_manualKernel[i][k][l]
 				}
 			}
 		}
@@ -106,16 +106,14 @@ func (shelf *ConvLayer) forward(mim *MiM) {
 
 func (shelf *ConvLayer) backprop(mim *MiM, prev_layer_act Activation) {
 
-	//mim.request_3d(shelf.layerID)
-
-	// for f, filter := range shelf.filters {
-	// 	filter.compute_loss_kernel_gradient(mim, shelf.output_width, shelf.output_height, shelf.layerID, f)
-	//}
+	for f, filter := range shelf.filters {
+		filter.compute_loss_kernel_gradient(mim, shelf.output_width, shelf.output_height, shelf.layerID, f, shelf.input_shape)
+	}
 }
 func (shelf *Filter) compute_loss_kernel_gradient(mim *MiM, O_W int, O_H int, layerID int, filterID int, inp_shape []int) {
 	// Compute convolution between the input this layer recieved, and the matrix respresenting
 	// the partial derivates of the Cost function with respect to this layers output.
-
+	out_grade := *mim.data_flat
 	for i := 0; i < len(shelf.kernels[0]); i++ {
 		for j := 0; j < len(shelf.kernels[0][0]); j++ {
 			for k := 0; k < O_H; k++ {
@@ -124,6 +122,8 @@ func (shelf *Filter) compute_loss_kernel_gradient(mim *MiM, O_W int, O_H int, la
 						//shelf.kernel_gradients[c][i][j] += mim.layers_out_3d[layerID-1][c][i+k][j+l] * (*mim.data_3d)[filterID][k][l]
 
 						//shelf.kernel_gradients[c][i][j] += mim.layers_out[layerID-1][c*inp_shape[1]*inp_shape[2]+(i+k)*inp_shape[1]+j+l] * (*mim.data_flat)[filterID][k][l]
+						shelf.kernel_gradients[c][i][j] += mim.layers_out[layerID-1][c*inp_shape[1]*inp_shape[2]+(i+k)*inp_shape[1]+j+l] * out_grade[filterID*O_H*O_W+k*O_W+l]
+
 					}
 				}
 			}
@@ -133,6 +133,8 @@ func (shelf *Filter) compute_loss_kernel_gradient(mim *MiM, O_W int, O_H int, la
 	for k := 0; k < O_H; k++ {
 		for l := 0; l < O_W; l++ {
 			//shelf.bias_gradient += (*mim.data_3d)[filterID][k][l]
+			shelf.bias_gradient += out_grade[filterID*O_H*O_W+k*O_W+l]
+
 		}
 	}
 }
@@ -204,7 +206,7 @@ func (shelf *ConvLayer) apply_gradients(learn_rate float64, batch_size float64) 
 			}
 
 		}
-		shelf.filters[i].bias -= shelf.filters[i].bias_gradient
+		shelf.filters[i].bias -= shelf.filters[i].bias_gradient * mult
 		shelf.filters[i].bias_gradient = 0
 	}
 
