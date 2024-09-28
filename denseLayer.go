@@ -45,14 +45,28 @@ func (shelf *DenseLayer) backprop(mim *MiM, prev_act_interface Activation) {
 	if shelf.layerID > 1 { //First layerID == 1, behövr inte räkna ut nästa lagers: Cost/Out om vi är på första lagret.
 		//MiM data_flat = nextLayerOut
 
+		// for prev_neuronID := 0; prev_neuronID < shelf.prev_layer_size; prev_neuronID++ {
+		// 	new_grade := 0.0
+
+		// 	for neuronID := 0; neuronID < shelf.size; neuronID++ {
+		// 		new_grade += shelf.weights[neuronID][prev_neuronID] * out_grade[neuronID]
+		// 	}
+
+		// 	prevLayerOut[prev_neuronID] = new_grade * prev_act_interface.ddx(mim.layers_out_non_activated[shelf.layerID-1][prev_neuronID])
+		// }
+
 		for prev_neuronID := 0; prev_neuronID < shelf.prev_layer_size; prev_neuronID++ {
-			new_grade := 0.0
+			prevLayerOut[prev_neuronID] = 0
+		}
 
-			for neuronID := 0; neuronID < shelf.size; neuronID++ {
-				new_grade += shelf.weights[neuronID][prev_neuronID] * out_grade[neuronID]
+		for neuronID, neuronGradient := range out_grade {
+			neuronWeights := shelf.weights[neuronID]
+			for prev_neuronID := 0; prev_neuronID < shelf.prev_layer_size; prev_neuronID++ {
+				prevLayerOut[prev_neuronID] += neuronWeights[prev_neuronID] * neuronGradient
 			}
-
-			prevLayerOut[prev_neuronID] = new_grade * prev_act_interface.ddx(mim.layers_out_non_activated[shelf.layerID-1][prev_neuronID])
+		}
+		for prev_neuronID, v := range mim.layers_out_non_activated[shelf.layerID-1] {
+			prevLayerOut[prev_neuronID] *= prev_act_interface.ddx(v)
 		}
 
 		mim.data_flat = &mim.layers_out[shelf.layerID-1]

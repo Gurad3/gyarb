@@ -33,7 +33,7 @@ func mnist(net *Network) {
 		TrainDataLabel: MNIST_TrainDataLabel,
 		TestDataLabel:  MNIST_TestDataLabel,
 
-		batch_size:        50,
+		batch_size:        200,
 		info_milestone:    60_000,
 		save_at_milestone: false,
 	}
