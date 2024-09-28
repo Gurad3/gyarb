@@ -33,7 +33,7 @@ func mnist(net *Network) {
 		TrainDataLabel: MNIST_TrainDataLabel,
 		TestDataLabel:  MNIST_TestDataLabel,
 
-		batch_size:        200,
+		batch_size:        100,
 		info_milestone:    60_000,
 		save_at_milestone: false,
 	}
@@ -61,7 +61,7 @@ func xor(net *Network) {
 func tmpNewMNIST() *Network {
 	net := new(Network)
 
-	net.learn_rate = .15
+	net.learn_rate = .12
 	net.learn_rate_decay = 0.0001
 	net.file_name = "NewTrainedMNIST_2"
 	net.cost_interface = &MeanSquare{}
@@ -75,12 +75,17 @@ func tmpNewMNIST() *Network {
 		&ConvLayer{
 			act_interface: &RelU{},
 			kernel_size:   3,
-			depth:         2,
+			depth:         3,
 		},
 
 		&DenseLayer{
 			act_interface: &RelU{},
-			size:          200,
+			size:          180,
+		},
+
+		&DenseLayer{
+			act_interface: &RelU{},
+			size:          40,
 		},
 
 		&DenseLayer{
