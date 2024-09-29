@@ -110,6 +110,20 @@ func (shelf *ConvLayer) backprop(mim *MiM, prev_layer_act Activation) {
 	for f, filter := range shelf.filters {
 		filter.compute_loss_kernel_gradient(mim, shelf.output_width, shelf.output_height, shelf.layerID, f, shelf.input_shape)
 	}
+
+	if shelf.layerID == 1 {
+		return
+	}
+	prevOut := mim.layers_out[shelf.layerID-1]
+	for i := 0; i < shelf.input_depth*shelf.input_height*shelf.input_width; i++ {
+		prevOut[i] = 0
+	}
+
+	for f, filter := range shelf.filters {
+		filter.compute_output_gradient(mim, shelf.output_width, shelf.output_height, shelf.layerID, f, shelf.input_shape)
+	}
+
+	mim.data_flat = &prevOut
 }
 func (shelf *Filter) compute_loss_kernel_gradient(mim *MiM, O_W int, O_H int, layerID int, filterID int, inp_shape []int) {
 	// Compute convolution between the input this layer recieved, and the matrix respresenting
@@ -130,11 +144,10 @@ func (shelf *Filter) compute_loss_kernel_gradient(mim *MiM, O_W int, O_H int, la
 			for j := 0; j < len(shelf.kernels[0][0]); j++ {
 				kgcij := kgci[j]
 
-				for k := 0; k < O_W; k++ {
-					for l := 0; l < O_H; l++ {
+				for k := 0; k < O_H; k++ {
+					for l := 0; l < O_W; l++ {
 
 						//shelf.kernel_gradients[c][i][j] += mim.layers_out_3d[layerID-1][c][i+k][j+l] * (*mim.data_3d)[filterID][k][l]
-
 						//shelf.kernel_gradients[c][i][j] += mim.layers_out[layerID-1][c*inp_shape[1]*inp_shape[2]+(i+k)*inp_shape[1]+j+l] * (*mim.data_flat)[filterID][k][l]
 						//shelf.kernel_gradients[c][i][j] += prev_layer_out[c*inp_shape[1]*inp_shape[2]+(i+k)*inp_shape[1]+j+l] * out_grade[filterID*O_H*O_W+k*O_W+l]
 
@@ -155,16 +168,55 @@ func (shelf *Filter) compute_loss_kernel_gradient(mim *MiM, O_W int, O_H int, la
 	}
 }
 
-/*	func (shelf *ConvLayer) compute_output_gradient() [][]float64 {
-		// Kommer skickas vidare bakåt till nästa lager i backpropagation följden.
-		// Outputen här blir matrisen som representerar partiella derivatorna för Cost med respekt till
-		// lagrets output. Detta kommer då sedan användas i `compute_loss_kernel_gradient()`.
+func (shelf *Filter) compute_output_gradient(mim *MiM, O_W int, O_H int, layerID int, filterID int, inp_shape []int) {
+	// Kommer skickas vidare bakåt till nästa lager i backpropagation följden.
+	// Outputen här blir matrisen som representerar partiella derivatorna för Cost med respekt till
+	// lagrets output. Detta kommer då sedan användas i `compute_loss_kernel_gradient()`.
 
-		// Använder även det föregående lagrets `compute_output_gradient`
+	// Använder även det föregående lagrets `compute_output_gradient`
 
-		return full_convolve()
+	out_grade := *mim.data_flat
+	filterOffset := filterID * O_H * O_W
+
+	prev_layer_out := mim.layers_out[layerID-1]
+
+	K_Y := len(shelf.kernels[0])
+	K_X := len(shelf.kernels[0][0])
+	for c := 0; c < inp_shape[0]; c++ {
+
+		channelOffset := c * inp_shape[1] * inp_shape[2]
+
+		for i := 0; i < inp_shape[1]; i++ {
+
+			for j := 0; j < inp_shape[2]; j++ {
+
+				for k := 0; k < K_Y; k++ {
+					for l := 0; l < K_X; l++ {
+
+						//shelf.kernel_gradients[c][i][j] += mim.layers_out_3d[layerID-1][c][i+k][j+l] * (*mim.data_3d)[filterID][k][l]
+						//shelf.kernel_gradients[c][i][j] += mim.layers_out[layerID-1][c*inp_shape[1]*inp_shape[2]+(i+k)*inp_shape[1]+j+l] * (*mim.data_flat)[filterID][k][l]
+
+						//shelf.kernel_gradients[c][i][j] += prev_layer_out[c*inp_shape[1]*inp_shape[2]+(i+k)*inp_shape[1]+j+l] * out_grade[filterID*O_H*O_W+k*O_W+l]
+						//kgcij += prev_layer_out[channelOffset+(i+k)*inp_shape[1]+j+l] * out_grade[filterOffset+k*O_W+l]
+
+						// TODO: Om "filterOffset+(i+k)*inp_shape[1]+j+l" ligger utanför indexes för "out_grade" så ska det vara 0. Kolla för boundary för en artificell 2d array.
+
+						if !((j+l) < (K_X-1) || (i+k) < (K_Y-1) || (j+l) > (K_X-1)+O_W-1 || (i+k) > (K_Y-1)+O_H-1) {
+							//	fmt.Println("prev", len(prev_layer_out))
+
+							//fmt.Println(filterID, "out", len(out_grade), filterOffset+(i+k-(K_Y-1))*O_W+j+l-(K_X-1), i, k, K_Y)
+
+							prev_layer_out[channelOffset+i*inp_shape[1]+j] += out_grade[filterOffset+(i+k-(K_Y-1))*O_W+j+l-(K_X-1)] * shelf.kernels[c][K_X-1-k][K_Y-1-l]
+						}
+
+						//flipped[i][j] = kernel[rows-1-i][cols-1-j]
+					}
+				}
+			}
+		}
 	}
-*/
+
+}
 
 func (shelf *Filter) correlation(matrix []float64, target_activated []float64, target_non_activated []float64, activation Activation, input_shape []int, out_shape []int) {
 
