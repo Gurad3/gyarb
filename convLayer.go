@@ -77,10 +77,10 @@ func (shelf *ConvLayer) init_new_weights(xavierRange float64, r rand.Rand) {
 		for j := 0; j < shelf.input_depth; j++ {
 			for k := 0; k < shelf.kernel_size; k++ {
 				for l := 0; l < shelf.kernel_size; l++ {
-					//shelf.filters[i].kernels[j][k][l] = initWeightXavierUniform(xavierRange, r)
+					shelf.filters[i].kernels[j][k][l] = initWeightXavierUniform(xavierRange, r)
 
 					//shelf.filters[i].kernels[j][k][l] = tmp_manualKernel[i][k][l]
-					shelf.filters[i].kernels[j][k][l] = tmp_manualKernel[i][k][l] + initWeightXavierUniform(xavierRange, r)*0.05
+					//shelf.filters[i].kernels[j][k][l] = tmp_manualKernel[i][k][l] + initWeightXavierUniform(xavierRange, r)*0.05
 				}
 			}
 		}
@@ -134,24 +134,24 @@ func (shelf *Filter) compute_loss_kernel_gradient(mim *MiM, O_W int, O_H int, la
 	prev_layer_out := mim.layers_out[layerID-1]
 
 	for c := 0; c < len(shelf.kernels); c++ {
-		kgc := shelf.kernel_gradients[c]
+		//kgc := shelf.kernel_gradients[c]
 
-		channelOffset := c * inp_shape[1] * inp_shape[2]
+		//channelOffset := c * inp_shape[1] * inp_shape[2]
 
 		for i := 0; i < len(shelf.kernels[0]); i++ {
-			kgci := kgc[i]
+			//kgci := kgc[i]
 
 			for j := 0; j < len(shelf.kernels[0][0]); j++ {
-				kgcij := kgci[j]
+				//kgcij := kgci[j]
 
 				for k := 0; k < O_H; k++ {
 					for l := 0; l < O_W; l++ {
 
 						//shelf.kernel_gradients[c][i][j] += mim.layers_out_3d[layerID-1][c][i+k][j+l] * (*mim.data_3d)[filterID][k][l]
 						//shelf.kernel_gradients[c][i][j] += mim.layers_out[layerID-1][c*inp_shape[1]*inp_shape[2]+(i+k)*inp_shape[1]+j+l] * (*mim.data_flat)[filterID][k][l]
-						//shelf.kernel_gradients[c][i][j] += prev_layer_out[c*inp_shape[1]*inp_shape[2]+(i+k)*inp_shape[1]+j+l] * out_grade[filterID*O_H*O_W+k*O_W+l]
+						shelf.kernel_gradients[c][i][j] += prev_layer_out[c*inp_shape[1]*inp_shape[2]+(i+k)*inp_shape[1]+j+l] * out_grade[filterID*O_H*O_W+k*O_W+l]
 
-						kgcij += prev_layer_out[channelOffset+(i+k)*inp_shape[1]+j+l] * out_grade[filterOffset+k*O_W+l]
+						//kgcij += prev_layer_out[channelOffset+(i+k)*inp_shape[1]+j+l] * out_grade[filterOffset+k*O_W+l]
 
 					}
 				}
@@ -307,6 +307,8 @@ func (shelf *ConvLayer) get_name() string {
 }
 
 func (shelf *ConvLayer) debug_print() {
+	fmt.Println("---")
 	fmt.Println(shelf.filters[0].kernels)
 	fmt.Println(shelf.filters[0].kernel_gradients)
+	fmt.Println("------")
 }

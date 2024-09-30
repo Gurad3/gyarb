@@ -72,17 +72,16 @@ func tmpNewMNIST() *Network {
 
 	net.layers = []Layer{
 
-		&ConvLayer{
-			act_interface: &RelU{},
-			kernel_size:   3,
-			depth:         2,
-		},
+		// &ConvLayer{
+		// 	act_interface: &RelU{},
+		// 	kernel_size:   3,
+		// 	depth:         2,
+		// },
 
 		&DenseLayer{
-			act_interface: &RelU{},
-			size:          160,
+			act_interface: &Sigmoid{},
+			size:          100,
 		},
-
 		&DenseLayer{
 			act_interface: &Sigmoid{},
 			size:          10,

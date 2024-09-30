@@ -179,5 +179,5 @@ func (shelf *DenseLayer) get_act_interface() Activation {
 }
 
 func (shelf *DenseLayer) debug_print() {
-	fmt.Println(shelf.prev_layer_size)
+	fmt.Println("dense", shelf.prev_layer_size)
 }

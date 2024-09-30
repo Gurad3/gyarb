@@ -54,7 +54,7 @@ func (shelf *Network) train_network(trainData trainer, threded bool) {
 						shelf.Test(mim, trainData.TestData, trainData.TestDataLabel)
 
 						// b++
-
+						//shelf.layers[0].debug_print()
 						if trainData.save_at_milestone {
 							encode_to_json(shelf)
 						}
