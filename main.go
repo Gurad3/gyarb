@@ -61,7 +61,7 @@ func xor(net *Network) {
 func tmpNewMNIST() *Network {
 	net := new(Network)
 
-	net.learn_rate = .12
+	net.learn_rate = .15
 	net.learn_rate_decay = 0.0001
 	net.file_name = "NewTrainedMNIST_2"
 	net.cost_interface = &MeanSquare{}
@@ -72,16 +72,12 @@ func tmpNewMNIST() *Network {
 
 	net.layers = []Layer{
 
-		// &ConvLayer{
-		// 	act_interface: &RelU{},
-		// 	kernel_size:   3,
-		// 	depth:         2,
-		// },
-
-		&DenseLayer{
-			act_interface: &Sigmoid{},
-			size:          100,
+		&ConvLayer{
+			act_interface: &RelU{},
+			kernel_size:   3,
+			depth:         2,
 		},
+
 		&DenseLayer{
 			act_interface: &Sigmoid{},
 			size:          10,
