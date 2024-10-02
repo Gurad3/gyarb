@@ -94,7 +94,7 @@ func (shelf *ConvLayer) forward(mim *MiM) {
 	for f, filter := range shelf.filters {
 		outRangeStart := f * shelf.output_width * shelf.output_height
 		outRangeEnd := (f + 1) * shelf.output_width * shelf.output_height
-		filter.correlation(matrix, mim.layers_out[shelf.layerID][outRangeStart:outRangeEnd], mim.layers_out_non_activated[shelf.layerID], shelf.act_interface, shelf.input_shape, shelf.out_size[1:])
+		filter.correlation(matrix, mim.layers_out[shelf.layerID][outRangeStart:outRangeEnd], mim.layers_out_non_activated[shelf.layerID][outRangeStart:outRangeEnd], shelf.act_interface, shelf.input_shape, shelf.out_size[1:])
 
 	}
 
@@ -272,7 +272,7 @@ func (shelf *ConvLayer) apply_gradients(learn_rate float64, batch_size float64) 
 			for k := 0; k < shelf.kernel_size; k++ {
 				for l := 0; l < shelf.kernel_size; l++ {
 					shelf.filters[i].kernels[j][k][l] -= shelf.filters[i].kernel_gradients[j][k][l] * mult
-					// fmt.Println(shelf.filters[i].kernel_gradients[j][k][l])
+					//fmt.Println(i, shelf.filters[i].kernel_gradients[j][k][l])
 
 					shelf.filters[i].kernel_gradients[j][k][l] = 0
 				}

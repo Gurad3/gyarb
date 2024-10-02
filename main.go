@@ -80,6 +80,11 @@ func tmpNewMNIST() *Network {
 
 		&DenseLayer{
 			act_interface: &Sigmoid{},
+			size:          150,
+		},
+
+		&DenseLayer{
+			act_interface: &Sigmoid{},
 			size:          10,
 		},
 	}

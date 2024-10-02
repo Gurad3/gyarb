@@ -50,6 +50,8 @@ func (shelf *Network) print_weights() {
 	}
 }
 
+var g int = 0
+
 func (shelf *Network) forward(mim *MiM, data []float64) {
 
 	mim.data_flat = &data
@@ -63,6 +65,11 @@ func (shelf *Network) forward(mim *MiM, data []float64) {
 		//layer.debug_print()
 		// fmt.Println(layer.get_size())
 	}
+	// g++
+	// if g%100 == 0 {
+	// 	fmt.Println(mim.data_flat)
+
+	// }
 
 }
 
