@@ -124,7 +124,11 @@ func (shelf *ConvLayer) backprop(mim *MiM, prev_layer_act Activation) {
 		filter.compute_output_gradient(mim, shelf.output_width, shelf.output_height, shelf.layerID, f, shelf.input_shape, prev_layer_act)
 	}
 
-	mim.data_flat = &prevOut
+	// for i := 0; i < shelf.input_depth*shelf.input_height*shelf.input_width; i++ {
+	// 	prevOut[i] *= prev_layer_act.ddx(prevOut[i])
+	// }
+
+	mim.data_flat = &mim.layers_out[shelf.layerID-1]
 }
 func (shelf *Filter) compute_loss_kernel_gradient(mim *MiM, O_W int, O_H int, layerID int, filterID int, inp_shape []int) {
 	// Compute convolution between the input this layer recieved, and the matrix respresenting
@@ -150,6 +154,7 @@ func (shelf *Filter) compute_loss_kernel_gradient(mim *MiM, O_W int, O_H int, la
 
 						//shelf.kernel_gradients[c][i][j] += mim.layers_out_3d[layerID-1][c][i+k][j+l] * (*mim.data_3d)[filterID][k][l]
 						//shelf.kernel_gradients[c][i][j] += mim.layers_out[layerID-1][c*inp_shape[1]*inp_shape[2]+(i+k)*inp_shape[1]+j+l] * (*mim.data_flat)[filterID][k][l]
+
 						shelf.kernel_gradients[c][i][j] += prev_layer_out[c*inp_shape[1]*inp_shape[2]+(i+k)*inp_shape[1]+j+l] * out_grade[filterOffset+k*O_W+l]
 
 						//kgcij += prev_layer_out[channelOffset+(i+k)*inp_shape[1]+j+l] * out_grade[filterOffset+k*O_W+l]
@@ -179,7 +184,7 @@ func (shelf *Filter) compute_output_gradient(mim *MiM, O_W int, O_H int, layerID
 	out_grade := *mim.data_flat
 	filterOffset := filterID * O_H * O_W
 
-	prev_layer_out := mim.layers_out[layerID-1]
+	//prev_layer_out := mim.layers_out[layerID-1]
 
 	K_Y := len(shelf.kernels[0])
 	K_X := len(shelf.kernels[0][0])
@@ -207,14 +212,14 @@ func (shelf *Filter) compute_output_gradient(mim *MiM, O_W int, O_H int, layerID
 
 							//fmt.Println(filterID, "out", len(out_grade), filterOffset+(i+k-(K_Y-1))*O_W+j+l-(K_X-1), i, k, K_Y)
 
-							prev_layer_out[channelOffset+i*inp_shape[1]+j] += out_grade[filterOffset+(i+k-(K_Y-1))*O_W+j+l-(K_X-1)] * shelf.kernels[c][K_Y-1-k][K_X-1-l]
+							mim.layers_out[layerID-1][channelOffset+i*inp_shape[1]+j] += out_grade[filterOffset+(i+k-(K_Y-1))*O_W+j+l-(K_X-1)] * shelf.kernels[c][K_Y-1-k][K_X-1-l]
 						}
 
 						//flipped[i][j] = kernel[rows-1-i][cols-1-j]
 					}
 				}
 
-				prev_layer_out[channelOffset+i*inp_shape[1]+j] = prev_act_out.call(prev_layer_out[channelOffset+i*inp_shape[1]+j])
+				//	mim.layers_out[layerID-1][channelOffset+i*inp_shape[1]+j] *= prev_act_out.ddx(mim.layers_out[layerID-1][channelOffset+i*inp_shape[1]+j])
 			}
 		}
 	}
@@ -265,14 +270,17 @@ func flipKernel(kernel [][]float64) [][]float64 {
 	return flipped
 }
 
-func (shelf *ConvLayer) apply_gradients(learn_rate float64, batch_size float64) {
-	mult := learn_rate / batch_size
+func (shelf *ConvLayer) apply_gradients(learn_rate float64, batch_size int, regularization float64) {
+	mult := learn_rate / float64(batch_size)
+	weight_decay := (1 - regularization*mult)
+
 	for i := 0; i < shelf.depth; i++ {
 		for j := 0; j < shelf.input_depth; j++ {
 			for k := 0; k < shelf.kernel_size; k++ {
 				for l := 0; l < shelf.kernel_size; l++ {
-					shelf.filters[i].kernels[j][k][l] -= shelf.filters[i].kernel_gradients[j][k][l] * mult
-					//fmt.Println(i, shelf.filters[i].kernel_gradients[j][k][l])
+
+					//shelf.filters[i].kernels[j][k][l] -= shelf.filters[i].kernel_gradients[j][k][l] * mult
+					shelf.filters[i].kernels[j][k][l] = shelf.filters[i].kernels[j][k][l]*weight_decay - shelf.filters[i].kernel_gradients[j][k][l]*mult
 
 					shelf.filters[i].kernel_gradients[j][k][l] = 0
 				}
@@ -313,7 +321,7 @@ func (shelf *ConvLayer) get_name() string {
 
 func (shelf *ConvLayer) debug_print() {
 	fmt.Println("---")
-	fmt.Println(shelf.filters[0].kernels)
-	fmt.Println(shelf.filters[0].kernel_gradients)
+	// fmt.Println(shelf.filters[0].kernels)
+	// fmt.Println(shelf.filters[0].kernel_gradients)
 	fmt.Println("------")
 }

@@ -125,11 +125,14 @@ func (shelf *Network) Test(mim *MiM, TestData [][]float64, TestLabels [][]float6
 		if isCorrect(*mim.data_flat, TestLabels[sampleID]) {
 			correct_choises += 1
 		}
+
+		// if sampleID%1000 == 0 {
+		// 	fmt.Println(mim.data_flat)
+		// }
 	}
 	// fmt.Println(*mim.data_flat, TestLabels[len(TestLabels)-1], isCorrect(*mim.data_flat, TestLabels[len(TestLabels)-1]))
 	fmt.Println("Percantage Correct on Test Data: ", float64(correct_choises)/float64(len(TestLabels)))
 	fmt.Println("Cost: ", totalCost/float64(len(TestLabels)))
-
 	//shelf.layers[0].debug_print()
 
 	return totalCost / float64(len(TestLabels))

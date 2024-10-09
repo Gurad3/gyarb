@@ -9,7 +9,7 @@ type Layer interface {
 	backprop(mim *MiM, prev_layer_act Activation)      // Har
 	init(layerID int, prev_layer_size []int)           // Har
 	init_new_weights(xavierRange float64, r rand.Rand) // Har
-	apply_gradients(learn_rate float64, batch_size float64)
+	apply_gradients(learn_rate float64, batch_size int, regularization float64)
 
 	load_weights(flat_weights []float64)
 	load_biases(flat_biases []float64)

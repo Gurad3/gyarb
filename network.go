@@ -11,6 +11,7 @@ type Network struct {
 
 	learn_rate       float64
 	learn_rate_decay float64
+	regularization   float64
 	momentum         float64
 
 	input_shape []int
@@ -79,6 +80,8 @@ func (shelf *Network) backprop(mim *MiM, labels []float64) {
 	for layerID := len(shelf.layers) - 1; layerID > 0; layerID-- {
 		shelf.layers[layerID].backprop(mim, shelf.layers[layerID-1].get_act_interface())
 	}
+
+	// fmt.Println(mim.data_flat)
 	shelf.layers[0].backprop(mim, shelf.layers[0].get_act_interface())
 }
 
@@ -97,6 +100,6 @@ func (shelf *Network) get_output_ddx(mim *MiM, labels []float64) *[]float64 {
 func (shelf *Network) apply_gradients(batch_size int) {
 
 	for _, layer := range shelf.layers {
-		layer.apply_gradients(shelf.learn_rate, float64(batch_size))
+		layer.apply_gradients(shelf.learn_rate, batch_size, shelf.regularization)
 	}
 }

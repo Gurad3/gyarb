@@ -74,8 +74,10 @@ func (shelf *DenseLayer) backprop(mim *MiM, prev_act_interface Activation) {
 
 }
 
-func (shelf *DenseLayer) apply_gradients(learn_rate float64, batch_size float64) {
-	mult := learn_rate / batch_size
+func (shelf *DenseLayer) apply_gradients(learn_rate float64, batch_size int, regularization float64) {
+	mult := learn_rate / float64(batch_size)
+	weight_decay := (1 - regularization*mult)
+
 	for neuronID := range shelf.bias {
 		shelf.bias[neuronID] -= shelf.bias_gradiants[neuronID] * mult
 		shelf.bias_gradiants[neuronID] = 0
@@ -84,7 +86,7 @@ func (shelf *DenseLayer) apply_gradients(learn_rate float64, batch_size float64)
 		wtg := shelf.weights_gradiants[neuronID]
 
 		for weightID, wtgv := range wtg {
-			wt[weightID] -= wtgv * mult
+			wt[weightID] = wt[weightID]*weight_decay - wtgv*mult
 			wtg[weightID] = 0
 		}
 
