@@ -53,7 +53,7 @@ func (shelf *Network) train_network(trainData trainer, threded bool) {
 					if totalSamples%trainData.info_milestone == 0 {
 						shelf.Test(mim, trainData.TestData, trainData.TestDataLabel)
 
-						b++
+						// b++
 						//shelf.layers[0].debug_print()
 						if trainData.save_at_milestone {
 							encode_to_json(shelf)
@@ -83,7 +83,7 @@ func (shelf *Network) train_network(trainData trainer, threded bool) {
 					shelf.backprop(mim, trainData.train_label_batches[batchID][sampleID])
 					if totalSamples%trainData.info_milestone == 0 {
 						shelf.Test(mim, trainData.TestData, trainData.TestDataLabel)
-						b++
+						// b++
 						if trainData.save_at_milestone {
 							encode_to_json(shelf)
 						}
@@ -161,12 +161,22 @@ func isCorrect(values []float64, target_values []float64) bool {
 	return higT == highVID
 }
 
+// func (shelf *trainer) shuffle_batches() {
+// 	rng := rand.New(rand.NewSource(time.Now().Unix()))
+// 	for batch_index := range shelf.train_batches {
+// 		rand_index := rng.Int() % len(shelf.train_batches)
+
+// 		shelf.train_batches[batch_index], shelf.train_batches[rand_index] = shelf.train_batches[rand_index], shelf.train_batches[batch_index]
+// 		shelf.train_label_batches[batch_index], shelf.train_label_batches[rand_index] = shelf.train_label_batches[rand_index], shelf.train_label_batches[batch_index]
+// 	}
+// }
+
 func (shelf *trainer) shuffle_batches() {
 	rng := rand.New(rand.NewSource(time.Now().Unix()))
-	for batch_index := range shelf.train_batches {
-		rand_index := rng.Int() % len(shelf.train_batches)
+	for batch_index := range shelf.TrainData {
+		rand_index := rng.Int() % len(shelf.TrainData)
 
-		shelf.train_batches[batch_index], shelf.train_batches[rand_index] = shelf.train_batches[rand_index], shelf.train_batches[batch_index]
-		shelf.train_label_batches[batch_index], shelf.train_label_batches[rand_index] = shelf.train_label_batches[rand_index], shelf.train_label_batches[batch_index]
+		shelf.TrainData[batch_index], shelf.TrainData[rand_index] = shelf.TrainData[rand_index], shelf.TrainData[batch_index]
+		shelf.TrainDataLabel[batch_index], shelf.TrainDataLabel[rand_index] = shelf.TrainDataLabel[rand_index], shelf.TrainDataLabel[batch_index]
 	}
 }
