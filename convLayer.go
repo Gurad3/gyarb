@@ -214,10 +214,8 @@ func (shelf *Filter) compute_output_gradient(mim *MiM, O_W int, O_H int, layerID
 
 						// TODO: Om "filterOffset+(i+k)*inp_shape[1]+j+l" ligger utanför indexes för "out_grade" så ska det vara 0. Kolla för boundary för en artificell 2d array.
 
+						//TODO: Mer effetkiv statment, (Exit early)
 						if !((j+l) < (K_X-1) || (i+k) < (K_Y-1) || (j+l) > (K_X-1)+O_W-1 || (i+k) > (K_Y-1)+O_H-1) {
-							//	fmt.Println("prev", len(prev_layer_out))
-
-							//fmt.Println(filterID, "out", len(out_grade), filterOffset+(i+k-(K_Y-1))*O_W+j+l-(K_X-1), i, k, K_Y)
 
 							mim.layers_out[layerID-1][channelOffset+i*inp_shape[1]+j] += out_grade[filterOffset+(i+k-(K_Y-1))*O_W+j+l-(K_X-1)] * shelf.kernels[c][K_Y-1-k][K_X-1-l]
 						}
@@ -330,6 +328,10 @@ func (shelf *ConvLayer) get_size() []int {
 }
 func (shelf *ConvLayer) get_name() string {
 	return shelf.layer_type
+}
+
+func (shelf *ConvLayer) get_init_vals() []int {
+	return []int{shelf.kernel_size, shelf.depth}
 }
 
 func (shelf *ConvLayer) debug_print() {

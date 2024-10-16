@@ -12,6 +12,7 @@ type NetworkData struct {
 	Input_size       int     `json:"input_size"`
 	Output_size      int     `json:"output_size"`
 	Cost_interface   string  `json:"cost_interface"`
+	Input_shape      []int   `json:"input_shape"`
 
 	Layer_types       []string `json:"layer_types"`
 	Layer_activations []string `json:"layer_activations"`
@@ -35,6 +36,8 @@ func load_from_net_data(net_data NetworkData) Network {
 
 	net.layers = make([]Layer, len(net_data.Layer_types))
 
+	prev_layer_shape := net_data.Input_shape
+
 	for i := 0; i < len(net_data.Layer_types); i++ {
 		if net_data.Layer_types[i] == "DenseLayer" {
 			New_layer := DenseLayer{
@@ -51,8 +54,14 @@ func load_from_net_data(net_data NetworkData) Network {
 		}
 
 		if net_data.Layer_types[i] == "CNNLayer" {
+			New_layer := ConvLayer{
+				act_interface: act_name_to_interface(net_data.Layer_activations[i]),
+			}
 
+			New_layer.init(i+1, prev_layer_shape)
 		}
+
+		prev_layer_shape = net_data.Layer_sizes[i]
 	}
 
 	return *net
@@ -69,6 +78,8 @@ func save_to_net_data(net *Network) NetworkData {
 	net_data.Input_size = net.input_size
 	net_data.Output_size = net.output_size
 
+	net_data.Input_shape = net.input_shape
+
 	net_data.Cost_interface = net.cost_interface.get_name()
 
 	layers_len := len(net.layers)
@@ -76,7 +87,7 @@ func save_to_net_data(net *Network) NetworkData {
 	net_data.Layer_activations = make([]string, layers_len)
 	net_data.Layer_biases = make([][]float64, layers_len)
 	net_data.Layer_weights = make([][]float64, layers_len)
-	net_data.Layer_sizes = make([][]int, layers_len)
+
 	for layerID, layer := range net.layers {
 		net_data.Layer_types[layerID] = layer.get_name()
 		net_data.Layer_activations[layerID] = layer.get_act_interface().get_name()

@@ -204,6 +204,10 @@ func (shelf *DenseLayer) get_act_interface() Activation {
 	return shelf.act_interface
 }
 
+func (shelf *DenseLayer) get_init_vals() []int {
+	return []int{}
+}
+
 func (shelf *DenseLayer) debug_print() {
 	fmt.Println("dense", shelf.prev_layer_size)
 }

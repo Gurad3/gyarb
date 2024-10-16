@@ -19,6 +19,7 @@ type Layer interface {
 	print_weights()
 	get_size() []int
 	get_name() string
+	get_init_vals() []int
 
 	get_act_interface() Activation
 
