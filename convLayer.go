@@ -31,6 +31,9 @@ type Filter struct {
 
 	kernel_gradients [][][]float64
 	bias_gradient    float64
+
+	weight_velocities [][][]float64
+	bias_velocitiy    float64
 }
 
 func (shelf *ConvLayer) init(layerID int, prev_layer_size []int) {
@@ -54,16 +57,20 @@ func (shelf *ConvLayer) init(layerID int, prev_layer_size []int) {
 		//kernels
 		shelf.filters[i].kernels = make([][][]float64, shelf.input_depth)
 		shelf.filters[i].kernel_gradients = make([][][]float64, shelf.input_depth)
+		shelf.filters[i].weight_velocities = make([][][]float64, shelf.input_depth)
 		shelf.filters[i].bias = 0
 		shelf.filters[i].bias_gradient = 0
+		shelf.filters[i].bias_velocitiy = 0
 		for j := 0; j < shelf.input_depth; j++ {
 
 			shelf.filters[i].kernels[j] = make([][]float64, shelf.kernel_size)
 			shelf.filters[i].kernel_gradients[j] = make([][]float64, shelf.kernel_size)
+			shelf.filters[i].weight_velocities[j] = make([][]float64, shelf.kernel_size)
 
 			for k := 0; k < shelf.kernel_size; k++ {
 				shelf.filters[i].kernels[j][k] = make([]float64, shelf.kernel_size)
 				shelf.filters[i].kernel_gradients[j][k] = make([]float64, shelf.kernel_size)
+				shelf.filters[i].weight_velocities[j][k] = make([]float64, shelf.kernel_size)
 			}
 		}
 
@@ -270,7 +277,7 @@ func flipKernel(kernel [][]float64) [][]float64 {
 	return flipped
 }
 
-func (shelf *ConvLayer) apply_gradients(learn_rate float64, batch_size int, regularization float64) {
+func (shelf *ConvLayer) apply_gradients(learn_rate float64, batch_size int, regularization float64, momentum float64) {
 	mult := learn_rate / float64(batch_size)
 	weight_decay := (1 - regularization*mult)
 
@@ -280,14 +287,20 @@ func (shelf *ConvLayer) apply_gradients(learn_rate float64, batch_size int, regu
 				for l := 0; l < shelf.kernel_size; l++ {
 
 					//shelf.filters[i].kernels[j][k][l] -= shelf.filters[i].kernel_gradients[j][k][l] * mult
-					shelf.filters[i].kernels[j][k][l] = shelf.filters[i].kernels[j][k][l]*weight_decay - shelf.filters[i].kernel_gradients[j][k][l]*mult
+					velocity := shelf.filters[i].weight_velocities[j][k][l]*momentum - shelf.filters[i].kernel_gradients[j][k][l]*mult
+					shelf.filters[i].weight_velocities[j][k][l] = velocity
+
+					shelf.filters[i].kernels[j][k][l] = shelf.filters[i].kernels[j][k][l]*weight_decay + velocity
 
 					shelf.filters[i].kernel_gradients[j][k][l] = 0
 				}
 			}
 
 		}
-		shelf.filters[i].bias -= shelf.filters[i].bias_gradient * mult
+		velocity := shelf.filters[i].bias_velocitiy*momentum - shelf.filters[i].bias_gradient*mult
+		shelf.filters[i].bias_velocitiy = velocity
+
+		shelf.filters[i].bias += velocity
 		shelf.filters[i].bias_gradient = 0
 	}
 

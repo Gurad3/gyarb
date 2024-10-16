@@ -5,6 +5,48 @@ import (
 	"math/rand"
 )
 
+type DenseLayer struct {
+	act_interface   Activation
+	layerID         int
+	size            int
+	prev_layer_size int
+	layer_type      string
+
+	weights [][]float64
+	bias    []float64
+
+	weight_gradients [][]float64
+	bias_gradients   []float64
+
+	weight_velocities [][]float64
+	bias_velocities   []float64
+}
+
+func (shelf *DenseLayer) init(layerID int, prev_layer_size []int) {
+	//Init all layer arrays sizes, Sets bias AND WEIGHTS to 0
+	shelf.layer_type = "DenseLayer"
+	shelf.layerID = layerID
+
+	shelf.prev_layer_size = 1
+	for _, v := range prev_layer_size {
+		shelf.prev_layer_size *= v
+	}
+
+	shelf.bias = make([]float64, shelf.size)
+	shelf.weights = make([][]float64, shelf.size)
+
+	shelf.bias_gradients = make([]float64, shelf.size)
+	shelf.bias_velocities = make([]float64, shelf.size)
+	shelf.weight_gradients = make([][]float64, shelf.size)
+	shelf.weight_velocities = make([][]float64, shelf.size)
+
+	for i := 0; i < shelf.size; i++ {
+		shelf.weights[i] = make([]float64, shelf.prev_layer_size)
+		shelf.weight_gradients[i] = make([]float64, shelf.prev_layer_size)
+		shelf.weight_velocities[i] = make([]float64, shelf.prev_layer_size)
+	}
+}
+
 func (shelf *DenseLayer) forward(mim *MiM) {
 	data := *mim.data_flat
 
@@ -31,7 +73,7 @@ func (shelf *DenseLayer) backprop(mim *MiM, prev_act_interface Activation) {
 
 	for neuronID, neuronGradient := range out_grade {
 
-		neuronWeights := shelf.weights_gradiants[neuronID]
+		neuronWeights := shelf.weight_gradients[neuronID]
 
 		for weightID, prevLayer := range prevLayerOut {
 
@@ -39,7 +81,7 @@ func (shelf *DenseLayer) backprop(mim *MiM, prev_act_interface Activation) {
 
 		}
 
-		shelf.bias_gradiants[neuronID] += neuronGradient
+		shelf.bias_gradients[neuronID] += neuronGradient
 	}
 
 	if shelf.layerID > 1 { //First layerID == 1, behövr inte räkna ut nästa lagers: Cost/Out om vi är på första lagret.
@@ -74,19 +116,24 @@ func (shelf *DenseLayer) backprop(mim *MiM, prev_act_interface Activation) {
 
 }
 
-func (shelf *DenseLayer) apply_gradients(learn_rate float64, batch_size int, regularization float64) {
+func (shelf *DenseLayer) apply_gradients(learn_rate float64, batch_size int, regularization float64, momentum float64) {
 	mult := learn_rate / float64(batch_size)
 	weight_decay := (1 - regularization*mult)
 
 	for neuronID := range shelf.bias {
-		shelf.bias[neuronID] -= shelf.bias_gradiants[neuronID] * mult
-		shelf.bias_gradiants[neuronID] = 0
+		velocity := shelf.bias_velocities[neuronID]*momentum - shelf.bias_gradients[neuronID]*mult
+		shelf.bias_velocities[neuronID] = velocity
+		shelf.bias[neuronID] += velocity
+		shelf.bias_gradients[neuronID] = 0
 
 		wt := shelf.weights[neuronID]
-		wtg := shelf.weights_gradiants[neuronID]
+		wtg := shelf.weight_gradients[neuronID]
 
 		for weightID, wtgv := range wtg {
-			wt[weightID] = wt[weightID]*weight_decay - wtgv*mult
+			velocity := shelf.weight_velocities[neuronID][weightID]*momentum - wtgv*mult
+			shelf.weight_velocities[neuronID][weightID] = velocity
+
+			wt[weightID] = wt[weightID]*weight_decay + velocity
 			wtg[weightID] = 0
 		}
 
@@ -94,29 +141,6 @@ func (shelf *DenseLayer) apply_gradients(learn_rate float64, batch_size int, reg
 		// 	shelf.weights[neuronID][weightID] -= shelf.weights_gradiants[neuronID][weightID] * mult
 		// 	shelf.weights_gradiants[neuronID][weightID] = 0
 		// }
-	}
-}
-
-func (shelf *DenseLayer) init(layerID int, prev_layer_size []int) {
-	//Init all layer arrays sizes, Sets bias AND WEIGHTS to 0
-	shelf.layer_type = "DenseLayer"
-	shelf.layerID = layerID
-
-	shelf.prev_layer_size = 1
-	for _, v := range prev_layer_size {
-		shelf.prev_layer_size *= v
-	}
-
-	shelf.bias = make([]float64, shelf.size)
-	shelf.weights = make([][]float64, shelf.size)
-
-	shelf.bias_gradiants = make([]float64, shelf.size)
-	shelf.weights_gradiants = make([][]float64, shelf.size)
-
-	for i := 0; i < shelf.size; i++ {
-		shelf.weights[i] = make([]float64, shelf.prev_layer_size)
-		shelf.weights_gradiants[i] = make([]float64, shelf.prev_layer_size)
-
 	}
 }
 

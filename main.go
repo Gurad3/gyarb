@@ -64,6 +64,7 @@ func tmpNewMNIST() *Network {
 	net.learn_rate = .2
 	//net.learn_rate_decay = 0.0001
 	net.regularization = 0.1
+	net.momentum = 0.5
 	net.file_name = "NewTrainedMNIST_2"
 	net.cost_interface = &MeanSquare{}
 
