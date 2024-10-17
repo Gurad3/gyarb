@@ -305,16 +305,39 @@ func (shelf *ConvLayer) apply_gradients(learn_rate float64, batch_size int, regu
 }
 
 func (shelf *ConvLayer) load_weights(flat_weights []float64) {
-
+	for i := 0; i < shelf.depth; i++ {
+		for j := 0; j < shelf.input_depth; j++ {
+			for k := 0; k < shelf.kernel_size; k++ {
+				for l := 0; l < shelf.kernel_size; l++ {
+					shelf.filters[i].kernels[j][k][l] = flat_weights[i*shelf.depth+j*shelf.input_depth+k*shelf.kernel_size+l]
+				}
+			}
+		}
+	}
 }
-func (shelf *ConvLayer) load_biases(flat_weights []float64) {
 
+func (shelf *ConvLayer) load_biases(flat_biases []float64) {
+	for i := 0; i < shelf.depth; i++ {
+		shelf.filters[i].bias = flat_biases[i]
+	}
 }
 func (shelf *ConvLayer) get_weights() []float64 {
-	return []float64{}
+	weights := make([]float64, 0, shelf.depth*shelf.input_depth*shelf.kernel_size*shelf.kernel_size)
+	for _, filter := range shelf.filters {
+		for _, kernal := range filter.kernels {
+			for _, kernal_X := range kernal {
+				weights = append(weights, kernal_X...)
+			}
+		}
+	}
+	return weights
 }
 func (shelf *ConvLayer) get_biases() []float64 {
-	return []float64{}
+	biases := make([]float64, 0, shelf.depth)
+	for _, filter := range shelf.filters {
+		biases = append(biases, filter.bias)
+	}
+	return biases
 }
 func (shelf *ConvLayer) print_weights() {
 

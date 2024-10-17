@@ -6,15 +6,20 @@ import (
 
 func main() {
 
-	net := tmpNewMNIST()
+	//net := tmpNewMNIST()
 	//net := tmpNewXOR()
 	// net.print_weights()
 
-	//net := load_from_json("saves/NewTrainedMNIST.json")
+	net := load_from_json("saves/ConvMNIST_1.json")
 	//net.print_weights()
 
 	//xor(net)
-	mnist(net)
+	//mnist(net)
+
+	mim := new(MiM)
+	mim.init(net)
+	_, _, MNIST_TestDataLabel, MNIST_TestData := data_handler.Load_mnist()
+	net.Test(mim, MNIST_TestData, MNIST_TestDataLabel)
 
 	//net.print_weights()
 	//_, _, _, TestData := loadMnist()
@@ -35,10 +40,11 @@ func mnist(net *Network) {
 
 		batch_size:        100,
 		info_milestone:    60_000,
-		save_at_milestone: false,
+		save_at_milestone: true,
 	}
 
 	net.train_network(td, true)
+
 }
 
 func xor(net *Network) {
@@ -65,7 +71,7 @@ func tmpNewMNIST() *Network {
 	//net.learn_rate_decay = 0.0001
 	net.regularization = 0.1
 	net.momentum = 0.5
-	net.file_name = "NewTrainedMNIST_2"
+	net.file_name = "ConvMNIST_1"
 	net.cost_interface = &MeanSquare{}
 
 	net.input_shape = []int{1, 28, 28}
@@ -86,11 +92,11 @@ func tmpNewMNIST() *Network {
 			depth:         4,
 		},
 
-		&ConvLayer{
-			act_interface: &RelU{},
-			kernel_size:   3,
-			depth:         8,
-		},
+		// &ConvLayer{
+		// 	act_interface: &RelU{},
+		// 	kernel_size:   3,
+		// 	depth:         8,
+		// },
 
 		&DenseLayer{
 			act_interface: &RelU{},
