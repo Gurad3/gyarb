@@ -17,7 +17,9 @@ type NetworkData struct {
 	Layer_types       []string `json:"layer_types"`
 	Layer_activations []string `json:"layer_activations"`
 
-	Layer_sizes [][]int `json:"layer_sizes"`
+	Layer_sizes     [][]int `json:"layer_sizes"`
+	Layer_init_vals [][]int `json:"layer_sizes"`
+
 	//All flated
 	Layer_biases  [][]float64 `json:"layer_biases"`
 	Layer_weights [][]float64 `json:"layer_weights"`
@@ -56,6 +58,8 @@ func load_from_net_data(net_data NetworkData) Network {
 		if net_data.Layer_types[i] == "CNNLayer" {
 			New_layer := ConvLayer{
 				act_interface: act_name_to_interface(net_data.Layer_activations[i]),
+				kernel_size:   net_data.Layer_init_vals[i][0],
+				depth:         net_data.Layer_init_vals[i][1],
 			}
 
 			New_layer.init(i+1, prev_layer_shape)
@@ -87,6 +91,7 @@ func save_to_net_data(net *Network) NetworkData {
 	net_data.Layer_activations = make([]string, layers_len)
 	net_data.Layer_biases = make([][]float64, layers_len)
 	net_data.Layer_weights = make([][]float64, layers_len)
+	net_data.Layer_init_vals = make([][]int, layers_len)
 
 	for layerID, layer := range net.layers {
 		net_data.Layer_types[layerID] = layer.get_name()
@@ -94,6 +99,7 @@ func save_to_net_data(net *Network) NetworkData {
 		net_data.Layer_biases[layerID] = layer.get_biases()
 		net_data.Layer_weights[layerID] = layer.get_weights()
 		net_data.Layer_sizes[layerID] = layer.get_size()
+		net_data.Layer_init_vals[layerID] = layer.get_init_vals()
 	}
 
 	return *net_data
