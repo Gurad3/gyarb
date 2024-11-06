@@ -56,7 +56,9 @@ func (shelf *Network) train_network(trainData trainer, threded bool) {
 						// b++
 						//shelf.layers[0].debug_print()
 						if trainData.save_at_milestone {
+							fmt.Println("Start JSON Save")
 							encode_to_json(shelf)
+							fmt.Println("Done JSON Save")
 						}
 					}
 					totalSamples++

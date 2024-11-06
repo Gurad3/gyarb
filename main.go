@@ -70,7 +70,7 @@ func tmpNewMNIST() *Network {
 	net.learn_rate = .2
 	//net.learn_rate_decay = 0.0001
 	net.regularization = 0.1
-	net.momentum = 0.5
+	net.momentum = 0
 	net.file_name = "ConvMNIST_1"
 	net.cost_interface = &MeanSquare{}
 
@@ -91,12 +91,6 @@ func tmpNewMNIST() *Network {
 			kernel_size:   3,
 			depth:         4,
 		},
-
-		// &ConvLayer{
-		// 	act_interface: &RelU{},
-		// 	kernel_size:   3,
-		// 	depth:         8,
-		// },
 
 		&DenseLayer{
 			act_interface: &RelU{},

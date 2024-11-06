@@ -322,20 +322,24 @@ func (shelf *ConvLayer) load_biases(flat_biases []float64) {
 	}
 }
 func (shelf *ConvLayer) get_weights() []float64 {
-	weights := make([]float64, 0, shelf.depth*shelf.input_depth*shelf.kernel_size*shelf.kernel_size)
-	for _, filter := range shelf.filters {
-		for _, kernal := range filter.kernels {
-			for _, kernal_X := range kernal {
-				weights = append(weights, kernal_X...)
+	weights := make([]float64, shelf.depth*shelf.input_depth*shelf.kernel_size*shelf.kernel_size)
+	for fID, filter := range shelf.filters {
+		for kID, kernal := range filter.kernels {
+			for kXID, kernal_X := range kernal {
+
+				for kYID, kernal_Y := range kernal_X {
+					weights[fID*shelf.depth+kID*shelf.input_depth+kXID*shelf.kernel_size+kYID] = kernal_Y
+				}
+				//	weights = append(weights, kernal_X...)
 			}
 		}
 	}
 	return weights
 }
 func (shelf *ConvLayer) get_biases() []float64 {
-	biases := make([]float64, 0, shelf.depth)
-	for _, filter := range shelf.filters {
-		biases = append(biases, filter.bias)
+	biases := make([]float64, shelf.depth)
+	for filterId, filter := range shelf.filters {
+		biases[filterId] = filter.bias
 	}
 	return biases
 }
