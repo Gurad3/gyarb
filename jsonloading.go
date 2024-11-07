@@ -33,6 +33,7 @@ func load_from_net_data(net_data NetworkData) Network {
 	net.learn_rate_decay = net_data.Learn_rate_decay
 	net.input_size = net_data.Input_size
 	net.output_size = net_data.Output_size
+	net.input_shape = net_data.Input_shape
 
 	net.cost_interface = cost_name_to_interface(net_data.Cost_interface)
 
@@ -67,7 +68,6 @@ func load_from_net_data(net_data NetworkData) Network {
 			New_layer.load_biases(net_data.Layer_biases[i])
 			net.layers[i] = &New_layer
 		}
-
 		prev_layer_shape = net_data.Layer_sizes[i]
 	}
 
@@ -75,6 +75,11 @@ func load_from_net_data(net_data NetworkData) Network {
 }
 
 func save_to_net_data(net *Network) NetworkData {
+	// fmt.Println("---")
+	// net.layers[0].debug_print()
+	// fmt.Println("-")
+	// net.layers[1].debug_print()
+	// fmt.Println("---")
 
 	net_data := new(NetworkData)
 

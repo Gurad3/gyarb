@@ -81,6 +81,7 @@ func (shelf *ConvLayer) init_new_weights(xavierRange float64, r rand.Rand) {
 	//Give each weights new random weights (Currentlu 0)
 
 	for i := 0; i < shelf.depth; i++ {
+
 		for j := 0; j < shelf.input_depth; j++ {
 			for k := 0; k < shelf.kernel_size; k++ {
 				for l := 0; l < shelf.kernel_size; l++ {
@@ -315,26 +316,24 @@ func (shelf *ConvLayer) load_weights(flat_weights []float64) {
 		}
 	}
 }
+func (shelf *ConvLayer) get_weights() []float64 {
+	weights := make([]float64, shelf.depth*shelf.input_depth*shelf.kernel_size*shelf.kernel_size)
+	for i := 0; i < shelf.depth; i++ {
+		for j := 0; j < shelf.input_depth; j++ {
+			for k := 0; k < shelf.kernel_size; k++ {
+				for l := 0; l < shelf.kernel_size; l++ {
+					weights[i*shelf.depth+j*shelf.input_depth+k*shelf.kernel_size+l] = shelf.filters[i].kernels[j][k][l]
+				}
+			}
+		}
+	}
+	return weights
+}
 
 func (shelf *ConvLayer) load_biases(flat_biases []float64) {
 	for i := 0; i < shelf.depth; i++ {
 		shelf.filters[i].bias = flat_biases[i]
 	}
-}
-func (shelf *ConvLayer) get_weights() []float64 {
-	weights := make([]float64, shelf.depth*shelf.input_depth*shelf.kernel_size*shelf.kernel_size)
-	for fID, filter := range shelf.filters {
-		for kID, kernal := range filter.kernels {
-			for kXID, kernal_X := range kernal {
-
-				for kYID, kernal_Y := range kernal_X {
-					weights[fID*shelf.depth+kID*shelf.input_depth+kXID*shelf.kernel_size+kYID] = kernal_Y
-				}
-				//	weights = append(weights, kernal_X...)
-			}
-		}
-	}
-	return weights
 }
 func (shelf *ConvLayer) get_biases() []float64 {
 	biases := make([]float64, shelf.depth)
@@ -363,7 +362,10 @@ func (shelf *ConvLayer) get_init_vals() []int {
 
 func (shelf *ConvLayer) debug_print() {
 	fmt.Println("---")
-	// fmt.Println(shelf.filters[0].kernels)
-	// fmt.Println(shelf.filters[0].kernel_gradients)
+
+	for i := 0; i < len(shelf.filters); i++ {
+		fmt.Println(shelf.filters[i].bias)
+	}
+
 	fmt.Println("------")
 }

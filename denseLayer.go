@@ -209,5 +209,5 @@ func (shelf *DenseLayer) get_init_vals() []int {
 }
 
 func (shelf *DenseLayer) debug_print() {
-	fmt.Println("dense", shelf.prev_layer_size)
+	fmt.Println(shelf.bias[0])
 }
