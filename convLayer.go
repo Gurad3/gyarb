@@ -310,7 +310,8 @@ func (shelf *ConvLayer) load_weights(flat_weights []float64) {
 		for j := 0; j < shelf.input_depth; j++ {
 			for k := 0; k < shelf.kernel_size; k++ {
 				for l := 0; l < shelf.kernel_size; l++ {
-					shelf.filters[i].kernels[j][k][l] = flat_weights[i*shelf.depth+j*shelf.input_depth+k*shelf.kernel_size+l]
+					//shelf.filters[i].kernels[j][k][l] = flat_weights[i*shelf.depth+j*shelf.input_depth+k*shelf.kernel_size+l]
+					shelf.filters[i].kernels[j][k][l] = flat_weights[i*shelf.input_depth*shelf.kernel_size*shelf.kernel_size+j*shelf.kernel_size*shelf.kernel_size+k*shelf.kernel_size+l]
 				}
 			}
 		}
@@ -318,15 +319,26 @@ func (shelf *ConvLayer) load_weights(flat_weights []float64) {
 }
 func (shelf *ConvLayer) get_weights() []float64 {
 	weights := make([]float64, shelf.depth*shelf.input_depth*shelf.kernel_size*shelf.kernel_size)
+
 	for i := 0; i < shelf.depth; i++ {
 		for j := 0; j < shelf.input_depth; j++ {
 			for k := 0; k < shelf.kernel_size; k++ {
 				for l := 0; l < shelf.kernel_size; l++ {
-					weights[i*shelf.depth+j*shelf.input_depth+k*shelf.kernel_size+l] = shelf.filters[i].kernels[j][k][l]
+					weights[i*shelf.input_depth*shelf.kernel_size*shelf.kernel_size+j*shelf.kernel_size*shelf.kernel_size+k*shelf.kernel_size+l] = shelf.filters[i].kernels[j][k][l]
 				}
 			}
 		}
 	}
+
+	// for i := 0; i < shelf.depth; i++ {
+	// 	for j := 0; j < shelf.input_depth; j++ {
+	// 		for k := 0; k < shelf.kernel_size; k++ {
+	// 			for l := 0; l < shelf.kernel_size; l++ {
+	// 				weights[i*shelf.depth+j*shelf.input_depth+k*shelf.kernel_size+l] = shelf.filters[i].kernels[j][k][l]
+	// 			}
+	// 		}
+	// 	}
+	//}
 	return weights
 }
 
@@ -363,8 +375,14 @@ func (shelf *ConvLayer) get_init_vals() []int {
 func (shelf *ConvLayer) debug_print() {
 	fmt.Println("---")
 
-	for i := 0; i < len(shelf.filters); i++ {
-		fmt.Println(shelf.filters[i].bias)
+	for i := 0; i < shelf.depth; i++ {
+		for j := 0; j < shelf.input_depth; j++ {
+			for k := 0; k < shelf.kernel_size; k++ {
+				for l := 0; l < shelf.kernel_size; l++ {
+					fmt.Println(shelf.filters[i].kernels[j][k][l])
+				}
+			}
+		}
 	}
 
 	fmt.Println("------")
