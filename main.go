@@ -64,11 +64,11 @@ func cliHandler() {
 
 func main() {
 	//cliHandler()
-	net := tmpNewMNIST()
+	//net := tmpNewMNIST()
 	//net := tmpNewXOR()
 	// net.print_weights()
 
-	//net := load_from_json("saves/ConvMNIST_1.json")
+	net := load_from_json("saves/ConvMNIST_1.json")
 
 	// net.file_name = "test"
 
@@ -77,12 +77,12 @@ func main() {
 	//net.layers[1].debug_print()
 
 	//xor(net)
-	mnist(net)
+	//mnist(net)
 
-	// mim := new(MiM)
-	// mim.init(net)
-	// _, _, MNIST_TestDataLabel, MNIST_TestData := data_handler.Load_mnist()
-	// net.Test(mim, MNIST_TestData, MNIST_TestDataLabel)
+	mim := new(MiM)
+	mim.init(net)
+	_, _, MNIST_TestDataLabel, MNIST_TestData := data_handler.Load_mnist()
+	net.Test(mim, MNIST_TestData, MNIST_TestDataLabel)
 
 	//net.print_weights()
 	//_, _, _, TestData := loadMnist()
