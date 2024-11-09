@@ -32,39 +32,103 @@ def display_text(text, x, y, font_size=20):
     text_surface = font.render(text, True, black)
     screen.blit(text_surface, (x, y))
 
-def preprocess_and_center_image(pygame_image):
-    #Convert to grayscale and find bounding box
-    gray_image = cv2.cvtColor(np.transpose(pygame_image, (1, 0, 2)), cv2.COLOR_RGB2GRAY)
-    _, thresholded = cv2.threshold(gray_image, 127, 255, cv2.THRESH_BINARY_INV)
-    
-    
-    contours, _ = cv2.findContours(thresholded, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    if contours:
-        x, y, w, h = cv2.boundingRect(contours[0])
-        cropped_image = gray_image[y:y+h, x:x+w]
-        
-        #Resize to 20x20 
-        digit_resized = cv2.resize(cropped_image, (20, 20), interpolation=cv2.INTER_AREA)
-        
-        #Create  28x28 canvas and center
-        centered_image = np.full((28, 28), 255, dtype=np.float64)
-        offset_x = (28 - 20) // 2
-        offset_y = (28 - 20) // 2
-        centered_image[offset_y:offset_y+20, offset_x:offset_x+20] = digit_resized
-        
-       
-        #TMP VISUAL
-        cv2.imshow('Centered Image', centered_image)
-        cv2.waitKey(1000) #(ms)
-        cv2.destroyAllWindows()
-      
-        for y in range(len(centered_image)):
-            for x in range(len(centered_image[y])):
-                centered_image[x][y] = (255 - centered_image[x][y])
 
-        return centered_image
+def image_data_to_grayscale(img_data):
+    height, width, _ = img_data.shape
+    grayscale_img = np.zeros((height, width))
+
+    for y in range(height):
+        for x in range(width):
+            # rgb
+            grayscale_value = img_data[y, x, 0] / 255.0
+            grayscale_img[y, x] = grayscale_value
+
+    return grayscale_img
+
+def get_bounding_rectangle(img, threshold):
+    rows, columns = img.shape
+    min_x, min_y = columns, rows
+    max_x, max_y = -1, -1
+
+    for y in range(rows):
+        for x in range(columns):
+            if img[y, x] < threshold:
+                if min_x > x:
+                    min_x = x
+                if max_x < x:
+                    max_x = x
+                if min_y > y:
+                    min_y = y
+                if max_y < y:
+                    max_y = y
+
+    return {'minY': min_y, 'minX': min_x, 'maxY': max_y, 'maxX': max_x}
+
+def center_image(img):
+    mean_x = 0
+    mean_y = 0
+    rows, columns = img.shape
+    sum_pixels = 0
+
+    for y in range(rows):
+        for x in range(columns):
+            pixel = 1 - img[y, x]
+            sum_pixels += pixel
+            mean_y += y * pixel
+            mean_x += x * pixel
+
+    if sum_pixels == 0:
+        return {'transX': 0, 'transY': 0}
+
+    mean_x /= sum_pixels
+    mean_y /= sum_pixels
+
+    d_y = round(rows / 2 - mean_y)
+    d_x = round(columns / 2 - mean_x)
+
+    return {'transX': d_x, 'transY': d_y}
+
+def preprocess_and_center_image(pygame_image):
+    gray_image = image_data_to_grayscale(np.transpose(pygame_image, (1, 0, 2)))
+
+    bounding_rect = get_bounding_rectangle(gray_image, threshold=0.5)
+
+    min_y, min_x, max_y, max_x = bounding_rect['minY'], bounding_rect['minX'], bounding_rect['maxY'], bounding_rect['maxX']
+    if min_x < max_x and min_y < max_y:
+        cropped_image = gray_image[min_y:max_y+1, min_x:max_x+1]
+
+        # Maintain aspect ratio while resizing
+        h, w = cropped_image.shape
+        aspect_ratio = max(h, w)
+        scaling_factor = 20.0 / aspect_ratio
+        new_h = int(h * scaling_factor)
+        new_w = int(w * scaling_factor)
+
+        digit_resized = cv2.resize(cropped_image, (new_w, new_h), interpolation=cv2.INTER_AREA)
+
+        # Create 28x28 canvas
+        centered_image = np.full((28, 28), 1.0, dtype=np.float64)
+        offset_x = (28 - new_w) // 2
+        offset_y = (28 - new_h) // 2
+        centered_image[offset_y:offset_y + new_h, offset_x:offset_x + new_w] = digit_resized
+
+    
+        centered_image = 1.0 - centered_image
+
+        # TMP visual
+        # cv2.imshow('Centered Image', centered_image * 255)
+        # cv2.waitKey(1000)
+        # cv2.destroyAllWindows()
+
+        cv2.imwrite('drawn_digit.png', centered_image*255)
+        display_text("Image saved!", canvas_width + 10, 120)
+        print("Image saved as 'drawn_digit.png'")
+
+        return centered_image  
     else:
-        return np.full((28, 28), 255, dtype=np.float64) 
+        return np.full((28, 28), 255, dtype=np.float64)
+
+
 
 
 currentVal = -1
@@ -83,17 +147,19 @@ def send_command(command):
         response = neural.stdout.readline()  # Read response line-by-line
         return response.strip()
 
-print(send_command("load net.json"))
 
 
 def evalImage(img_data):
     global currentVal
-    normData =  (img_data / 255).flatten().tolist()
+    normData = (img_data).flatten().tolist()
+    for x in range(len(normData)):
+       
+        normData[x] =  max(0,round(normData[x],12))
 
-    #print(json.dumps(normData))
+    print(json.dumps(normData))
     RES = send_command("eval " + json.dumps(normData))
     RES = json.loads(RES.replace(" ", ","))
-    print(RES)
+    ##print(RES)
     mxVal = 0
     mxIndex = -1
     for x in range(len(RES)):
@@ -102,9 +168,8 @@ def evalImage(img_data):
             mxIndex = x
     currentVal = mxIndex
 
-    
 
-
+print(send_command("load net.json"))
 
 while running:
     for event in pygame.event.get():
@@ -120,6 +185,7 @@ while running:
 
             pygame_image = pygame.surfarray.array3d(screen.subsurface((0, 0, canvas_width, canvas_height)))
             processed_image = preprocess_and_center_image(pygame_image)
+
             evalImage(processed_image)
 
         
@@ -134,7 +200,7 @@ while running:
         if mouse_x < canvas_width:
             if last_pos is not None:
                 
-                pygame.draw.line(screen, black, last_pos, (mouse_x, mouse_y), 20) #DrawWidth
+                pygame.draw.line(screen, black, last_pos, (mouse_x, mouse_y), 30) #DrawWidth
             last_pos = (mouse_x, mouse_y) 
 
 

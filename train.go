@@ -117,8 +117,10 @@ func (shelf *Network) tmpRun(mim *MiM, sample []float64, label []float64, wg *sy
 func (shelf *Network) Test(mim *MiM, TestData [][]float64, TestLabels [][]float64) float64 {
 	// return 0
 	totalCost := 0.0
-
 	correct_choises := 0
+
+	wrongMap := make([]int, 10)
+
 	for sampleID, sample := range TestData {
 		shelf.forward(mim, sample)
 		totalCost += shelf.cost_interface.call(*mim.data_flat, TestLabels[sampleID])
@@ -128,15 +130,20 @@ func (shelf *Network) Test(mim *MiM, TestData [][]float64, TestLabels [][]float6
 		// fmt.Println("--")
 		if isCorrect(*mim.data_flat, TestLabels[sampleID]) {
 			correct_choises += 1
+		} else {
+			for id, v := range TestLabels[sampleID] {
+				if v == 1 {
+					wrongMap[id] += 1
+					break
+				}
+			}
 		}
 
-		// if sampleID%1000 == 0 {
-		// 	fmt.Println(mim.data_flat)
-		// }
 	}
 	// fmt.Println(*mim.data_flat, TestLabels[len(TestLabels)-1], isCorrect(*mim.data_flat, TestLabels[len(TestLabels)-1]))
 	fmt.Println("Percantage Correct on Test Data: ", float64(correct_choises)/float64(len(TestLabels)))
 	fmt.Println("Cost: ", totalCost/float64(len(TestLabels)))
+	fmt.Println("Wrong guess: ", wrongMap)
 	//shelf.layers[0].debug_print()
 
 	return totalCost / float64(len(TestLabels))

@@ -63,8 +63,8 @@ func cliHandler() {
 }
 
 func main() {
-	cliHandler()
-	//net := tmpNewMNIST()
+	//cliHandler()
+	net := tmpNewMNIST()
 	//net := tmpNewXOR()
 	// net.print_weights()
 
@@ -77,7 +77,7 @@ func main() {
 	//net.layers[1].debug_print()
 
 	//xor(net)
-	//mnist(net)
+	mnist(net)
 
 	// mim := new(MiM)
 	// mim.init(net)
@@ -90,6 +90,9 @@ func main() {
 
 	//encode_to_json(net)
 
+	// _, _, MNIST_TestDataLabel, MNIST_TestData := data_handler.Load_mnist()
+
+	// fmt.Println(MNIST_TestData[0], MNIST_TestDataLabel[0])
 }
 
 func mnist(net *Network) {
