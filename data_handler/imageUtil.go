@@ -82,6 +82,7 @@ func rotateFloatArray(data *[]float64, angle float64) {
 }
 
 func noise(data *[]float64) {
+	rotateFloatArray(data, (rand.Float64()*2-1)*45)
 	addNoiseToFloatArray(data, 0.1)
-	rotateFloatArray(data, (rand.Float64()*2-1)*20)
+
 }

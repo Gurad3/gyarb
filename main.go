@@ -64,7 +64,7 @@ func cliHandler() {
 
 func main() {
 	//cliHandler()
-	//net := tmpNewMNIST()
+	net := tmpNewMNIST()
 	//net := tmpNewXOR()
 	// net.print_weights()
 
@@ -77,7 +77,7 @@ func main() {
 	//net.layers[1].debug_print()
 
 	//xor(net)
-	//mnist(net)
+	mnist(net)
 
 	// mim := new(MiM)
 	// mim.init(net)
@@ -149,18 +149,29 @@ func tmpNewMNIST() *Network {
 		&ConvLayer{
 			act_interface: &RelU{},
 			kernel_size:   3,
-			depth:         2,
+			depth:         6,
 		},
 
 		&ConvLayer{
 			act_interface: &RelU{},
 			kernel_size:   3,
-			depth:         4,
+			depth:         12,
+		},
+
+		&ConvLayer{
+			act_interface: &RelU{},
+			kernel_size:   3,
+			depth:         24,
+		},
+		&ConvLayer{
+			act_interface: &RelU{},
+			kernel_size:   3,
+			depth:         48,
 		},
 
 		&DenseLayer{
 			act_interface: &RelU{},
-			size:          160,
+			size:          150,
 		},
 
 		&DenseLayer{
