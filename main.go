@@ -68,7 +68,7 @@ func main() {
 	//net := tmpNewXOR()
 	// net.print_weights()
 
-	net := load_from_json("saves/ConvMNIST_1.json")
+	//net := load_from_json("saves/ConvMNIST_1.json")
 
 	// net.file_name = "test"
 
@@ -79,10 +79,10 @@ func main() {
 	//xor(net)
 	//mnist(net)
 
-	mim := new(MiM)
-	mim.init(net)
-	_, _, MNIST_TestDataLabel, MNIST_TestData := data_handler.Load_mnist()
-	net.Test(mim, MNIST_TestData, MNIST_TestDataLabel)
+	// mim := new(MiM)
+	// mim.init(net)
+	// _, _, MNIST_TestDataLabel, MNIST_TestData := data_handler.Load_mnist()
+	// net.Test(mim, MNIST_TestData, MNIST_TestDataLabel)
 
 	//net.print_weights()
 	//_, _, _, TestData := loadMnist()
@@ -90,8 +90,8 @@ func main() {
 
 	//encode_to_json(net)
 
-	// _, _, MNIST_TestDataLabel, MNIST_TestData := data_handler.Load_mnist()
-
+	// _, _, _, MNIST_TestData := data_handler.Load_mnist()
+	// data_handler.SaveImage(MNIST_TestData[0], "./images/image.png")
 	// fmt.Println(MNIST_TestData[0], MNIST_TestDataLabel[0])
 }
 
@@ -137,7 +137,7 @@ func tmpNewMNIST() *Network {
 	//net.learn_rate_decay = 0.0001
 	net.regularization = 0.1
 	net.momentum = 0
-	net.file_name = "ConvMNIST_1"
+	net.file_name = "ConvMNIST_2"
 	net.cost_interface = &MeanSquare{}
 
 	net.input_shape = []int{1, 28, 28}

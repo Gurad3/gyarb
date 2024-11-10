@@ -12,6 +12,20 @@ func Load_mnist() ([][]float64, [][]float64, [][]float64, [][]float64) {
 
 	TrainDataLabel := loadLabelFile(folderLocation+"train-labels.idx1-ubyte", 60_000, 8)
 	TestDataLabel := loadLabelFile(folderLocation+"t10k-labels.idx1-ubyte", 10_000, 8)
+
+	//v := rand.Int63n(10_000)
+	//SaveImage(TestData[v], "./images/norm.png")
+
+	// for i := 0; i < 60_000; i++ {
+	// 	noise(&TrainData[i])
+	// }
+
+	// for i := 0; i < 10_000; i++ {
+	// 	noise(&TestData[i])
+	// }
+
+	//SaveImage(TestData[v], "./images/process.png")
+
 	return TrainDataLabel, TrainData, TestDataLabel, TestData
 }
 
