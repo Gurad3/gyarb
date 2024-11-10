@@ -19,6 +19,7 @@ pygame.display.set_caption('Draw a Number')
 white = (255, 255, 255)
 black = (0, 0, 0)
 gray = (200, 200, 200)
+drawrad = 30
 
 screen.fill(white)
 pygame.draw.rect(screen, gray, (canvas_width, 0, panel_width, window_height))
@@ -200,8 +201,9 @@ while running:
         if mouse_x < canvas_width:
             if last_pos is not None:
                 
-                pygame.draw.line(screen, black, last_pos, (mouse_x, mouse_y), 30) #DrawWidth
+                pygame.draw.line(screen, black, last_pos, (mouse_x, mouse_y), drawrad) #DrawWidth
             last_pos = (mouse_x, mouse_y) 
+            pygame.draw.circle(screen, black,(mouse_x, mouse_y),drawrad/2)
 
 
     #INFO area
