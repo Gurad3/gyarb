@@ -64,7 +64,7 @@ func cliHandler() {
 
 func main() {
 	//cliHandler()
-	net := tmpNewMNIST()
+	//net := tmpNewMNIST()
 	//net := tmpNewXOR()
 	// net.print_weights()
 
@@ -77,7 +77,7 @@ func main() {
 	//net.layers[1].debug_print()
 
 	//xor(net)
-	mnist(net)
+	//mnist(net)
 
 	// mim := new(MiM)
 	// mim.init(net)
@@ -90,8 +90,8 @@ func main() {
 
 	//encode_to_json(net)
 
-	// _, _, _, MNIST_TestData := data_handler.Load_mnist()
-	// data_handler.SaveImage(MNIST_TestData[0], "./images/image.png")
+	_, _, _, MNIST_TestData := data_handler.Load_mnist()
+	data_handler.SaveImage(MNIST_TestData[0], "./images/image.png")
 	// fmt.Println(MNIST_TestData[0], MNIST_TestDataLabel[0])
 }
 

@@ -19,7 +19,7 @@ pygame.display.set_caption('Draw a Number')
 white = (255, 255, 255)
 black = (0, 0, 0)
 gray = (200, 200, 200)
-drawrad = 30
+drawrad = 20
 
 screen.fill(white)
 pygame.draw.rect(screen, gray, (canvas_width, 0, panel_width, window_height))
