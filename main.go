@@ -64,7 +64,7 @@ func cliHandler() {
 
 func main() {
 	//cliHandler()
-	//net := tmpNewMNIST()
+	net := tmpNewMNIST()
 	//net := tmpNewXOR()
 	// net.print_weights()
 
@@ -77,7 +77,7 @@ func main() {
 	//net.layers[1].debug_print()
 
 	//xor(net)
-	//mnist(net)
+	mnist(net)
 
 	// mim := new(MiM)
 	// mim.init(net)
@@ -90,8 +90,8 @@ func main() {
 
 	//encode_to_json(net)
 
-	_, _, _, MNIST_TestData := data_handler.Load_mnist()
-	data_handler.SaveImage(MNIST_TestData[0], "./images/image.png")
+	// _, _, _, MNIST_TestData := data_handler.Load_mnist()
+	// data_handler.SaveImage(MNIST_TestData[0], "./images/image.png")
 	// fmt.Println(MNIST_TestData[0], MNIST_TestDataLabel[0])
 }
 
@@ -104,7 +104,7 @@ func mnist(net *Network) {
 		TrainDataLabel: MNIST_TrainDataLabel,
 		TestDataLabel:  MNIST_TestDataLabel,
 
-		batch_size:        100,
+		batch_size:        40,
 		info_milestone:    60_000,
 		save_at_milestone: true,
 	}
@@ -137,7 +137,7 @@ func tmpNewMNIST() *Network {
 	//net.learn_rate_decay = 0.0001
 	net.regularization = 0.1
 	net.momentum = 0
-	net.file_name = "ConvMNIST_2"
+	net.file_name = "MNIST_4"
 	net.cost_interface = &MeanSquare{}
 
 	net.input_shape = []int{1, 28, 28}
@@ -149,29 +149,12 @@ func tmpNewMNIST() *Network {
 		&ConvLayer{
 			act_interface: &RelU{},
 			kernel_size:   3,
-			depth:         6,
-		},
-
-		&ConvLayer{
-			act_interface: &RelU{},
-			kernel_size:   3,
-			depth:         12,
-		},
-
-		&ConvLayer{
-			act_interface: &RelU{},
-			kernel_size:   3,
-			depth:         24,
-		},
-		&ConvLayer{
-			act_interface: &RelU{},
-			kernel_size:   3,
-			depth:         48,
+			depth:         2,
 		},
 
 		&DenseLayer{
 			act_interface: &RelU{},
-			size:          150,
+			size:          160,
 		},
 
 		&DenseLayer{

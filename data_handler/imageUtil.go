@@ -81,8 +81,17 @@ func rotateFloatArray(data *[]float64, angle float64) {
 	*data = rotatedData
 }
 
-func noise(data *[]float64) {
+func NoiseInplace(data *[]float64) {
 	rotateFloatArray(data, (rand.Float64()*2-1)*45)
 	addNoiseToFloatArray(data, 0.1)
+}
 
+func NoiseNewSet(data *[][]float64) *[][]float64 {
+	out := make([][]float64, len(*data))
+	copy(out, (*data))
+	for i := 0; i < len(*data); i++ {
+		NoiseInplace(&out[i])
+	}
+
+	return &out
 }

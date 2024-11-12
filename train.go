@@ -13,6 +13,8 @@ type trainer struct {
 	TestData       [][]float64
 	TestDataLabel  [][]float64
 
+	TrainDataOrignal [][]float64
+
 	train_batches       [][][]float64
 	train_label_batches [][][]float64
 
@@ -23,6 +25,8 @@ type trainer struct {
 }
 
 func (shelf *Network) train_network(trainData trainer, threded bool) {
+
+	//trainData.TrainDataOrignal = trainData.TrainData
 
 	for i := 0; i < len(trainData.TrainData); i += trainData.batch_size {
 		end := i + trainData.batch_size
