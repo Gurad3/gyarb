@@ -5,7 +5,6 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 )
@@ -43,7 +42,7 @@ func cliHandler() {
 			// Parse the JSON data
 			err := json.Unmarshal([]byte(jsonData), &data)
 			if err != nil {
-				log.Fatalf("Error parsing JSON: %v", err)
+
 			}
 			net.forward(mim, data)
 			//response, _ := json.Marshal(*mim.data_flat)
@@ -137,7 +136,7 @@ func tmpNewMNIST() *Network {
 	//net.learn_rate_decay = 0.0001
 	net.regularization = 0.1
 	net.momentum = 0
-	net.file_name = "MNIST_4"
+	net.file_name = "MNIST_5"
 	net.cost_interface = &MeanSquare{}
 
 	net.input_shape = []int{1, 28, 28}
@@ -149,12 +148,17 @@ func tmpNewMNIST() *Network {
 		&ConvLayer{
 			act_interface: &RelU{},
 			kernel_size:   3,
-			depth:         2,
+			depth:         3,
+		},
+		&ConvLayer{
+			act_interface: &RelU{},
+			kernel_size:   3,
+			depth:         6,
 		},
 
 		&DenseLayer{
 			act_interface: &RelU{},
-			size:          160,
+			size:          180,
 		},
 
 		&DenseLayer{
