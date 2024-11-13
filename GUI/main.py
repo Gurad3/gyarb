@@ -134,6 +134,7 @@ def preprocess_and_center_image(pygame_image):
 
 currentVal = -1
 path = "./net.exe"
+#path = "./netMULT.exe"
 neural = subprocess.Popen(
     [path],  # The program path and arguments if needed
     stdin=subprocess.PIPE,

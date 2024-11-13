@@ -91,7 +91,6 @@ func (shelf *Network) get_output_ddx(mim *MiM, labels []float64) *[]float64 {
 	for outID, output := range *mim.data_flat {
 		gradiants[outID] = shelf.layers[len(shelf.layers)-1].get_act_interface().ddx(mim.layers_out_non_activated[len(shelf.layers)][outID])
 		gradiants[outID] *= shelf.cost_interface.ddx(output, labels[outID])
-
 	}
 
 	return &gradiants
