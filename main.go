@@ -103,7 +103,7 @@ func mnist(net *Network) {
 		TrainDataLabel: MNIST_TrainDataLabel,
 		TestDataLabel:  MNIST_TestDataLabel,
 
-		batch_size:        40,
+		batch_size:        100,
 		info_milestone:    60_000,
 		save_at_milestone: true,
 	}
@@ -148,17 +148,17 @@ func tmpNewMNIST() *Network {
 		&ConvLayer{
 			act_interface: &RelU{},
 			kernel_size:   3,
-			depth:         3,
+			depth:         2,
 		},
 		&ConvLayer{
 			act_interface: &RelU{},
 			kernel_size:   3,
-			depth:         6,
+			depth:         4,
 		},
 
 		&DenseLayer{
 			act_interface: &RelU{},
-			size:          180,
+			size:          200,
 		},
 
 		&DenseLayer{

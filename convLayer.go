@@ -81,7 +81,7 @@ func (shelf *ConvLayer) init_new_weights(xavierRange float64, r rand.Rand) {
 	//Give each weights new random weights (Currentlu 0)
 
 	for i := 0; i < shelf.depth; i++ {
-
+		// shelf.filters[i].bias = initWeightXavierUniform(xavierRange, r)
 		for j := 0; j < shelf.input_depth; j++ {
 			for k := 0; k < shelf.kernel_size; k++ {
 				for l := 0; l < shelf.kernel_size; l++ {
@@ -177,7 +177,7 @@ func (shelf *Filter) compute_loss_kernel_gradient(mim *MiM, O_W int, O_H int, la
 		for l := 0; l < O_H; l++ {
 			//shelf.bias_gradient += (*mim.data_3d)[filterID][k][l]
 			shelf.bias_gradient += out_grade[filterOffset+k*O_W+l]
-
+			// fmt.Println("g", shelf.bias_gradient)
 		}
 	}
 }
@@ -300,7 +300,10 @@ func (shelf *ConvLayer) apply_gradients(learn_rate float64, batch_size int, regu
 		shelf.filters[i].bias_velocitiy = velocity
 
 		shelf.filters[i].bias += velocity
+
+		// fmt.Println(shelf.filters[i].bias, velocity, shelf.filters[i].bias_gradient)
 		shelf.filters[i].bias_gradient = 0
+
 	}
 
 }
