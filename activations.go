@@ -30,9 +30,11 @@ type RelU struct {
 func (shelf *RelU) get_name() string {
 	return "relu"
 }
+
 func (shelf *RelU) call(val float64) float64 {
 	return max(0, val)
 }
+
 func (shelf *RelU) ddx(val float64) float64 {
 	if val > 0 {
 		return 1
@@ -60,6 +62,7 @@ type TanH struct{}
 func (shelf *TanH) get_name() string {
 	return "tanh"
 }
+
 func (shelf *TanH) call(val float64) float64 {
 	posExp := math.Exp(val)
 	negExp := math.Exp(-val)
@@ -76,6 +79,7 @@ type SiLU struct{}
 func (shelf *SiLU) get_name() string {
 	return "SiLU"
 }
+
 func (shelf *SiLU) call(val float64) float64 {
 	return val / (1 + math.Exp(-val))
 }
