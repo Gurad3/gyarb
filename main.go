@@ -62,8 +62,10 @@ func cliHandler() {
 }
 
 func main() {
+	//tmp()
 	//cliHandler()
-	net := tmpNewMNIST()
+	//TMPCLI()
+	//net := tmpNewMNIST()
 	//net := tmpNewXOR()
 	// net.print_weights()
 
@@ -76,7 +78,7 @@ func main() {
 	//net.layers[1].debug_print()
 
 	//xor(net)
-	mnist(net)
+	//mnist(net)
 
 	// mim := new(MiM)
 	// mim.init(net)
@@ -96,7 +98,6 @@ func main() {
 
 func mnist(net *Network) {
 	MNIST_TrainDataLabel, MNIST_TrainData, MNIST_TestDataLabel, MNIST_TestData := data_handler.Load_mnist()
-
 	td := trainer{
 		TrainData:      MNIST_TrainData,
 		TestData:       MNIST_TestData,
@@ -150,15 +151,10 @@ func tmpNewMNIST() *Network {
 			kernel_size:   3,
 			depth:         2,
 		},
-		&ConvLayer{
-			act_interface: &RelU{},
-			kernel_size:   3,
-			depth:         4,
-		},
 
 		&DenseLayer{
 			act_interface: &RelU{},
-			size:          200,
+			size:          150,
 		},
 
 		&DenseLayer{
