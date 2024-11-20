@@ -65,7 +65,7 @@ func main() {
 	//tmp()
 	//cliHandler()
 	//TMPCLI()
-	//net := tmpNewMNIST()
+	net := tmpNewMNIST()
 	//net := tmpNewXOR()
 	// net.print_weights()
 
@@ -78,7 +78,7 @@ func main() {
 	//net.layers[1].debug_print()
 
 	//xor(net)
-	//mnist(net)
+	mnist(net)
 
 	// mim := new(MiM)
 	// mim.init(net)
@@ -104,7 +104,7 @@ func mnist(net *Network) {
 		TrainDataLabel: MNIST_TrainDataLabel,
 		TestDataLabel:  MNIST_TestDataLabel,
 
-		batch_size:        100,
+		batch_size:        50,
 		info_milestone:    60_000,
 		save_at_milestone: true,
 	}
@@ -137,7 +137,7 @@ func tmpNewMNIST() *Network {
 	//net.learn_rate_decay = 0.0001
 	net.regularization = 0.1
 	net.momentum = 0
-	net.file_name = "MNIST_5"
+	net.file_name = "MNIST_SiLU"
 	net.cost_interface = &MeanSquare{}
 
 	net.input_shape = []int{1, 28, 28}
@@ -146,15 +146,26 @@ func tmpNewMNIST() *Network {
 
 	net.layers = []Layer{
 
-		&ConvLayer{
-			act_interface: &RelU{},
-			kernel_size:   3,
-			depth:         2,
+		// &ConvLayer{
+		// 	act_interface: &SiLU{},
+		// 	kernel_size:   4,
+		// 	depth:         2,
+		// },
+
+		// &ConvLayer{
+		// 	act_interface: &SiLU{},
+		// 	kernel_size:   3,
+		// 	depth:         4,
+		// },
+
+		&DenseLayer{
+			act_interface: &SiLU{},
+			size:          120,
 		},
 
 		&DenseLayer{
-			act_interface: &RelU{},
-			size:          150,
+			act_interface: &SiLU{},
+			size:          120,
 		},
 
 		&DenseLayer{
