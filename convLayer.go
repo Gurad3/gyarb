@@ -191,9 +191,6 @@ func (shelf *Filter) compute_output_gradient(mim *MiM, O_W int, O_H int, layerID
 
 	out_grade := *mim.data_flat
 	filterOffset := filterID * O_H * O_W
-
-	//prev_layer_out := mim.layers_out[layerID-1]
-
 	K_Y := len(shelf.kernels[0])
 	K_X := len(shelf.kernels[0][0])
 	for c := 0; c < inp_shape[0]; c++ {
@@ -207,15 +204,7 @@ func (shelf *Filter) compute_output_gradient(mim *MiM, O_W int, O_H int, layerID
 				for k := 0; k < K_Y; k++ {
 					for l := 0; l < K_X; l++ {
 
-						//shelf.kernel_gradients[c][i][j] += mim.layers_out_3d[layerID-1][c][i+k][j+l] * (*mim.data_3d)[filterID][k][l]
-						//shelf.kernel_gradients[c][i][j] += mim.layers_out[layerID-1][c*inp_shape[1]*inp_shape[2]+(i+k)*inp_shape[1]+j+l] * (*mim.data_flat)[filterID][k][l]
-
-						//shelf.kernel_gradients[c][i][j] += prev_layer_out[c*inp_shape[1]*inp_shape[2]+(i+k)*inp_shape[1]+j+l] * out_grade[filterID*O_H*O_W+k*O_W+l]
-						//kgcij += prev_layer_out[channelOffset+(i+k)*inp_shape[1]+j+l] * out_grade[filterOffset+k*O_W+l]
-
-						// TODO: Om "filterOffset+(i+k)*inp_shape[1]+j+l" ligger utanför indexes för "out_grade" så ska det vara 0. Kolla för boundary för en artificell 2d array.
-
-						//TODO: Mer effetkiv statment, (Exit early)
+						///TODO: Mer effetkiv statment, (Exit early)
 						if !((j+l) < (K_X-1) || (i+k) < (K_Y-1) || (j+l) > (K_X-1)+O_W-1 || (i+k) > (K_Y-1)+O_H-1) {
 
 							mim.layers_out[layerID-1][channelOffset+i*inp_shape[1]+j] += out_grade[filterOffset+(i+k-(K_Y-1))*O_W+j+l-(K_X-1)] * shelf.kernels[c][K_Y-1-k][K_X-1-l]
@@ -224,7 +213,6 @@ func (shelf *Filter) compute_output_gradient(mim *MiM, O_W int, O_H int, layerID
 						//flipped[i][j] = kernel[rows-1-i][cols-1-j]
 					}
 				}
-
 				//	mim.layers_out[layerID-1][channelOffset+i*inp_shape[1]+j] *= prev_act_out.ddx(mim.layers_out[layerID-1][channelOffset+i*inp_shape[1]+j])
 			}
 		}
@@ -243,11 +231,7 @@ func (shelf *Filter) correlation(matrix []float64, target_activated []float64, t
 			for kernel_index := 0; kernel_index < len(shelf.kernels); kernel_index++ {
 				kernel_offset := kernel_index * input_shape[1] * input_shape[2]
 				for k := 0; k < len(shelf.kernels[kernel_index]); k++ {
-
 					for l := 0; l < len(shelf.kernels[kernel_index][0]); l++ {
-
-						//sum += (*matrix)[kernel_index][i+k][j+l] * shelf.kernels[kernel_index][k][l]
-
 						sum += matrix[kernel_offset+(i+k)*input_shape[1]+(j+l)] * shelf.kernels[kernel_index][k][l]
 					}
 				}
@@ -257,7 +241,7 @@ func (shelf *Filter) correlation(matrix []float64, target_activated []float64, t
 
 			target_activated[i*out_shape[0]+j] = activation.call(sum)
 			target_non_activated[i*out_shape[0]+j] = sum
-			// fmt.Println(sum)
+
 		}
 	}
 }
@@ -286,11 +270,10 @@ func (shelf *ConvLayer) apply_gradients(learn_rate float64, batch_size int, regu
 				for l := 0; l < shelf.kernel_size; l++ {
 
 					//shelf.filters[i].kernels[j][k][l] -= shelf.filters[i].kernel_gradients[j][k][l] * mult
+
 					velocity := shelf.filters[i].weight_velocities[j][k][l]*momentum - shelf.filters[i].kernel_gradients[j][k][l]*mult
 					shelf.filters[i].weight_velocities[j][k][l] = velocity
-
 					shelf.filters[i].kernels[j][k][l] = shelf.filters[i].kernels[j][k][l]*weight_decay + velocity
-
 					shelf.filters[i].kernel_gradients[j][k][l] = 0
 				}
 			}
@@ -298,12 +281,8 @@ func (shelf *ConvLayer) apply_gradients(learn_rate float64, batch_size int, regu
 		}
 		velocity := shelf.filters[i].bias_velocitiy*momentum - shelf.filters[i].bias_gradient*mult
 		shelf.filters[i].bias_velocitiy = velocity
-
 		shelf.filters[i].bias += velocity
-
-		// fmt.Println(shelf.filters[i].bias, velocity, shelf.filters[i].bias_gradient)
 		shelf.filters[i].bias_gradient = 0
-
 	}
 
 }
@@ -313,7 +292,6 @@ func (shelf *ConvLayer) load_weights(flat_weights []float64) {
 		for j := 0; j < shelf.input_depth; j++ {
 			for k := 0; k < shelf.kernel_size; k++ {
 				for l := 0; l < shelf.kernel_size; l++ {
-					//shelf.filters[i].kernels[j][k][l] = flat_weights[i*shelf.depth+j*shelf.input_depth+k*shelf.kernel_size+l]
 					shelf.filters[i].kernels[j][k][l] = flat_weights[i*shelf.input_depth*shelf.kernel_size*shelf.kernel_size+j*shelf.kernel_size*shelf.kernel_size+k*shelf.kernel_size+l]
 				}
 			}

@@ -136,7 +136,6 @@ func (shelf *DenseLayer) apply_gradients(learn_rate float64, batch_size int, reg
 			wt[weightID] = wt[weightID]*weight_decay + velocity
 			wtg[weightID] = 0
 		}
-
 		// for weightID := range shelf.weights[neuronID] {
 		// 	shelf.weights[neuronID][weightID] -= shelf.weights_gradiants[neuronID][weightID] * mult
 		// 	shelf.weights_gradiants[neuronID][weightID] = 0
@@ -149,9 +148,7 @@ func (shelf *DenseLayer) init_new_weights(xavierRange float64, r rand.Rand) {
 
 	for neuronID := range shelf.bias {
 		shelf.bias[neuronID] = 0
-
 		for weightID := range shelf.weights[neuronID] {
-
 			shelf.weights[neuronID][weightID] = initWeightXavierUniform(xavierRange, r)
 		}
 	}
@@ -189,8 +186,6 @@ func (shelf *DenseLayer) print_weights() {
 	for neuronID := range shelf.bias {
 		fmt.Println(shelf.weights[neuronID])
 	}
-
-	//fmt.Println(shelf.bias)
 }
 
 func (shelf *DenseLayer) get_size() []int {

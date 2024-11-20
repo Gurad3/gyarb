@@ -20,7 +20,7 @@ type NetworkData struct {
 	Layer_sizes     [][]int `json:"layer_sizes"`
 	Layer_init_vals [][]int `json:"layer_sizes_vals"`
 
-	//All flated
+	//flat
 	Layer_biases  [][]float64 `json:"layer_biases"`
 	Layer_weights [][]float64 `json:"layer_weights"`
 }
@@ -36,9 +36,7 @@ func load_from_net_data(net_data NetworkData) Network {
 	net.input_shape = net_data.Input_shape
 
 	net.cost_interface = cost_name_to_interface(net_data.Cost_interface)
-
 	net.layers = make([]Layer, len(net_data.Layer_types))
-
 	prev_layer_shape := net_data.Input_shape
 
 	for i := 0; i < len(net_data.Layer_types); i++ {
@@ -75,12 +73,6 @@ func load_from_net_data(net_data NetworkData) Network {
 }
 
 func save_to_net_data(net *Network) NetworkData {
-	// fmt.Println("---")
-	// net.layers[0].debug_print()
-	// fmt.Println("-")
-	// net.layers[1].debug_print()
-	// fmt.Println("---")
-
 	net_data := new(NetworkData)
 
 	net_data.File_name = net.file_name
@@ -128,7 +120,6 @@ func load_from_json(path string) *Network {
 	netData := new(NetworkData)
 	decoder.Decode(netData)
 
-	//fmt.Println(netData.Layer_weights)
 	net := load_from_net_data(*netData)
 	return &net
 }

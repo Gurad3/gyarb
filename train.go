@@ -25,9 +25,6 @@ type trainer struct {
 }
 
 func (shelf *Network) train_network(trainData trainer, threded bool) {
-
-	//trainData.TrainDataOrignal = trainData.TrainData
-
 	for i := 0; i < len(trainData.TrainData); i += trainData.batch_size {
 		end := i + trainData.batch_size
 		if end > len(trainData.TrainData) {
@@ -40,7 +37,9 @@ func (shelf *Network) train_network(trainData trainer, threded bool) {
 	totalSamples := 0
 	mim := new(MiM)
 	mim.init(shelf)
-	b := 0
+
+	running := true
+
 	if threded {
 		mimArray := make([]MiM, trainData.batch_size)
 		for i := 0; i < trainData.batch_size; i++ {
@@ -48,50 +47,37 @@ func (shelf *Network) train_network(trainData trainer, threded bool) {
 		}
 		var wg sync.WaitGroup
 
-		for b < 2 {
+		for running {
 			for batchID, batch := range trainData.train_batches {
 				wg.Add(trainData.batch_size)
 				for sampleID, sample := range batch {
-					go shelf.tmpRun(&mimArray[sampleID], sample, trainData.train_label_batches[batchID][sampleID], &wg)
+					go shelf.ThreadRun(&mimArray[sampleID], sample, trainData.train_label_batches[batchID][sampleID], &wg)
 
 					if totalSamples%trainData.info_milestone == 0 {
 						shelf.Test(mim, trainData.TestData, trainData.TestDataLabel)
 
-						// b++
-						//shelf.layers[0].debug_print()
 						if trainData.save_at_milestone {
-							fmt.Println("Start JSON Save")
 							encode_to_json(shelf)
-							fmt.Println("Done JSON Save")
-
-							// shelf.layers[0].debug_print()
 						}
 					}
 					totalSamples++
-
 				}
 				wg.Wait()
 				shelf.apply_gradients(trainData.batch_size)
-				if b == 2 {
-					break
-				}
+
 			}
-
 			trainData.shuffle_batches()
-
 		}
 		wg.Wait()
 	} else {
-		for b < 2 {
+		for running {
 			for batchID, batch := range trainData.train_batches {
 				for sampleID, sample := range batch {
 					shelf.forward(mim, sample)
-					// shelf.print_weights()
-					// fmt.Println(mim.data_flat)
+
 					shelf.backprop(mim, trainData.train_label_batches[batchID][sampleID])
 					if totalSamples%trainData.info_milestone == 0 {
 						shelf.Test(mim, trainData.TestData, trainData.TestDataLabel)
-						// b++
 						if trainData.save_at_milestone {
 							encode_to_json(shelf)
 						}
@@ -99,9 +85,6 @@ func (shelf *Network) train_network(trainData trainer, threded bool) {
 					totalSamples++
 				}
 				shelf.apply_gradients(trainData.batch_size)
-				if b == 2 {
-					break
-				}
 			}
 			trainData.shuffle_batches()
 		}
@@ -109,17 +92,14 @@ func (shelf *Network) train_network(trainData trainer, threded bool) {
 
 }
 
-func (shelf *Network) tmpRun(mim *MiM, sample []float64, label []float64, wg *sync.WaitGroup) {
+func (shelf *Network) ThreadRun(mim *MiM, sample []float64, label []float64, wg *sync.WaitGroup) {
 	defer wg.Done()
 	shelf.forward(mim, sample)
-	// shelf.print_weights()
-	// fmt.Println(mim.data_flat)
 	shelf.backprop(mim, label)
 
 }
 
 func (shelf *Network) Test(mim *MiM, TestData [][]float64, TestLabels [][]float64) float64 {
-	// return 0
 	totalCost := 0.0
 	correct_choises := 0
 
@@ -129,9 +109,6 @@ func (shelf *Network) Test(mim *MiM, TestData [][]float64, TestLabels [][]float6
 		shelf.forward(mim, sample)
 		totalCost += shelf.cost_interface.call(*mim.data_flat, TestLabels[sampleID])
 
-		// fmt.Println("--")
-		// fmt.Println(&sample, *mim.data_flat, TestLabels[sampleID], isCorrect(*mim.data_flat, TestLabels[sampleID]))
-		// fmt.Println("--")
 		if isCorrect(*mim.data_flat, TestLabels[sampleID]) {
 			correct_choises += 1
 		} else {
@@ -144,7 +121,6 @@ func (shelf *Network) Test(mim *MiM, TestData [][]float64, TestLabels [][]float6
 		}
 
 	}
-	// fmt.Println(*mim.data_flat, TestLabels[len(TestLabels)-1], isCorrect(*mim.data_flat, TestLabels[len(TestLabels)-1]))
 	fmt.Println("Percantage Correct on Test Data: ", float64(correct_choises)/float64(len(TestLabels)))
 	fmt.Println("Cost: ", totalCost/float64(len(TestLabels)))
 	fmt.Println("Wrong guess: ", wrongMap)
@@ -169,10 +145,6 @@ func isCorrect(values []float64, target_values []float64) bool {
 			highV = v
 		}
 	}
-
-	// fmt.Print("--")
-	// fmt.Println(higT == highVID, values, target_values)
-	// fmt.Print("--")
 	return higT == highVID
 }
 
@@ -181,11 +153,10 @@ func isCorrect(values []float64, target_values []float64) bool {
 // 	for batch_index := range shelf.train_batches {
 // 		rand_index := rng.Int() % len(shelf.train_batches)
 
-// 		shelf.train_batches[batch_index], shelf.train_batches[rand_index] = shelf.train_batches[rand_index], shelf.train_batches[batch_index]
-// 		shelf.train_label_batches[batch_index], shelf.train_label_batches[rand_index] = shelf.train_label_batches[rand_index], shelf.train_label_batches[batch_index]
-// 	}
-// }
-
+//			shelf.train_batches[batch_index], shelf.train_batches[rand_index] = shelf.train_batches[rand_index], shelf.train_batches[batch_index]
+//			shelf.train_label_batches[batch_index], shelf.train_label_batches[rand_index] = shelf.train_label_batches[rand_index], shelf.train_label_batches[batch_index]
+//		}
+//	}
 func (shelf *trainer) shuffle_batches() {
 	rng := rand.New(rand.NewSource(time.Now().Unix()))
 	for batch_index := range shelf.TrainData {

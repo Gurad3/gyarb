@@ -27,7 +27,6 @@ type MeanSquare struct {
 func (shelf *MeanSquare) call(out_values []float64, target_values []float64) float64 {
 	sum := 0.0
 	for i := range out_values {
-		//sum += math.Pow(out_values[i]-target_values[i], 2)
 		sum += (out_values[i] - target_values[i]) * (out_values[i] - target_values[i])
 	}
 
