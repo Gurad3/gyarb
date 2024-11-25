@@ -137,8 +137,8 @@ func tmpNewMNIST() *Network {
 	//net.learn_rate_decay = 0.0001
 	net.regularization = 0.1
 	net.momentum = 0
-	net.file_name = "MNIST_SiLU"
-	net.cost_interface = &MeanSquare{}
+	net.file_name = "MNIST_SiLU_Cross"
+	net.cost_interface = &CrossEntropy{}
 
 	net.input_shape = []int{1, 28, 28}
 	//net.input_shape = []int{28 * 28}
