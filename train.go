@@ -22,9 +22,11 @@ type trainer struct {
 	info_milestone    int
 	save_at_milestone bool
 	epochs            int
+
+	threded bool
 }
 
-func (shelf *Network) train_network(trainData trainer, threded bool) {
+func (shelf *Network) train_network(trainData trainer) {
 	for i := 0; i < len(trainData.TrainData); i += trainData.batch_size {
 		end := i + trainData.batch_size
 		if end > len(trainData.TrainData) {
@@ -40,7 +42,7 @@ func (shelf *Network) train_network(trainData trainer, threded bool) {
 
 	running := true
 
-	if threded {
+	if trainData.threded {
 		mimArray := make([]MiM, trainData.batch_size)
 		for i := 0; i < trainData.batch_size; i++ {
 			mimArray[i].init(shelf)

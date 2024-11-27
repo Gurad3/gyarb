@@ -107,9 +107,11 @@ func mnist(net *Network) {
 		batch_size:        50,
 		info_milestone:    60_000,
 		save_at_milestone: true,
+
+		threded: true,
 	}
 
-	net.train_network(td, true)
+	net.train_network(td)
 
 }
 
@@ -125,8 +127,10 @@ func xor(net *Network) {
 		batch_size:        4,
 		info_milestone:    10_000,
 		save_at_milestone: false,
+
+		threded: false,
 	}
-	net.train_network(td, true)
+	net.train_network(td)
 
 }
 
