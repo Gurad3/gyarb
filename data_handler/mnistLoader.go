@@ -17,13 +17,13 @@ func Load_mnist() ([][]float64, [][]float64, [][]float64, [][]float64) {
 	// SaveImage(TestData[v], "./images/norm.png")
 	// NoiseInplace(&TestData[v])
 
-	for i := 0; i < 60_000; i++ {
-		NoiseInplace(&TrainData[i])
-	}
+	// for i := 0; i < 60_000; i++ {
+	// 	NoiseInplace(&TrainData[i])
+	// }
 
-	for i := 0; i < 10_000; i++ {
-		NoiseInplace(&TestData[i])
-	}
+	// for i := 0; i < 10_000; i++ {
+	// 	NoiseInplace(&TestData[i])
+	// }
 
 	// SaveImage(TestData[v], "./images/process.png")
 

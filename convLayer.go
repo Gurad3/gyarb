@@ -103,7 +103,6 @@ func (shelf *ConvLayer) forward(mim *MiM) {
 		outRangeStart := f * shelf.output_width * shelf.output_height
 		outRangeEnd := (f + 1) * shelf.output_width * shelf.output_height
 		filter.correlation(matrix, mim.layers_out[shelf.layerID][outRangeStart:outRangeEnd], mim.layers_out_non_activated[shelf.layerID][outRangeStart:outRangeEnd], shelf.act_interface, shelf.input_shape, shelf.out_size[1:])
-
 	}
 
 	//mim.data_3d = &mim.layers_out_3d[shelf.layerID]
@@ -115,8 +114,8 @@ func (shelf *ConvLayer) forward(mim *MiM) {
 
 func (shelf *ConvLayer) backprop(mim *MiM, prev_layer_act Activation) {
 
-	for f, filter := range shelf.filters {
-		filter.compute_loss_kernel_gradient(mim, shelf.output_width, shelf.output_height, shelf.layerID, f, shelf.input_shape)
+	for filterID := range shelf.filters {
+		shelf.filters[filterID].compute_loss_kernel_gradient(mim, shelf.output_width, shelf.output_height, shelf.layerID, filterID, shelf.input_shape)
 	}
 
 	if shelf.layerID == 1 {
@@ -128,8 +127,8 @@ func (shelf *ConvLayer) backprop(mim *MiM, prev_layer_act Activation) {
 		prevOut[i] = 0
 	}
 
-	for f, filter := range shelf.filters {
-		filter.compute_output_gradient(mim, shelf.output_width, shelf.output_height, shelf.layerID, f, shelf.input_shape, prev_layer_act)
+	for filterID := range shelf.filters {
+		shelf.filters[filterID].compute_output_gradient(mim, shelf.output_width, shelf.output_height, shelf.layerID, filterID, shelf.input_shape, prev_layer_act)
 	}
 
 	// for i := 0; i < shelf.input_depth*shelf.input_height*shelf.input_width; i++ {
