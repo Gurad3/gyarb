@@ -1,6 +1,7 @@
 package main
 
 import (
+	"ProjectX/data_handler"
 	"fmt"
 	"math/rand"
 	"sync"
@@ -27,6 +28,18 @@ type trainer struct {
 }
 
 func (shelf *Network) train_network(trainData trainer) {
+
+	trainData.TrainDataOrignal = make([][]float64, len(trainData.TrainData))
+	fmt.Println(copy(trainData.TrainDataOrignal, trainData.TrainData))
+
+	for i := 0; i < 60_000; i++ {
+		data_handler.NoiseInplace(&trainData.TrainData[i])
+	}
+
+	for i := 0; i < 10_000; i++ {
+		data_handler.NoiseInplace(&trainData.TestData[i])
+	}
+
 	for i := 0; i < len(trainData.TrainData); i += trainData.batch_size {
 		end := i + trainData.batch_size
 		if end > len(trainData.TrainData) {
@@ -166,5 +179,16 @@ func (shelf *trainer) shuffle_batches() {
 
 		shelf.TrainData[batch_index], shelf.TrainData[rand_index] = shelf.TrainData[rand_index], shelf.TrainData[batch_index]
 		shelf.TrainDataLabel[batch_index], shelf.TrainDataLabel[rand_index] = shelf.TrainDataLabel[rand_index], shelf.TrainDataLabel[batch_index]
+
+		shelf.TrainDataOrignal[batch_index], shelf.TrainDataOrignal[rand_index] = shelf.TrainDataOrignal[rand_index], shelf.TrainDataOrignal[batch_index]
 	}
+
+	for i := 0; i < int(float64(len(shelf.TrainData))*0.05); i++ {
+		rand_index := rng.Int() % len(shelf.TrainData)
+
+		copy(shelf.TrainData[rand_index], shelf.TrainDataOrignal[rand_index])
+
+		data_handler.NoiseInplace(&shelf.TrainData[rand_index])
+	}
+
 }

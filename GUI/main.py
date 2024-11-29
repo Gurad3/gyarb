@@ -133,6 +133,7 @@ def preprocess_and_center_image(pygame_image):
 
 
 currentVal = -1
+#path = "./netNoise.exe"
 path = "./net.exe"
 #path = "./netMULT.exe"
 neural = subprocess.Popen(

@@ -33,11 +33,13 @@ func train_mnist(net *Network) {
 func CreateNewNetwork() *Network {
 	net := new(Network)
 
-	net.learn_rate = .02
-	net.regularization = 0.1
-	net.momentum = 0.4
+	// Hyperparametrar
+	net.learn_rate = .04
+	net.regularization = 0.01
+	net.momentum = 0.3
 
-	net.file_name = "MNIST_Example_Net" // Filnamnet som nätvärket sparas till. (JSON)
+	// Filnamnet som nätvärket sparas till. (JSON)
+	net.file_name = "MNIST_Example_Net"
 	net.cost_interface = &MeanSquare{}
 
 	net.input_shape = []int{1, 28, 28} // Djup, Bredd, Höjd.
@@ -45,6 +47,7 @@ func CreateNewNetwork() *Network {
 
 	net.layers = []Layer{
 
+		// Initialisering av ett convulutional layer
 		&ConvLayer{
 			act_interface: &RelU{},
 			kernel_size:   3,
@@ -57,7 +60,9 @@ func CreateNewNetwork() *Network {
 			depth:         4,
 		},
 
-		&DenseLayer{ //Alias till fully-connected layer.
+		// Initialisering av ett fully-connected layer
+		// DenseLayer är ett alias till fully-connected layer.
+		&DenseLayer{
 			act_interface: &RelU{},
 			size:          120,
 		},
@@ -74,7 +79,7 @@ func CreateNewNetwork() *Network {
 	}
 
 	net.init()             // Allokerar minne för nätvärket.
-	net.init_new_weights() //Slumpar nya weights
+	net.init_new_weights() // Slumpar nya weights
 
 	return net
 }

@@ -187,7 +187,6 @@ func (shelf *Filter) compute_output_gradient(mim *MiM, O_W int, O_H int, layerID
 	// lagrets output. Detta kommer då sedan användas i `compute_loss_kernel_gradient()`.
 
 	// Använder även det föregående lagrets `compute_output_gradient`
-
 	out_grade := *mim.data_flat
 	filterOffset := filterID * O_H * O_W
 	K_Y := len(shelf.kernels[0])

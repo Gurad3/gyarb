@@ -1,6 +1,7 @@
 package main
 
 import (
+	"ProjectX/data_handler"
 	"bufio"
 	"encoding/json"
 	"fmt"
@@ -129,6 +130,7 @@ func cliHandler() {
 			if err != nil {
 
 			}
+			data_handler.NoiseInplace(&data)
 			net.forward(mim, data)
 			//response, _ := json.Marshal(*mim.data_flat)
 			fmt.Println(*mim.data_flat)
