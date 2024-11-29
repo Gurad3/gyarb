@@ -33,9 +33,9 @@ func train_mnist(net *Network) {
 func CreateNewNetwork() *Network {
 	net := new(Network)
 
-	net.learn_rate = .2
+	net.learn_rate = .02
 	net.regularization = 0.1
-	net.momentum = 0
+	net.momentum = 0.4
 
 	net.file_name = "MNIST_Example_Net" // Filnamnet som nätvärket sparas till. (JSON)
 	net.cost_interface = &MeanSquare{}
@@ -47,7 +47,7 @@ func CreateNewNetwork() *Network {
 
 		&ConvLayer{
 			act_interface: &RelU{},
-			kernel_size:   4,
+			kernel_size:   3,
 			depth:         2,
 		},
 
