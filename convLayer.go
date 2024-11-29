@@ -78,7 +78,7 @@ func (shelf *ConvLayer) init(layerID int, prev_layer_size []int) {
 }
 
 func (shelf *ConvLayer) init_new_weights(xavierRange float64, r rand.Rand) {
-	//Give each weights new random weights (Currentlu 0)
+	//Give each weights new random weights (Currently 0)
 
 	for i := 0; i < shelf.depth; i++ {
 		// shelf.filters[i].bias = initWeightXavierUniform(xavierRange, r)
@@ -105,11 +105,7 @@ func (shelf *ConvLayer) forward(mim *MiM) {
 		filter.correlation(matrix, mim.layers_out[shelf.layerID][outRangeStart:outRangeEnd], mim.layers_out_non_activated[shelf.layerID][outRangeStart:outRangeEnd], shelf.act_interface, shelf.input_shape, shelf.out_size[1:])
 	}
 
-	//mim.data_3d = &mim.layers_out_3d[shelf.layerID]
-	//mim.data_type = ThreeD
-
 	mim.data_flat = &mim.layers_out[shelf.layerID]
-	//fmt.Println(mim.data_flat)
 }
 
 func (shelf *ConvLayer) backprop(mim *MiM, prev_layer_act Activation) {
@@ -131,10 +127,6 @@ func (shelf *ConvLayer) backprop(mim *MiM, prev_layer_act Activation) {
 		shelf.filters[filterID].compute_output_gradient(mim, shelf.output_width, shelf.output_height, shelf.layerID, filterID, shelf.input_shape, prev_layer_act)
 	}
 
-	// for i := 0; i < shelf.input_depth*shelf.input_height*shelf.input_width; i++ {
-	// 	prevOut[i] *= prev_layer_act.ddx(prevOut[i])
-	// }
-
 	mim.data_flat = &mim.layers_out[shelf.layerID-1]
 }
 func (shelf *Filter) compute_loss_kernel_gradient(mim *MiM, O_W int, O_H int, layerID int, filterID int, inp_shape []int) {
@@ -146,26 +138,12 @@ func (shelf *Filter) compute_loss_kernel_gradient(mim *MiM, O_W int, O_H int, la
 	prev_layer_out := mim.layers_out[layerID-1]
 
 	for c := 0; c < len(shelf.kernels); c++ {
-		//kgc := shelf.kernel_gradients[c]
-
-		//channelOffset := c * inp_shape[1] * inp_shape[2]
-
 		for i := 0; i < len(shelf.kernels[0]); i++ {
-			//kgci := kgc[i]
-
 			for j := 0; j < len(shelf.kernels[0][0]); j++ {
-				//kgcij := kgci[j]
 
 				for k := 0; k < O_H; k++ {
 					for l := 0; l < O_W; l++ {
-
-						//shelf.kernel_gradients[c][i][j] += mim.layers_out_3d[layerID-1][c][i+k][j+l] * (*mim.data_3d)[filterID][k][l]
-						//shelf.kernel_gradients[c][i][j] += mim.layers_out[layerID-1][c*inp_shape[1]*inp_shape[2]+(i+k)*inp_shape[1]+j+l] * (*mim.data_flat)[filterID][k][l]
-
 						shelf.kernel_gradients[c][i][j] += prev_layer_out[c*inp_shape[1]*inp_shape[2]+(i+k)*inp_shape[1]+j+l] * out_grade[filterOffset+k*O_W+l]
-
-						//kgcij += prev_layer_out[channelOffset+(i+k)*inp_shape[1]+j+l] * out_grade[filterOffset+k*O_W+l]
-
 					}
 				}
 			}
@@ -185,7 +163,6 @@ func (shelf *Filter) compute_output_gradient(mim *MiM, O_W int, O_H int, layerID
 	// Kommer skickas vidare bakåt till nästa lager i backpropagation följden.
 	// Outputen här blir matrisen som representerar partiella derivatorna för Cost med respekt till
 	// lagrets output. Detta kommer då sedan användas i `compute_loss_kernel_gradient()`.
-
 	// Använder även det föregående lagrets `compute_output_gradient`
 	out_grade := *mim.data_flat
 	filterOffset := filterID * O_H * O_W
@@ -211,7 +188,6 @@ func (shelf *Filter) compute_output_gradient(mim *MiM, O_W int, O_H int, layerID
 						//flipped[i][j] = kernel[rows-1-i][cols-1-j]
 					}
 				}
-				//	mim.layers_out[layerID-1][channelOffset+i*inp_shape[1]+j] *= prev_act_out.ddx(mim.layers_out[layerID-1][channelOffset+i*inp_shape[1]+j])
 			}
 		}
 	}
@@ -221,11 +197,8 @@ func (shelf *Filter) compute_output_gradient(mim *MiM, O_W int, O_H int, layerID
 func (shelf *Filter) correlation(matrix []float64, target_activated []float64, target_non_activated []float64, activation Activation, input_shape []int, out_shape []int) {
 
 	for i := 0; i < out_shape[0]; i++ {
-
 		for j := 0; j < out_shape[1]; j++ {
-
 			sum := shelf.bias
-
 			for kernel_index := 0; kernel_index < len(shelf.kernels); kernel_index++ {
 				kernel_offset := kernel_index * input_shape[1] * input_shape[2]
 				for k := 0; k < len(shelf.kernels[kernel_index]); k++ {
@@ -234,28 +207,11 @@ func (shelf *Filter) correlation(matrix []float64, target_activated []float64, t
 					}
 				}
 			}
-			//(*target_activated)[i][j] = (*activation).call(sum)
-			//(*target_non_activated)[i][j] = sum
-
 			target_activated[i*out_shape[0]+j] = activation.call(sum)
 			target_non_activated[i*out_shape[0]+j] = sum
 
 		}
 	}
-}
-
-// flipKernel flips the kernel (matrix) horizontally and vertically for convolution.
-func flipKernel(kernel [][]float64) [][]float64 {
-	rows := len(kernel)
-	cols := len(kernel[0])
-	flipped := make([][]float64, rows)
-	for i := range flipped {
-		flipped[i] = make([]float64, cols)
-		for j := range flipped[i] {
-			flipped[i][j] = kernel[rows-1-i][cols-1-j] // Flip both rows and columns.
-		}
-	}
-	return flipped
 }
 
 func (shelf *ConvLayer) apply_gradients(learn_rate float64, batch_size int, regularization float64, momentum float64) {

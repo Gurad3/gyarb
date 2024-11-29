@@ -183,12 +183,12 @@ func (shelf *trainer) shuffle_batches() {
 		shelf.TrainDataOrignal[batch_index], shelf.TrainDataOrignal[rand_index] = shelf.TrainDataOrignal[rand_index], shelf.TrainDataOrignal[batch_index]
 	}
 
-	for i := 0; i < int(float64(len(shelf.TrainData))*0.05); i++ {
-		rand_index := rng.Int() % len(shelf.TrainData)
+	// for i := 0; i < int(float64(len(shelf.TrainData))*0.05); i++ {
+	// 	rand_index := rng.Int() % len(shelf.TrainData)
 
-		copy(shelf.TrainData[rand_index], shelf.TrainDataOrignal[rand_index])
+	// 	copy(shelf.TrainData[rand_index], shelf.TrainDataOrignal[rand_index])
 
-		data_handler.NoiseInplace(&shelf.TrainData[rand_index])
-	}
+	// 	data_handler.NoiseInplace(&shelf.TrainData[rand_index])
+	// }
 
 }

@@ -34,9 +34,9 @@ func CreateNewNetwork() *Network {
 	net := new(Network)
 
 	// Hyperparametrar
-	net.learn_rate = .04
+	net.learn_rate = .1
 	net.regularization = 0.01
-	net.momentum = 0.3
+	net.momentum = 0
 
 	// Filnamnet som nätvärket sparas till. (JSON)
 	net.file_name = "MNIST_Example_Net"
@@ -64,12 +64,11 @@ func CreateNewNetwork() *Network {
 		// DenseLayer är ett alias till fully-connected layer.
 		&DenseLayer{
 			act_interface: &RelU{},
-			size:          120,
+			size:          140,
 		},
-
 		&DenseLayer{
 			act_interface: &RelU{},
-			size:          120,
+			size:          40,
 		},
 
 		&DenseLayer{
