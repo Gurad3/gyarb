@@ -1,8 +1,13 @@
 package main
 
 import (
+	"bufio"
+	"encoding/json"
+	"fmt"
 	"math"
 	"math/rand"
+	"os"
+	"strings"
 	"time"
 )
 
@@ -87,4 +92,56 @@ func (shelf *Network) apply_gradients(batch_size int) {
 	for _, layer := range shelf.layers {
 		layer.apply_gradients(shelf.learn_rate, batch_size, shelf.regularization, shelf.momentum)
 	}
+}
+
+func cliHandler() {
+	reader := bufio.NewReader(os.Stdin)
+	var net *Network
+	var mim *MiM
+	// Loop to read commands from the GUI
+	for {
+		command, err := reader.ReadString('\n')
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "Error reading input:", err)
+			os.Exit(0)
+			continue
+		}
+		command = strings.TrimSpace(command)
+		// Parse the command
+		parts := strings.Fields(command)
+		if len(parts) == 0 {
+			continue
+		}
+		switch parts[0] {
+		case "load":
+			net = load_from_json(parts[1])
+			mim = new(MiM)
+			mim.init(net)
+
+			fmt.Println("loadok")
+
+		case "eval":
+			jsonData := strings.Join(parts[1:], " ")
+			var data []float64
+
+			// Parse the JSON data
+			err := json.Unmarshal([]byte(jsonData), &data)
+			if err != nil {
+
+			}
+			net.forward(mim, data)
+			//response, _ := json.Marshal(*mim.data_flat)
+			fmt.Println(*mim.data_flat)
+
+		case "hello":
+			fmt.Println("hellook" + parts[1])
+		case "isready":
+			fmt.Println("readyok")
+		case "quit":
+			os.Exit(0)
+		case "exit":
+			os.Exit(0)
+		}
+	}
+
 }

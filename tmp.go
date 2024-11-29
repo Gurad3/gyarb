@@ -1,5 +1,7 @@
 package main
 
+//Temporära funktioner(debug), Igronera alla
+
 import (
 	"ProjectX/data_handler"
 	"bufio"
@@ -11,6 +13,43 @@ import (
 )
 
 func tmp() {
+	//tmp2()
+
+	//TMPCLI()
+
+	//net := CreateNewNetwork()
+	//net := tmpNewXOR()
+	// net.print_weights()
+
+	//net := load_from_json("saves/ConvMNIST_1.json")
+
+	// net.file_name = "test"
+
+	// encode_to_json(net)
+
+	//net.layers[1].debug_print()
+
+	//xor(net)
+	//train_mnist(net)
+
+	// mim := new(MiM)
+	// mim.init(net)
+	// _, _, MNIST_TestDataLabel, MNIST_TestData := data_handler.Load_mnist()
+	// net.Test(mim, MNIST_TestData, MNIST_TestDataLabel)
+
+	//net.print_weights()
+	//_, _, _, TestData := loadMnist()
+	//net.forward(mim, TestData[1])
+
+	//encode_to_json(net)
+
+	// _, _, _, MNIST_TestData := data_handler.Load_mnist()
+	// data_handler.SaveImage(MNIST_TestData[0], "./images/image.png")
+	// fmt.Println(MNIST_TestData[0], MNIST_TestDataLabel[0])
+}
+
+func tmp2() {
+
 	_, _, MNIST_TestDataLabel, MNIST_TestData := data_handler.Load_mnist()
 
 	// t := 9

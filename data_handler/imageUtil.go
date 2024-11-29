@@ -45,9 +45,11 @@ func clampFloat(value, min, max float64) float64 {
 func addNoiseToFloatArray(data *[]float64, noiseLevel float64) {
 	rand.Seed(time.Now().UnixNano())
 
+	nyans := (rand.Float64()*2 - 1) * 0.1
+
 	for i := range len(*data) {
 		noise := (rand.Float64()*2 - 1) * noiseLevel
-		noisyValue := (*data)[i] + noise
+		noisyValue := (*data)[i] + noise + nyans
 		(*data)[i] = clampFloat(noisyValue, 0.0, 1.0)
 	}
 }
